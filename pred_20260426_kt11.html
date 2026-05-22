@@ -452,7 +452,7 @@
     </span>
     <span style="color:#7f8c8d;font-size:11px;margin-left:6px">（SmartRC速度データ未取得時は脚質のみで推定）</span>
   </div>
-  <div id="formation-panels" style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px"></div>
+  <div id="formation-panels" style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;align-items:stretch"></div>
 </div>
 
 <script>
@@ -548,6 +548,28 @@
   const container = document.getElementById('formation-panels');
   if (!container) return;
 
+  // カスタムツールチップ
+  const _tip = document.createElement('div');
+  _tip.style.cssText = [
+    'position:fixed;display:none;z-index:9999;pointer-events:none;',
+    'background:#0f1923;border:1px solid #f1c40f;border-radius:8px;',
+    'padding:8px 12px;font-size:12px;color:#e0e0e0;',
+    'box-shadow:0 4px 16px rgba(0,0,0,0.6);line-height:1.7;white-space:nowrap;'
+  ].join('');
+  document.body.appendChild(_tip);
+  const _showTip = (e, html) => {
+    _tip.innerHTML = html;
+    _tip.style.display = 'block';
+    _tip.style.left = (e.clientX + 14) + 'px';
+    _tip.style.top  = (e.clientY - 8)  + 'px';
+  };
+  const _moveTip = (e) => {
+    _tip.style.left = (e.clientX + 14) + 'px';
+    _tip.style.top  = (e.clientY - 8)  + 'px';
+  };
+  const _hideTip = () => { _tip.style.display = 'none'; };
+
+
   phases.forEach(ph => {
     // ゾーン別に馬を分類 (inner順)
     const zones = [[],[],[],[]];
@@ -562,7 +584,7 @@
 
     // パネル本体
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'flex:1;min-width:240px;max-width:380px';
+    wrap.style.cssText = 'flex:1;min-width:280px;max-width:420px;display:flex;flex-direction:column';
 
     const titleEl = document.createElement('div');
     titleEl.style.cssText = 'text-align:center;font-weight:700;font-size:14px;color:#f1c40f;margin-bottom:3px';
@@ -575,7 +597,7 @@
     wrap.appendChild(subEl);
 
     const board = document.createElement('div');
-    board.style.cssText = 'background:#1a252f;border:1px solid #2c3e50;border-radius:8px;padding:8px;';
+    board.style.cssText = 'background:#1a252f;border:1px solid #2c3e50;border-radius:8px;padding:8px;flex:1;display:flex;flex-direction:column;';
 
     const goalLbl = document.createElement('div');
     goalLbl.style.cssText = 'text-align:center;font-size:10px;color:#556;margin-bottom:4px';
@@ -592,9 +614,9 @@
     zones.forEach((zHorses, zi) => {
       const row = document.createElement('div');
       row.style.cssText = [
-        'display:flex;align-items:center;gap:4px;',
-        'min-height:32px;padding:3px 4px;margin-bottom:3px;',
-        'border-radius:5px;',
+        'display:flex;align-items:center;gap:4px;flex:1;',
+        'min-height:0;height:100%;padding:3px 4px;margin-bottom:3px;',
+        'border-radius:5px;overflow:hidden;',
         `background:rgba(${ZONE_RGBA[zi]},0.08);`,
         `border-left:3px solid ${ZONE_COLORS[zi]};`,
       ].join('');
@@ -605,7 +627,7 @@
       row.appendChild(zoneLbl);
 
       const chips = document.createElement('div');
-      chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;flex:1';
+      chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;flex:1;align-content:flex-start;overflow:hidden;';
 
       if (zHorses.length === 0) {
         const empty = document.createElement('span');
@@ -618,14 +640,21 @@
           const bg   = WAKU_BG[waku] || '#888';
           const fg   = WAKU_FG[waku] || '#fff';
           const chip = document.createElement('div');
-          const tenInfo = h.ten_r != null ? ` テン${h.ten_r}位` : '';
-          const agaInfo = h.aga_r != null ? ` 上が${h.aga_r}位` : '';
-          chip.title = `${h.name} (${h.kyaku}) ${h.waku}枠${h.uma}番${tenInfo}${agaInfo}`;
+          const _tipLines = [
+            `<b style='color:#f1c40f'>${h.name}</b>`,
+            `${h.kyaku} &nbsp;|&nbsp; ${h.waku}枠 ${h.uma}番`,
+          ];
+          if (h.ten_r != null) _tipLines.push(`テン速度順位: <b>${h.ten_r}位</b>`);
+          if (h.aga_r != null) _tipLines.push(`上がり速度順位: <b>${h.aga_r}位</b>`);
+          const _tipHtml = _tipLines.join('<br>');
+          chip.addEventListener('mouseenter', e => _showTip(e, _tipHtml));
+          chip.addEventListener('mousemove',  e => _moveTip(e));
+          chip.addEventListener('mouseleave', () => _hideTip());
           chip.style.cssText = [
             `background:${bg};color:${fg};`,
             'border-radius:50%;width:24px;height:24px;',
             'display:flex;align-items:center;justify-content:center;',
-            'font-size:10px;font-weight:700;cursor:default;flex-shrink:0;',
+            'font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;',
             'box-shadow:0 0 0 1px rgba(255,255,255,0.25);',
           ].join('');
           chip.textContent = h.uma != null ? h.uma : '?';

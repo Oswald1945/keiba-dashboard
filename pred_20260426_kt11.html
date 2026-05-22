@@ -458,8 +458,9 @@
 <script>
 (function(){
   const fHorses = [{"name": "ランスオブカオス", "uma": 18, "waku": 8, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "アドマイヤズーム", "uma": 9, "waku": 5, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "オフトレイル", "uma": 2, "waku": 1, "kyaku": "追込", "ten_r": null, "aga_r": null}, {"name": "ウォーターリヒト", "uma": 10, "waku": 5, "kyaku": "追込", "ten_r": null, "aga_r": null}, {"name": "シックスペンス", "uma": 16, "waku": 8, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "エルトンバローズ", "uma": 17, "waku": 8, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "ベラジオボンド", "uma": 7, "waku": 4, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "ファーヴェント", "uma": 12, "waku": 6, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "ブエナオンダ", "uma": 6, "waku": 3, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "シャンパンカラー", "uma": 8, "waku": 4, "kyaku": "追込", "ten_r": null, "aga_r": null}, {"name": "クルゼイロドスル", "uma": 4, "waku": 2, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "マテンロウスカイ", "uma": 15, "waku": 7, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "キョウエイブリッサ", "uma": 11, "waku": 6, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ファインライン", "uma": 3, "waku": 2, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ショウナンアデイブ", "uma": 5, "waku": 3, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ロングラン", "uma": 14, "waku": 7, "kyaku": "追込", "ten_r": null, "aga_r": null}, {"name": "ドラゴンブースト", "uma": 1, "waku": 1, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "アサヒ", "uma": 13, "waku": 7, "kyaku": "追込", "ten_r": null, "aga_r": null}];
-  const pace    = 'high';
-  const N       = 18;
+  const pace      = 'high';
+  const N         = 18;
+  const direction  = '右';  // '左'=反時計 / '右'=時計回り
 
   // 脚質→基本前後スコア (0=逃げ先頭 ～ 3=追込最後方)
   const KYAKU_BASE = {'逃げ':0.0,'先行':1.0,'差し':2.0,'追込':3.0};
@@ -534,7 +535,8 @@
   // 内外スコア (枠番1→0, 枠番8→1)
   function innerScore(horse){
     const w = horse.waku || horse.uma || 4;
-    return (w - 1) / 7;
+    // 右回りは内外表示を反転（枠番1が右側＝内側）
+    return direction === '右' ? (8 - w) / 7 : (w - 1) / 7;
   }
 
   const phases = [
@@ -554,7 +556,9 @@
       const z  = getZone(fs);
       zones[z].push({...h, inner: innerScore(h), fs});
     });
-    zones.forEach(z => z.sort((a,b) => a.inner - b.inner));
+    // 右回りは逆ソート（内側が右）
+    const innerDir = direction === '右' ? -1 : 1;
+    zones.forEach(z => z.sort((a,b) => innerDir * (a.inner - b.inner)));
 
     // パネル本体
     const wrap = document.createElement('div');
@@ -580,7 +584,9 @@
 
     const axisRow = document.createElement('div');
     axisRow.style.cssText = 'display:flex;justify-content:space-between;font-size:9px;color:#445;margin-bottom:4px;padding:0 2px';
-    axisRow.innerHTML = '<span>内 →</span><span>← 外</span>';
+    axisRow.innerHTML = direction === '右'
+      ? '<span>外 →</span><span>← 内</span>'
+      : '<span>内 →</span><span>← 外</span>';
     board.appendChild(axisRow);
 
     zones.forEach((zHorses, zi) => {
@@ -612,7 +618,9 @@
           const bg   = WAKU_BG[waku] || '#888';
           const fg   = WAKU_FG[waku] || '#fff';
           const chip = document.createElement('div');
-          chip.title = `${h.name} (${h.kyaku}) ${h.waku}枠${h.uma}番`;
+          const tenInfo = h.ten_r != null ? ` テン${h.ten_r}位` : '';
+          const agaInfo = h.aga_r != null ? ` 上が${h.aga_r}位` : '';
+          chip.title = `${h.name} (${h.kyaku}) ${h.waku}枠${h.uma}番${tenInfo}${agaInfo}`;
           chip.style.cssText = [
             `background:${bg};color:${fg};`,
             'border-radius:50%;width:24px;height:24px;',

@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# バックアップ・作業ファイル
+*.bak
+*.truncated.bak
+*.tail.bak
+repair_*.py
+generate_all.py
+HANDOFF.md
+
+# 中間生成データ（JSONやCSVはgit管理不要）
+horses_data_*.json
+scores_*.csv
+smartrc_*.json
+shared_urls.txt
+accuracy_report_*.html
+
+# 完了マーカー
+*_review.done
+
+# inputフォルダ（CSVは個人データのため除外）
+input/
+
+# Windows
+Thumbs.db
+desktop.ini

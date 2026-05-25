@@ -330,7 +330,6 @@ for idx, h in enumerate(horses):
 <div class="horse-card rank-{min(rank,4)}" data-rank="{rank}" data-leg="{leg}">
   <div class="rank-badge" style="background:{color}">
     <span class="rank-num">{rank}</span>
-    <span class="rank-label">{label}</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
@@ -345,6 +344,7 @@ for idx, h in enumerate(horses):
       <div class="total-score">
         <span class="big-num">{score:.1f}</span>
         <span class="small-label">総合スコア</span>
+        <span style="margin-top:5px;display:inline-block;padding:2px 12px;border-radius:4px;font-size:13px;font-weight:700;letter-spacing:2px;background:{color};color:#fff">評価ランク&nbsp;{label}</span>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 {dev_score}</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 {fmt(odds,1)}倍<br>({fmt_int(pop)}人気)

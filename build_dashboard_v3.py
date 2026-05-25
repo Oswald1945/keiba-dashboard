@@ -249,11 +249,22 @@ def _trust_badge(h):
     else:
         return '<span class="trust-badge trust-none">❓ データなし</span>'
 
+# ── 偏差値（同一レース内相対スコア）事前計算 ─────────────
+_scores_all = [h['総合スコア'] for h in horses]
+_score_mu  = sum(_scores_all) / len(_scores_all) if _scores_all else 50.0
+_score_var = sum((s - _score_mu)**2 for s in _scores_all) / len(_scores_all) if _scores_all else 1.0
+_score_sig = _score_var ** 0.5
+if _score_sig == 0: _score_sig = 1.0
+def _dev(s):
+    return round((s - _score_mu) / _score_sig * 10 + 50)
+_dev_map = {h['馬名']: _dev(h['総合スコア']) for h in horses}
+
 # ── 各馬カード ────────────────────────────────────────────────
 horse_cards = ''
 for idx, h in enumerate(horses):
     rank   = h['順位予想']
     score  = h['総合スコア']
+    dev_score = _dev_map.get(h['馬名'], 50)
     label, color = class_label(score)
     leg    = h['脚質']
     odds   = h.get('単勝オッズ')
@@ -334,6 +345,7 @@ for idx, h in enumerate(horses):
       <div class="total-score">
         <span class="big-num">{score:.1f}</span>
         <span class="small-label">総合スコア</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 {dev_score}</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 {fmt(odds,1)}倍<br>({fmt_int(pop)}人気)
         </span>
@@ -442,6 +454,7 @@ def podium_waku_str(h):
 all_marks = ''
 for h in horses:
     r       = h['順位予想']
+    _dev_t  = _dev_map.get(h['馬名'], 50)
     waku_b  = h.get('枠番')
     bango_b = h.get('馬番')
     num_str = f'{fmt_int(waku_b)}枠-{fmt_int(bango_b)}番' if waku_b else '未定'
@@ -468,7 +481,7 @@ for h in horses:
         f'<td>{num_str}</td>'
         f'<td><b>{h["馬名"]}</b>{badges}</td>'
         f'<td>{h["脚質"]}</td>'
-        f'<td><b>{h["総合スコア"]:.1f}</b></td>'
+        f'<td style="white-space:nowrap"><b>{h["総合スコア"]:.1f}</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差{_dev_t}</span></td>'
         f'<td>{fmt(h.get("単勝オッズ"), 1)}倍 ({fmt_int(h.get("人気"))}人気)</td>'
         f'{src_ninki_cell}'
         f'<td>{h["騎手"]}</td>'
@@ -650,6 +663,28 @@ _formation_pace  = _today_pace      # 'high' / 'mid' / 'low'
 _formation_total = len(horses)
 _track_direction = _ri.get('回り', '左')   # '左'=反時計 / '右'=時計回り
 
+# SmartRC速度競合情報（展開パネルヘッダー表示用）
+_ten_ranks_disp  = [(h.get('ten_r'), h.get('name'), h.get('uma'))
+                    for h in _formation_horses_data if h.get('ten_r') is not None]
+_aga_ranks_disp  = [(h.get('aga_r'), h.get('name'), h.get('uma'))
+                    for h in _formation_horses_data if h.get('aga_r') is not None]
+_ten_top3  = sorted(_ten_ranks_disp, key=lambda x: x[0])[:3]
+_aga_top3  = sorted(_aga_ranks_disp, key=lambda x: x[0])[:3]
+_ten_competition = sum(1 for r, _, _ in _ten_ranks_disp if r <= 3)
+
+def _speed_badge(rank, name):
+    colors = {1:'#e74c3c',2:'#e67e22',3:'#f1c40f'}
+    c = colors.get(rank, '#7f8c8d')
+    return (f'<span style="background:{c};color:#fff;border-radius:3px;'
+            f'padding:1px 5px;font-size:10px;font-weight:700;margin:1px">'
+            f'{rank}位 {name}</span>')
+
+_ten_html = ''.join(_speed_badge(r, n) for r, n, _ in _ten_top3) if _ten_top3 else '<span style="color:#7f8c8d;font-size:11px">データなし</span>'
+_aga_html = ''.join(_speed_badge(r, n) for r, n, _ in _aga_top3) if _aga_top3 else '<span style="color:#7f8c8d;font-size:11px">データなし</span>'
+_competition_label = (f'<span style="color:#e74c3c;font-weight:700">速度競合({_ten_competition}頭)あり</span>'
+                      if _ten_competition >= 2 else
+                      '<span style="color:#bdc3c7">速度競合なし</span>')
+
 _formation_html = f'''<div class="section" id="section-formation">
   <h2>🐎 展開予想 — 序盤/中盤/終盤の隊列イメージ</h2>
   <div style="font-size:12px;color:#bdc3c7;margin-bottom:8px">
@@ -666,6 +701,12 @@ _formation_html = f'''<div class="section" id="section-formation">
       <span style="background:#e91e8c;color:#fff;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">8枠</span>
     </span>
     <span style="color:#7f8c8d;font-size:11px;margin-left:6px">（SmartRC速度データ未取得時は脚質のみで推定）</span>
+  </div>
+  <div style="font-size:11px;color:#bdc3c7;margin-bottom:6px;line-height:1.8">
+    <span style="color:#3498db;font-weight:700">⚡テン速度 TOP3：</span>{_ten_html}
+    &nbsp;|&nbsp;
+    <span style="color:#e74c3c;font-weight:700">🏁上がり速度 TOP3：</span>{_aga_html}
+    &nbsp;|&nbsp; {_competition_label}
   </div>
   <div id="formation-panels" style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;align-items:stretch"></div>
 </div>
@@ -695,16 +736,21 @@ _formation_html = f'''<div class="section" id="section-formation">
   // ── 位置スコア計算 ───────────────────────────────────────────
   // ペース×脚質×フェーズごとの調整テーブル (base への加算値)
   // 中盤: ペースによる圧縮・伸長
+  // 中盤: ペースで隊列がじわじわ変化
   const MID_ADJ = {{
-    'high': {{'逃げ': 0.0,'先行': 0.3,'差し':-0.15,'追込':-0.3}},
-    'mid':  {{'逃げ': 0.0,'先行': 0.0,'差し': 0.0, '追込': 0.0}},
-    'low':  {{'逃げ': 0.0,'先行':-0.3,'差し':-0.6, '追込':-0.9}},
+    // ハイ: 逃げが番手に詰め寄られ、差し/追込は前に出てこない（まだ脚を温存）
+    'high': {{'逃げ': 0.3,'先行': 0.1,'差し':-0.1,'追込':-0.2}},
+    'mid':  {{'逃げ': 0.0,'先行': 0.0,'差し': 0.0,'追込': 0.0}},
+    // スロー: 逃げ/番手が更に前に行き、後方は置かれる
+    'low':  {{'逃げ':-0.1,'先行':-0.2,'差し': 0.0,'追込': 0.0}},
   }};
   // 終盤: 脚質の本領発揮 + ペース補正
+  // 実績ベース: ハイペースでは番手(先行)が最有利、逃げは消耗、差し/追込は届くが過大評価しない
   const FIN_ADJ = {{
-    'high': {{'逃げ': 1.1,'先行': 0.5,'差し':-0.7,'追込':-1.1}},
-    'mid':  {{'逃げ': 0.2,'先行': 0.0,'差し':-0.5,'追込':-0.8}},
-    'low':  {{'逃げ': 0.1,'先行':-0.3,'差し':-0.9,'追込':-1.3}},
+    'high': {{'逃げ': 1.5,'先行': 0.2,'差し':-0.4,'追込':-0.6}},
+    'mid':  {{'逃げ': 0.3,'先行': 0.0,'差し':-0.4,'追込':-0.7}},
+    // スロー: 前が残る。差し/追込は全く伸びない
+    'low':  {{'逃げ': 0.0,'先行':-0.1,'差し':-0.3,'追込':-0.5}},
   }};
 
   function frontScore(horse, phase){{
@@ -1227,7 +1273,7 @@ html = f'''<!DOCTYPE html>
         <div class="summary-label">最高スコア馬</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">{horses[0]["総合スコア"]:.1f}</div>
+        <div class="summary-value">{horses[0]["総合スコア"]:.1f}<span style="font-size:10px;color:#f1c40f;font-weight:700;margin-left:4px">(偏差{_dev_map.get(horses[0]["馬名"],50)})</span></div>
         <div class="summary-label">最高スコア</div>
       </div>
     </div>
@@ -1242,19 +1288,19 @@ html = f'''<!DOCTYPE html>
         <div class="podium-mark">🥇</div>
         <div class="podium-name">{honmei["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(honmei)}{honmei["脚質"]} ・ {honmei["騎手"]} ・ {fmt(honmei.get("単勝オッズ"),1)}倍 ({fmt_int(honmei.get("人気"))}人気)</div>
-        <div class="podium-score">{honmei["総合スコア"]:.1f}</div>
+        <div class="podium-score">{honmei["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(honmei["馬名"],50)}</div></div>
       </div>
       <div class="podium-card second">
         <div class="podium-mark">🥈</div>
         <div class="podium-name">{taikou["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(taikou)}{taikou["脚質"]} ・ {taikou["騎手"]} ・ {fmt(taikou.get("単勝オッズ"),1)}倍 ({fmt_int(taikou.get("人気"))}人気)</div>
-        <div class="podium-score">{taikou["総合スコア"]:.1f}</div>
+        <div class="podium-score">{taikou["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(taikou["馬名"],50)}</div></div>
       </div>
       <div class="podium-card third">
         <div class="podium-mark">🥉</div>
         <div class="podium-name">{tanana["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(tanana)}{tanana["脚質"]} ・ {tanana["騎手"]} ・ {fmt(tanana.get("単勝オッズ"),1)}倍 ({fmt_int(tanana.get("人気"))}人気)</div>
-        <div class="podium-score">{tanana["総合スコア"]:.1f}</div>
+        <div class="podium-score">{tanana["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(tanana["馬名"],50)}</div></div>
       </div>
     </div>
   </div>

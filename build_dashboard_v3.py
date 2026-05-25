@@ -344,7 +344,7 @@ for idx, h in enumerate(horses):
       <div class="total-score">
         <span class="big-num">{score:.1f}</span>
         <span class="small-label">総合スコア</span>
-        <span style="margin-top:5px;display:inline-block;padding:2px 12px;border-radius:4px;font-size:13px;font-weight:700;letter-spacing:2px;background:{color};color:#fff">評価ランク&nbsp;{label}</span>
+        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:{color};color:#fff;line-height:1.3">{label}</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 {dev_score}</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 {fmt(odds,1)}倍<br>({fmt_int(pop)}人気)

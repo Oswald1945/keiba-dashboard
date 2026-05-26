@@ -565,7 +565,10 @@ _pred1_score = _sorted_valid[0].get('総合スコア', 0) if _sorted_valid else 
 _pred2_score = _sorted_valid[1].get('総合スコア', 0) if len(_sorted_valid) > 1 else 0
 _score_lead  = _pred1_score - _pred2_score
 _pred1_dev   = _dev_map.get(_pred1_name, 50)
-_pred1_is_fav = next((h.get('人気') for h in horses if h['馬名'] == _pred1_name), 99) == 1
+_pred1_smartrc_rank = next(
+    (int(h.get('SmartRC推定人気順') or 99)
+     for h in horses if h['馬名'] == _pred1_name), 99)
+_pred1_is_fav = _pred1_smartrc_rank == 1  # SmartRC推定1番人気=妙味なし
 _jishin_flag = ((_pred1_dev >= 65) or (_score_lead >= 15)) and not _pred1_is_fav
 
 # ── 推奨度判定 ───────────────────────────────────────────────

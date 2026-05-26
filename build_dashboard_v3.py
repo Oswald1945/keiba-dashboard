@@ -514,11 +514,67 @@ ev_data_json = json.dumps([
         '人気':            h.get('人気'),
         '脚質':            h['脚質'],
         'SmartRC推定人気順':  h.get('SmartRC推定人気順'),   # 数字
+        '乖離度':          (int(h.get('SmartRC推定人気順') or 99) - h.get('順位予想', 99)) if h.get('SmartRC推定人気順') else None,
     }
     for h in horses
     if not h.get('過去走なし', False)
 ], ensure_ascii=False)
 
+
+# ── レース推奨度計算（スコア上位3頭 vs SmartRC推定人気の乖離） ────────────
+_rc_top3 = sorted(
+    [h for h in horses if not h.get('過去走なし', False)],
+    key=lambda h: h.get('順位予想', 99)
+)[:3]
+_rc_candidates = []
+for _h in _rc_top3:
+    _src = _h.get('SmartRC推定人気順')
+    if _src is not None:
+        try:
+            _kairido = int(_src) - _h.get('順位予想', 99)
+            _rc_candidates.append({
+                '馬名':        _h['馬名'],
+                '乖離':        _kairido,
+                '予想順位':    _h.get('順位予想', 99),
+                'SmartRC推定': int(_src),
+                '人気':        _h.get('人気'),
+                'オッズ':      _h.get('単勝オッズ'),
+            })
+        except Exception:
+            pass
+
+_max_kairido = max((_v['乖離'] for _v in _rc_candidates), default=0)
+_best_val = (max(_rc_candidates, key=lambda x: x['乖離'])
+             if _rc_candidates else None)
+
+if _max_kairido >= 4:
+    _rec_badge  = '🟢 妙味有'
+    _rec_color  = '#27ae60'
+    _rec_bg     = '#1a3a28'
+    _rec_reason = f'SmartRC推定より{_max_kairido}順位上の穴馬候補あり（大きな市場乖離）'
+elif _max_kairido >= 2:
+    _rec_badge  = '🟡 要検討'
+    _rec_color  = '#f39c12'
+    _rec_bg     = '#3a2e10'
+    _rec_reason = f'SmartRC推定より{_max_kairido}順位上の乖離（中穴の可能性）'
+else:
+    _rec_badge  = '🔴 妙味薄'
+    _rec_color  = '#e74c3c'
+    _rec_bg     = '#3a1a1a'
+    _rec_reason = 'スコア上位3頭とSmartRC推定が概ね一致（妙味薄め）'
+
+_best_html = ''
+if _best_val and _best_val['乖離'] >= 2:
+    _odds_str = (f'{_best_val["オッズ"]:.1f}倍'
+                 if _best_val.get('オッズ') else '-')
+    _best_html = (
+        f'<span style="margin-left:14px;padding:3px 10px;'
+        f'background:#2c3e50;border-radius:4px;font-size:12px;">'
+        f'💎 注目馬: <b style="color:#f1c40f">{_best_val["馬名"]}</b>'
+        f'（予想{_best_val["予想順位"]}位 / SmartRC{_best_val["SmartRC推定"]}番人気'
+        f' / 乖離+{_best_val["乖離"]} / 単勝{_odds_str}）'
+        f'</span>'
+    )
 
 # ── 補正積み上げチャートデータ ──────────────────────────────────
 _comp_fields = [
@@ -1309,6 +1365,17 @@ html = f'''<!DOCTYPE html>
   <!-- 期待値シミュレーター -->
   <div class="section">
     <h2>💰 期待値シミュレーター</h2>
+    <!-- レース推奨度バナー -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+                padding:10px 16px;margin-bottom:14px;border-radius:8px;
+                background:{_rec_bg};border:1px solid {_rec_color};">
+      <span style="font-size:15px;font-weight:900;color:{_rec_color};
+                   padding:3px 14px;border-radius:5px;border:2px solid {_rec_color};">
+        {_rec_badge}
+      </span>
+      <span style="color:#ccc;font-size:12px;">{_rec_reason}</span>
+      {_best_html}
+    </div>
     <div class="temp-slider">
       <label style="font-weight:600">モデル信頼度</label>
       <span style="color:#7f8c8d;font-size:11px">本命重視</span>
@@ -1331,6 +1398,7 @@ html = f'''<!DOCTYPE html>
             <th data-col="score" onclick="sortEV(this)">スコア</th>
             <th data-col="rank" onclick="sortEV(this)">予想順位</th>
             <th data-col="src_ninki" onclick="sortEV(this)" title="SmartRC推定人気順">推定人気</th>
+            <th data-col="kairido" onclick="sortEV(this)" title="SmartRC推定人気順 − スコア順位（プラスほど穴馬）">乖離度</th>
             <th data-col="prob" id="thProb" onclick="sortEV(this)">勝率推定</th>
             <th data-col="breakeven" id="thBreakEven" onclick="sortEV(this)">採算オッズ</th>
             <th data-col="odds" id="thOdds" onclick="sortEV(this)">現在オッズ（入力可）</th>
@@ -1548,7 +1616,8 @@ function colVal(h, col) {{
     case 'name':  return h['馬名'];
     case 'leg':   return h['脚質'];
     case 'score': return h['スコア'];
-    case 'rank':  return h['順位予想'];
+    case 'rank':    return h['順位予想'];
+    case 'kairido': return h['乖離度'] != null ? h['乖離度'] : -99;
     case 'prob':  return h._prob || 0;
     case 'breakeven': return h._prob > 0 ? 1/h._prob : 999;
     case 'odds':  return currentTab === 'fukusho' ? (h['複勝下限'] || 999)
@@ -1624,6 +1693,17 @@ function renderRows(rows) {{
       <td>${{h['スコア'].toFixed(1)}}</td>
       <td>${{h['順位予想']}}</td>
       <td style="text-align:center;white-space:nowrap">${{srcNinkiCell}}</td>
+      <td style="text-align:center;white-space:nowrap">${{
+        (() => {{
+          const k = h['乖離度'];
+          if (k == null) return '<span style="color:#555">-</span>';
+          const col = k >= 4 ? '#27ae60' : k >= 2 ? '#f39c12' : k >= 0 ? '#95a5a6' : '#e74c3c';
+          const pf  = k > 0 ? '+' : '';
+          const lbl = k >= 4 ? '大穴↑' : k >= 2 ? '中穴↑' : k >= 0 ? '一致' : '妙味薄↓';
+          return `<span style="font-weight:700;color:${{col}}">${{pf}}${{k}}</span>`
+               + `<span style="font-size:9px;color:${{col}};margin-left:2px">${{lbl}}</span>`;
+        }})()
+      }}</td>
       <td>
         <div>${{probPct}}</div>
         <div class="ev-bar" style="background:${{barColor}};width:${{barWidth}}%"></div>

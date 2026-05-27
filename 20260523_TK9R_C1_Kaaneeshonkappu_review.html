@@ -42,6 +42,14 @@ tr:hover td{background:#1f2f42}
 .pickup-meta{font-size:11px;color:#7f8c8d;margin-left:auto}
 .waku-pill{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;border:1px solid #333}
 .pickup-reason{font-size:12px;color:#bdc3c7;line-height:1.8;padding-left:4px}
+.memo-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
+  background:#243447;border:1px solid #2c3e50;cursor:pointer;transition:all 0.15s;
+  font-size:12px;color:#e0e0e0;user-select:none}
+.memo-chip:hover{background:#2c3e50}
+.memo-chip-rank{font-size:11px;color:#7f8c8d;min-width:24px}
+.memo-chip-name{font-weight:700}
+.memo-chip-auto{font-size:10px;color:#f1c40f;font-weight:700;margin-left:2px}
+.memo-pre-selected{border-color:#8e44ad}
 </style></head><body>
 <h1>&#127943; レース回顧 &#8212; カーネーションカップ</h1>
 <div class="subtitle">2026年5月23日（土）・東京競馬場 芝1800m ・1勝 ・12頭立て</div>
@@ -113,6 +121,129 @@ tr:hover td{background:#1f2f42}
   <div class="pickup-reason">・上り3F 33.9秒（出走馬の上位3分の1に入る末脚）<br>・4角9番手から直線で3頭分ポジションを上げて6着<br>・1着と0.5秒差の僅差。着順以上に中身のある競馬</div>
   <div style="margin-top:8px;padding:8px 10px;background:#1a2332;border-radius:6px;border-left:3px solid #27ae60"><div style="font-size:11px;color:#2ecc71;font-weight:700;margin-bottom:4px">🔍 次走注目ポイント</div><span style="font-size:11px;color:#bdc3c7">・前走-10kg減量。体重が戻れば本来の力が発揮される可能性あり。</span><br><span style="font-size:11px;color:#bdc3c7">・1着と0.5秒差の僅差。展開が向けば勝ち負け可能なポテンシャル。</span></div>
 </div></div>
+<div class="section" id="memo-section">
+<h2>&#128204; 次走注目馬メモ</h2>
+<div style="font-size:12px;color:#bdc3c7;margin-bottom:12px;line-height:1.7;
+     padding:10px;background:#0d1117;border-radius:6px;border-left:3px solid #8e44ad">
+  ★印はシステムが自動ピックアップした馬です。クリックで選択・解除できます。<br>
+  選択後「メモに保存」ボタンを押すと <b>memo_horses.json</b> に追記されます。
+</div>
+<div id="memo-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+  <div class="memo-chip" id="chip-イクシード" data-name="イクシード" data-rank="1" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">1着</span><span class="memo-chip-name">イクシード</span></div><div class="memo-chip" id="chip-ガーヴィ" data-name="ガーヴィ" data-rank="2" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">2着</span><span class="memo-chip-name">ガーヴィ</span></div><div class="memo-chip" id="chip-ルージュリリック" data-name="ルージュリリック" data-rank="3" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">3着</span><span class="memo-chip-name">ルージュリリック</span></div><div class="memo-chip memo-pre-selected" id="chip-ヴァリスマリネリス" data-name="ヴァリスマリネリス" data-rank="4" data-selected="true" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">4着</span><span class="memo-chip-name">ヴァリスマリネリス</span><span class="memo-chip-auto">★ 自動</span></div><div class="memo-chip memo-pre-selected" id="chip-サンブライト" data-name="サンブライト" data-rank="5" data-selected="true" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">5着</span><span class="memo-chip-name">サンブライト</span><span class="memo-chip-auto">★ 自動</span></div><div class="memo-chip memo-pre-selected" id="chip-エンジョイドアスク" data-name="エンジョイドアスク" data-rank="6" data-selected="true" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">6着</span><span class="memo-chip-name">エンジョイドアスク</span><span class="memo-chip-auto">★ 自動</span></div><div class="memo-chip" id="chip-ヴェガリア" data-name="ヴェガリア" data-rank="7" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">7着</span><span class="memo-chip-name">ヴェガリア</span></div><div class="memo-chip" id="chip-シルバーリム" data-name="シルバーリム" data-rank="8" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">8着</span><span class="memo-chip-name">シルバーリム</span></div><div class="memo-chip" id="chip-ハーディジェナー" data-name="ハーディジェナー" data-rank="9" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">9着</span><span class="memo-chip-name">ハーディジェナー</span></div><div class="memo-chip" id="chip-ロザーンジュ" data-name="ロザーンジュ" data-rank="10" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">10着</span><span class="memo-chip-name">ロザーンジュ</span></div><div class="memo-chip" id="chip-ファンクション" data-name="ファンクション" data-rank="11" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">11着</span><span class="memo-chip-name">ファンクション</span></div><div class="memo-chip" id="chip-レディーゴール" data-name="レディーゴール" data-rank="12" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">12着</span><span class="memo-chip-name">レディーゴール</span></div>
+</div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+  <button onclick="saveMemoToFile({"日付": "2026/05/23", "場所": "東京", "R": 9, "レース名": "カーネーションカップ", "クラス": "1勝"})"
+     style="padding:8px 20px;background:linear-gradient(135deg,#8e44ad,#6c3483);
+            color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;
+            cursor:pointer;box-shadow:0 0 8px rgba(142,68,173,0.4)">
+    &#128204; メモに保存（memo_horses.json へ書き込み）
+  </button>
+  <button onclick="selectAllMemo(true)"
+     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+            border-radius:5px;font-size:12px;cursor:pointer">全選択</button>
+  <button onclick="selectAllMemo(false)"
+     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+            border-radius:5px;font-size:12px;cursor:pointer">全解除</button>
+  <span id="memo-save-msg" style="font-size:12px;color:#2ecc71;display:none;margin-left:8px"></span>
+</div>
+<div id="memo-browser-warn" style="display:none;margin-top:10px;padding:8px 12px;
+     background:#3a1a1a;border-radius:6px;font-size:12px;color:#e74c3c">
+  ⚠ このブラウザはFile System Access APIに対応していません。<br>
+  「JSONをダウンロード」ボタンでファイルを保存し、keiba-dashboardフォルダの
+  memo_horses.jsonに手動でマージしてください。
+  <br><button onclick="downloadMemoJson({"日付": "2026/05/23", "場所": "東京", "R": 9, "レース名": "カーネーションカップ", "クラス": "1勝"})"
+    style="margin-top:6px;padding:5px 12px;background:#c0392b;color:#fff;
+           border:none;border-radius:4px;font-size:12px;cursor:pointer">
+    JSONをダウンロード
+  </button>
+</div>
+</div>
+<script>
+(function(){
+  var MEMO_RACE_INFO = {"日付": "2026/05/23", "場所": "東京", "R": 9, "レース名": "カーネーションカップ", "クラス": "1勝"};
+  // チップの選択状態切り替え
+  window.toggleMemoChip = function(el) {
+    var sel = el.getAttribute('data-selected') === 'true';
+    el.setAttribute('data-selected', sel ? 'false' : 'true');
+    el.style.opacity = sel ? '0.4' : '1';
+    el.style.boxShadow = sel ? 'none' : '0 0 0 2px #8e44ad';
+  };
+  window.selectAllMemo = function(flag) {
+    document.querySelectorAll('.memo-chip').forEach(function(el) {
+      el.setAttribute('data-selected', flag ? 'true' : 'false');
+      el.style.opacity = flag ? '1' : '0.4';
+      el.style.boxShadow = flag ? '0 0 0 2px #8e44ad' : 'none';
+    });
+  };
+  // 初期スタイル適用
+  document.querySelectorAll('.memo-chip').forEach(function(el) {
+    var sel = el.getAttribute('data-selected') === 'true';
+    el.style.opacity = sel ? '1' : '0.4';
+    el.style.boxShadow = sel ? '0 0 0 2px #8e44ad' : 'none';
+  });
+  // 選択馬を収集してエントリ配列を返す
+  function collectEntries(raceInfo) {
+    var today = new Date().toISOString().slice(0,10);
+    var entries = [];
+    document.querySelectorAll('.memo-chip[data-selected="true"]').forEach(function(el) {
+      entries.push({
+        '馬名':   el.getAttribute('data-name'),
+        '登録日': today,
+        '元レース': raceInfo,
+        'メモ': ''
+      });
+    });
+    return entries;
+  }
+  // File System Access API で memo_horses.json に追記保存
+  window.saveMemoToFile = async function(raceInfo) {
+    if (!window.showOpenFilePicker) {
+      document.getElementById('memo-browser-warn').style.display = 'block';
+      return;
+    }
+    var newEntries = collectEntries(raceInfo);
+    if (!newEntries.length) {
+      alert('注目馬が選択されていません。');
+      return;
+    }
+    try {
+      var [fh] = await showOpenFilePicker({
+        types: [{ description: 'JSON', accept: {'application/json': ['.json']} }],
+        multiple: false
+      });
+      var f = await fh.getFile();
+      var existing = [];
+      try { existing = JSON.parse(await f.text()); } catch(e) { existing = []; }
+      // 同レースの同名馬は重複登録しない
+      var existingKeys = new Set(existing.map(function(e) {
+        return e['馬名'] + '|' + (e['元レース']||{})['日付'] + '|' + (e['元レース']||{})['R'];
+      }));
+      newEntries.forEach(function(e) {
+        var key = e['馬名'] + '|' + (e['元レース']||{})['日付'] + '|' + (e['元レース']||{})['R'];
+        if (!existingKeys.has(key)) { existing.push(e); }
+      });
+      var writable = await fh.createWritable();
+      await writable.write(JSON.stringify(existing, null, 2));
+      await writable.close();
+      var msg = document.getElementById('memo-save-msg');
+      msg.textContent = '✅ ' + newEntries.length + '頭を保存しました！';
+      msg.style.display = 'inline';
+      setTimeout(function(){ msg.style.display='none'; }, 4000);
+    } catch(e) {
+      if (e.name !== 'AbortError') alert('保存エラー: ' + e.message);
+    }
+  };
+  // フォールバック: JSONダウンロード
+  window.downloadMemoJson = function(raceInfo) {
+    var entries = collectEntries(raceInfo);
+    var blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'memo_additions.json';
+    a.click();
+  };
+})();
+</script>
 <script>
 const DATA = [{"入線順位": 1, "馬番": 10, "枠番": 7, "馬名": "イクシード", "人気": 1, "単勝オッズ": 1.3, "決め手": "差し", "タイム": "1.46.4", "着差": "0", "上り3F": 33.7, "通過1": null, "通過2": 6, "通過3": 6, "通過4": 6, "体重": 468, "増減": -10, "予想順位": 1, "スコア": 76.2, "予想脚質": "追込", "複勝下限": 1.0, "複勝上限": 1.1, "過去走なし": false, "着差_sec": 0.0}, {"入線順位": 2, "馬番": 8, "枠番": 6, "馬名": "ガーヴィ", "人気": 7, "単勝オッズ": 44.3, "決め手": "追込", "タイム": "1.46.4", "着差": "クビ", "上り3F": 33.1, "通過1": null, "通過2": 12, "通過3": 12, "通過4": 12, "体重": 454, "増減": -2, "予想順位": 7, "スコア": 31.7, "予想脚質": "差し", "複勝下限": 2.4, "複勝上限": 14.0, "過去走なし": false, "着差_sec": 0.0}, {"入線順位": 3, "馬番": 2, "枠番": 2, "馬名": "ルージュリリック", "人気": 3, "単勝オッズ": 16.9, "決め手": "逃げ", "タイム": "1.46.5", "着差": "クビ", "上り3F": 34.5, "通過1": null, "通過2": 1, "通過3": 2, "通過4": 2, "体重": 472, "増減": 8, "予想順位": 10, "スコア": 23.7, "予想脚質": "先行", "複勝下限": 2.9, "複勝上限": 18.1, "過去走なし": false, "着差_sec": 0.1}, {"入線順位": 4, "馬番": 5, "枠番": 5, "馬名": "ヴァリスマリネリス", "人気": 5, "単勝オッズ": 29.3, "決め手": "先行", "タイム": "1.46.6", "着差": "1/2", "上り3F": 34.3, "通過1": null, "通過2": 2, "通過3": 3, "通過4": 3, "体重": 434, "増減": 10, "予想順位": 6, "スコア": 33.6, "予想脚質": "追込", "複勝下限": 2.0, "複勝上限": 11.6, "過去走なし": false, "着差_sec": 0.2}, {"入線順位": 5, "馬番": 6, "枠番": 5, "馬名": "サンブライト", "人気": 12, "単勝オッズ": 95.2, "決め手": "中団", "タイム": "1.46.8", "着差": "1 1/4", "上り3F": 34.0, "通過1": null, "通過2": 6, "通過3": 8, "通過4": 7, "体重": 466, "増減": 10, "予想順位": 12, "スコア": 1.4, "予想脚質": "先行", "複勝下限": 5.3, "複勝上限": 35.1, "過去走なし": false, "着差_sec": 0.4}, {"入線順位": 6, "馬番": 12, "枠番": 8, "馬名": "エンジョイドアスク", "人気": 2, "単勝オッズ": 3.7, "決め手": "後方", "タイム": "1.46.9", "着差": "1", "上り3F": 33.9, "通過1": null, "通過2": 10, "通過3": 9, "通過4": 9, "体重": 474, "増減": -10, "予想順位": 5, "スコア": 35.9, "予想脚質": "差し", "複勝下限": 1.0, "複勝上限": 1.1, "過去走なし": false, "着差_sec": 0.5}, {"入線順位": 7, "馬番": 3, "枠番": 3, "馬名": "ヴェガリア", "人気": 8, "単勝オッズ": 48.9, "決め手": "ﾏｸﾘ", "タイム": "1.47.0", "着差": "クビ", "上り3F": 35.2, "通過1": null, "通過2": 10, "通過3": 1, "通過4": 1, "体重": 444, "増減": 2, "予想順位": 8, "スコア": 30.8, "予想脚質": "差し", "複勝下限": 7.3, "複勝上限": 49.4, "過去走なし": false, "着差_sec": 0.6}, {"入線順位": 8, "馬番": 7, "枠番": 6, "馬名": "シルバーリム", "人気": 11, "単勝オッズ": 79.5, "決め手": "後方", "タイム": "1.47.0", "着差": "頭", "上り3F": 34.0, "通過1": null, "通過2": 9, "通過3": 9, "通過4": 9, "体重": 456, "増減": 6, "予想順位": 9, "スコア": 26.3, "予想脚質": "先行", "複勝下限": 3.9, "複勝上限": 25.0, "過去走なし": false, "着差_sec": 0.6}, {"入線順位": 9, "馬番": 1, "枠番": 1, "馬名": "ハーディジェナー", "人気": 10, "単勝オッズ": 70.7, "決め手": "先行", "タイム": "1.47.0", "着差": "クビ", "上り3F": 34.4, "通過1": null, "通過2": 4, "通過3": 5, "通過4": 4, "体重": 414, "増減": 0, "予想順位": 11, "スコア": 22.6, "予想脚質": "差し", "複勝下限": 4.8, "複勝上限": 31.5, "過去走なし": false, "着差_sec": 0.6}, {"入線順位": 10, "馬番": 4, "枠番": 4, "馬名": "ロザーンジュ", "人気": 4, "単勝オッズ": 24.1, "決め手": "中団", "タイム": "1.47.1", "着差": "クビ", "上り3F": 34.3, "通過1": null, "通過2": 4, "通過3": 6, "通過4": 7, "体重": 418, "増減": -4, "予想順位": 4, "スコア": 43.9, "予想脚質": "差し", "複勝下限": 1.7, "複勝上限": 9.3, "過去走なし": false, "着差_sec": 0.7}, {"入線順位": 11, "馬番": 9, "枠番": 7, "馬名": "ファンクション", "人気": 6, "単勝オッズ": 35.6, "決め手": "先行", "タイム": "1.47.5", "着差": "2 1/2", "上り3F": 35.0, "通過1": null, "通過2": 3, "通過3": 4, "通過4": 4, "体重": 440, "増減": 10, "予想順位": 3, "スコア": 50.6, "予想脚質": "差し", "複勝下限": 4.4, "複勝上限": 28.8, "過去走なし": false, "着差_sec": 1.1}, {"入線順位": 12, "馬番": 11, "枠番": 8, "馬名": "レディーゴール", "人気": 9, "単勝オッズ": 64.1, "決め手": "後方", "タイム": "1.47.7", "着差": "1", "上り3F": 34.7, "通過1": null, "通過2": 6, "通過3": 9, "通過4": 9, "体重": 468, "増減": 6, "予想順位": 2, "スコア": 52.3, "予想脚質": "追込", "複勝下限": 5.6, "複勝上限": 37.3, "過去走なし": false, "着差_sec": 1.3}];
 const RACE = {"レース名": "カーネーションカップ", "場所": "東京", "距離": 1800, "芝ダ": "芝", "天候": "曇", "馬場": "良", "頭数": 12, "前半3F": 36.8, "後半3F": 34.6, "PCI": 53.8, "前後差": -2.2, "最速上3F": 33.1, "通過ラップ": "36.8-48.3-59.9-71.8", "上りラップ": "69.6-58.1-46.5-34.6", "1着タイム": "1.46.4", "R": "9", "クラス名": "1勝", "年": "2026", "月": "5", "日": "23"};

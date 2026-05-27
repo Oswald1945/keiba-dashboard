@@ -245,7 +245,12 @@ async function loadFromGitHub() {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const meta = await r.json();
     currentSha = meta.sha;
-    const json = atob(meta.content.replace(/\n/g,''));
+    // UTF-8対応のBase64デコード
+    const b64 = meta.content.replace(/\n/g,'');
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const json = new TextDecoder('utf-8').decode(bytes);
     memoData = JSON.parse(json || '[]');
     dirty = false;
     renderTable();

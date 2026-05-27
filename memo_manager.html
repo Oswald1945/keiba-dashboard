@@ -432,7 +432,8 @@ function renderTable() {
     const rdate = ri['日付'] || '';
     const rplace = ri['場所'] || '';
     const rnum   = ri['R']   || '';
-    const rname  = ri['レース名'] || ri['クラス'] || '';
+    const _clean = v => (!v || String(v).trim().toLowerCase() === 'nan') ? '' : String(v).trim();
+    const rname  = _clean(ri['レース名']) || _clean(ri['クラス']) || '';
     const rLabel = [rdate, rplace + (rnum ? rnum + 'R' : ''), rname].filter(Boolean).join(' ');
     const memo   = e['メモ'] || '';
     const author = e['追加者'] || '';

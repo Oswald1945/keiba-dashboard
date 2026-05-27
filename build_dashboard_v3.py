@@ -363,7 +363,7 @@ for idx, h in enumerate(horses):
     _memo_entry = _memo_map.get(name)
     if _memo_entry:
         _mo = _memo_entry.get('元レース', {})
-        _mo_date  = _memo_entry.get('登録日', '')
+        _mo_date  = _mo.get('日付', '')          # 元レース日付（登録日ではない）
         _mo_place = _mo.get('場所', '')
         _mo_r     = _mo.get('R', '')
         _mo_rname = _mo.get('レース名', '') or _mo.get('クラス', '')

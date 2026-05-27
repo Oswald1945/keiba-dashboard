@@ -108,9 +108,15 @@ input[type=text]:focus,input[type=password]:focus{outline:none;border-color:#8e4
       <button class="btn btn-green" onclick="addHorse()" style="margin-top:16px">追加</button>
     </div>
   </div>
-  <div style="margin-top:8px">
-    <label style="font-size:11px;color:#7f8c8d;display:block;margin-bottom:3px">メモ</label>
-    <input type="text" id="add-memo" placeholder="自由記述（例：差しで末脚光る、次走距離短縮で注目）">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+    <div>
+      <label style="font-size:11px;color:#7f8c8d;display:block;margin-bottom:3px">追加者名</label>
+      <input type="text" id="add-author" placeholder="例：くろあめ" oninput="saveAuthorName()">
+    </div>
+    <div>
+      <label style="font-size:11px;color:#7f8c8d;display:block;margin-bottom:3px">メモ</label>
+      <input type="text" id="add-memo" placeholder="自由記述（例：差しで末脚光る、次走距離短縮で注目）">
+    </div>
   </div>
 </div>
 
@@ -130,6 +136,7 @@ input[type=text]:focus,input[type=password]:focus{outline:none;border-color:#8e4
           <th><input type="checkbox" id="check-all" onchange="toggleAll(this.checked)"></th>
           <th>馬名</th>
           <th>登録日</th>
+          <th>追加者</th>
           <th>元レース</th>
           <th>メモ</th>
           <th>操作</th>
@@ -170,8 +177,17 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-load').disabled = false;
     document.getElementById('btn-save').disabled = false;
   }
+  // 追加者名を復元
+  const savedAuthor = localStorage.getItem('gh_author_keiba');
+  if (savedAuthor) document.getElementById('add-author').value = savedAuthor;
   renderTable();
 });
+
+function saveAuthorName() {
+  const v = document.getElementById('add-author').value.trim();
+  if (v) localStorage.setItem('gh_author_keiba', v);
+  else localStorage.removeItem('gh_author_keiba');
+}
 
 // ── GitHub接続 ────────────────────────────────────────────────
 async function connectGitHub() {
@@ -317,10 +333,12 @@ function addHorse() {
   const place = placeMatch ? placeMatch[1].trim() : placeRaw;
   const rnum  = placeMatch ? parseInt(placeMatch[2]) : '';
 
+  const author = document.getElementById('add-author').value.trim();
   const today = new Date().toISOString().slice(0,10);
   const entry = {
     '馬名': name,
     '登録日': today,
+    '追加者': author,
     '元レース': { '日付': dateStr, '場所': place, 'R': rnum, 'レース名': rname, 'クラス': '' },
     'メモ': memo
   };
@@ -412,10 +430,12 @@ function renderTable() {
     const rname  = ri['レース名'] || ri['クラス'] || '';
     const rLabel = [rdate, rplace + (rnum ? rnum + 'R' : ''), rname].filter(Boolean).join(' ');
     const memo   = e['メモ'] || '';
+    const author = e['追加者'] || '';
     return `<tr>
       <td><input type="checkbox" class="row-check" data-idx="${idx}"></td>
       <td><span class="badge-memo">📌 ${e['馬名']}</span></td>
       <td style="white-space:nowrap;font-size:12px;color:#7f8c8d">${e['登録日'] || ''}</td>
+      <td style="font-size:12px;color:#bdc3c7;white-space:nowrap">${author}</td>
       <td style="font-size:12px;color:#bdc3c7;white-space:nowrap">${rLabel}</td>
       <td id="memo-cell-${idx}">
         <span class="tag-memo" title="${memo}" onclick="editMemo(${idx})" style="cursor:pointer">

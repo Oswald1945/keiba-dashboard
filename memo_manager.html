@@ -178,17 +178,20 @@ async function connectGitHub() {
   const val = document.getElementById('pat-input').value.trim();
   if (!val) { showMsg('トークンを入力してください', 'err'); return; }
   setStatus('none', '接続確認中...');
+  // Fine-grained token は /user が使えないためリポジトリAPIで確認
+  const _savedPat = pat;
+  pat = val;
   try {
-    const r = await ghFetch('https://api.github.com/user', 'GET');
+    const r = await ghFetch(`https://api.github.com/repos/${OWNER}/${REPO}`, 'GET');
     if (!r.ok) throw new Error('認証失敗 (status ' + r.status + ')');
-    const u = await r.json();
-    pat = val;
+    const repo = await r.json();
     localStorage.setItem('gh_pat_keiba', pat);
-    setStatus('ok', `接続OK — ${u.login} としてログイン中`);
+    setStatus('ok', `接続OK — ${repo.full_name}`);
     document.getElementById('btn-load').disabled = false;
     document.getElementById('btn-save').disabled = false;
     showMsg('接続しました。「GitHubから読み込む」を押してください', 'ok');
   } catch(e) {
+    pat = _savedPat;
     setStatus('ng', '接続失敗: ' + e.message);
     showMsg('接続失敗: ' + e.message, 'err');
   }

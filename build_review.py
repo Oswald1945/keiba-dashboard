@@ -153,8 +153,19 @@ for _r in rows:
 # 全馬上り3F最速値（次走ヒント用）
 _agari_best_val = min((r['上り3F'] for r in rows if r.get('上り3F') is not None), default=99)
 
+def _str(v):
+    """NaN/None を空文字に、それ以外は str に変換"""
+    import math as _math
+    if v is None: return ''
+    try:
+        if _math.isnan(float(v)): return ''
+    except (TypeError, ValueError):
+        pass
+    s = str(v).strip()
+    return '' if s.lower() == 'nan' else s
+
 race = {
-    'レース名': str(meta['レース名']).strip(), '場所': str(meta['場所']).strip(),
+    'レース名': _str(meta['レース名']), '場所': _str(meta['場所']),
     '距離': int(meta['距離']), '芝ダ': str(meta['芝・ダート']).strip(),
     '天候': str(meta['天候']).strip(), '馬場': str(meta['馬場状態']).strip(),
     '頭数': int(meta['頭数']), '前半3F': float(meta['通過3F']),
@@ -275,7 +286,7 @@ improve_html = '<div class="section"><h2>&#128161; 次回への改善点</h2>' +
 
 # ── ピックアップ馬パネル生成 ─────────────────────────────────────
 def _find_pickup_horses(rows, race):
-    """展開不利の中で好走した馬（次走注目）を1〜4頭抽出する"""
+    """展開不利・末脚光った馬（次走注目）を厳選して最大3頭抽出する"""
     pci = race['PCI']
     n   = race['頭数']
     front_styles = {'逃げ', '先行'}
@@ -285,58 +296,77 @@ def _find_pickup_horses(rows, race):
     top3_front = sum(1 for r in top3 if r['決め手'] in front_styles)
     top3_rear  = sum(1 for r in top3 if r['決め手'] in rear_styles)
 
-    # 実際の展開タイプ判定（3着内の脚質構成 + PCI）
-    # 前有利展開: 逃げ/先行が2頭以上3着内 OR スロー(PCI>53)かつ1頭以上
-    is_front_race = (top3_front >= 2) or (pci > 55 and top3_front >= 1)
-    # 後方有利展開: 差し/追込が2頭以上3着内 OR ハイペース(PCI<48)かつ1頭以上
-    is_rear_race  = (top3_rear  >= 2) or (pci < 50 and top3_rear  >= 1)
+    # ── 展開タイプ判定（PCI境界を対称化・厳格化） ──────────────────
+    # 前有利: 逃げ/先行が3着内に2頭以上 OR 明確スロー(PCI>57)かつ1頭以上
+    #         OR 3着内が全員前め(top3_front==3)で圧倒的前有利
+    is_front_race = (
+        (top3_front >= 2) or
+        (pci > 57 and top3_front >= 1) or
+        (top3_front == 3)
+    )
+    # 後方有利: 差し/追込が3着内に2頭以上 OR 明確ハイ(PCI<43)かつ1頭以上
+    #           OR 3着内が全員後ろめ(top3_rear==3)で圧倒的後方有利
+    is_rear_race = (
+        (top3_rear >= 2) or
+        (pci < 43 and top3_rear >= 1) or
+        (top3_rear == 3)
+    )
 
     # 全馬の上り3F ソート（小さい=速い）
     agari_list = sorted([r['上り3F'] for r in rows if r.get('上り3F') is not None])
-    top33_threshold = agari_list[max(0, len(agari_list)//3 - 1)] if agari_list else 99
+    top25_threshold = agari_list[max(0, len(agari_list)//4 - 1)] if agari_list else 99  # 上位25%
+    top33_threshold = agari_list[max(0, len(agari_list)//3 - 1)] if agari_list else 99  # 上位33%
     agari_best = agari_list[0] if agari_list else 99
 
     candidates = []
     for r in rows:
         pos  = r['入線順位']
-        if pos <= 3:           continue   # 3着内は既に評価済み
-        if pos > min(10, n//2): continue  # 後半グループは除外
-        if r.get('過去走なし'): continue   # 参考スコア馬は除外
+        if pos <= 3:            continue   # 3着内は既に評価済み
+        if pos > min(9, n//2):  continue   # 後半グループは除外（10着以降も除外）
+        if r.get('過去走なし'):  continue   # 参考スコア馬は除外
 
         style   = r['決め手']
         agari   = r.get('上り3F')
         c4      = r.get('通過4')
-        c1      = r.get('通過1')
         pred    = r.get('予想順位') or pos
-        gap_sec = r.get('着差_sec', 99.0)   # 1着からの累積着差（秒）
-        score  = 0
+        gap_sec = r.get('着差_sec', 99.0)
+        score   = 0
         reasons = []
+        has_main = False   # ①展開不利 or ②上位末脚 のどちらかが必須
 
-        # ── 判定①: 展開の向かい風の中で好走 ──────────────────────
+        # ── 判定①: 展開の向かい風の中で好走（メイン判定） ───────────
         if is_front_race and style in rear_styles:
             score += 3
+            has_main = True
             reasons.append(
-                f"前有利の流れ（先行勢が上位を占拠）にもかかわらず、{style}策で{pos}着に食い込む")
+                f"前有利の流れ（先行勢が3着内を占拠）にもかかわらず、{style}策で{pos}着に食い込む")
         elif is_rear_race and style in front_styles:
             score += 3
+            has_main = True
             reasons.append(
                 f"後方有利の流れ（差し・追込勢が台頭）の中、{style}策から{pos}着まで粘り込む")
 
-        # ── 判定②: フィールド上位の上り3F ─────────────────────────
+        # ── 判定②: フィールド上位の上り3F（メイン判定） ──────────────
         if agari is not None:
             if agari == agari_best:
                 score += 3
+                has_main = True
                 reasons.append(f"上り3F {agari}秒はこのレースの最速タイム")
-            elif agari <= top33_threshold:
+            elif agari <= top25_threshold:
                 score += 2
+                has_main = True
+                reasons.append(f"上り3F {agari}秒（出走馬の上位4分の1に入る鋭い末脚）")
+            elif agari <= top33_threshold:
+                score += 1
                 reasons.append(f"上り3F {agari}秒（出走馬の上位3分の1に入る末脚）")
 
-        # ── 判定③: 4角から大幅追い込み ─────────────────────────────
+        # ── 判定③: 4角から大幅追い込み ──────────────────────────────
         if c4 is not None and pos is not None:
             gained = c4 - pos
-            if gained >= 6:
+            # 頭数比で相対評価（大きく上がるほど高評価）
+            if gained >= max(6, int(n * 0.4)):
                 score += 3
-                reasons.append(f"4角{c4}番手から直線で{gained}頭をかわして{pos}着")
+                reasons.append(f"4角{c4}番手から直線で{gained}頭をかわして{pos}着（大幅追い込み）")
             elif gained >= 4:
                 score += 2
                 reasons.append(f"4角{c4}番手から{gained}頭差し切って{pos}着")
@@ -344,7 +374,7 @@ def _find_pickup_horses(rows, race):
                 score += 1
                 reasons.append(f"4角{c4}番手から直線で{gained}頭分ポジションを上げて{pos}着")
 
-        # ── 判定④: 予想を大幅に上回る好走 ──────────────────────────
+        # ── 判定④: 低評価から大幅に上回る好走 ──────────────────────
         if pred and pos:
             outperform = int(pred) - int(pos)
             if outperform >= 7:
@@ -354,39 +384,37 @@ def _find_pickup_horses(rows, race):
                 score += 1
                 reasons.append(f"予想{pred}位から{pos}着と評価以上の走り")
 
-        # ── 判定⑤: 前で速い上り（前半消耗にも関わらず末脚維持） ────
+        # ── 判定⑤: 前め脚質でも速い上り（スタミナ証明） ────────────
         if style in front_styles and agari is not None and agari <= top33_threshold:
-            if score > 0:   # 他の判定と組み合わさる場合のみ加点
+            if score > 0:
                 score += 1
-                reasons.append(f"{style}で前半を消耗しながらも上り3F {agari}秒の末脚を維持（スタミナ面で優秀）")
+                reasons.append(
+                    f"{style}で前半を消耗しながらも上り3F {agari}秒の末脚を維持（スタミナ面で優秀）")
 
-        # ── 判定⑥: 1着との着差タイムが小さい（展開不利でも僅差） ──
-        if gap_sec <= 0.2:
+        # ── 判定⑥: 1着との着差（補助判定・単独では候補入り不可） ────
+        # 着差だけでメイン判定なしの場合はスキップ
+        if gap_sec <= 0.1:
             score += 3
             reasons.append(f"1着との差はわずか{gap_sec:.1f}秒（ほぼ差なし）。展開の不利を吸収した内容")
-        elif gap_sec <= 0.5:
+        elif gap_sec <= 0.3:
             score += 2
             reasons.append(f"1着と{gap_sec:.1f}秒差の僅差。着順以上に中身のある競馬")
-        elif gap_sec <= 0.8:
+        elif gap_sec <= 0.5:
             score += 1
             reasons.append(f"1着と{gap_sec:.1f}秒差。着順ほどの差はなく次走巻き返し圏内")
 
-        # スコア3以上 かつ 理由が1つ以上の馬のみ候補に
-        if score >= 3 and reasons:
+        # ── 候補入り条件（B案：メイン判定必須・閾値4点） ────────────
+        # 必須: ①展開不利 or ②上位末脚（上位25%以内or最速）のどちらかが入っていること
+        # 必須: 合計スコア4点以上
+        if score >= 4 and has_main and reasons:
             candidates.append({'horse': r, 'score': score, 'reasons': reasons,
                                 'agari_best': agari_best})
 
     # スコア降順、同点なら着順が良い馬を優先
     candidates.sort(key=lambda x: (-x['score'], x['horse']['入線順位']))
 
-    # 最大4頭 (同じ展開不利理由の馬が多い場合は3頭)
-    result = candidates[:4]
-    # 全員が同じ理由（展開不利のみ）の場合は2頭に絞る
-    if len(result) >= 3:
-        all_same = all('展開' in c['reasons'][0] and len(c['reasons']) == 1 for c in result)
-        if all_same:
-            result = result[:2]
-    return result
+    # 最大3頭に厳選
+    return candidates[:3]
 
 _WAKU_BG = {1:'#fff',2:'#555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'#22bb22',7:'#ff8822',8:'#ffaacc'}
 _WAKU_FG = {1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111',8:'#111'}
@@ -452,6 +480,169 @@ def _pickup_html(candidates, race):
 _pickup_candidates = _find_pickup_horses(rows, race)
 pickup_html = _pickup_html(_pickup_candidates, race)
 
+# ── 次走注目メモセクション生成 ──────────────────────────────────
+# ピックアップ候補の馬名セット（初期選択状態にする）
+_pickup_names = {c['horse']['馬名'] for c in _pickup_candidates}
+# 着順順に全馬リスト（着順でソート済みの rows を利用）
+_memo_rows_sorted = sorted(rows, key=lambda x: x['入線順位'])
+
+def _memo_section_html(memo_rows, pickup_names, race):
+    """次走注目メモ管理セクションのHTMLを生成"""
+    _r = race
+    _date_str = f"{_r['年']}/{int(_r['月']):02d}/{int(_r['日']):02d}"
+    _place = _r.get('場所','')
+    _rnum  = _r.get('R','')
+    _rname = _r.get('レース名','')
+    _cls   = _r.get('クラス名','')
+    # JS埋め込み用のレース情報JSON
+    _race_info_js = json.dumps({
+        '日付': _date_str,
+        '場所': _place,
+        'R':    int(_rnum) if str(_rnum).isdigit() else _rnum,
+        'レース名': _rname if str(_rname) not in ('nan','None','') else '',
+        'クラス': _cls,
+    }, ensure_ascii=False)
+    # 馬リスト（初期選択フラグ付き）
+    _horse_chips = ''
+    for r in memo_rows:
+        name = r['馬名']
+        rank = r['入線順位']
+        checked = 'true' if name in pickup_names else 'false'
+        pre_class = ' memo-pre-selected' if name in pickup_names else ''
+        _horse_chips += (
+            f'<div class="memo-chip{pre_class}" id="chip-{name}" '
+            f'data-name="{name}" data-rank="{rank}" data-selected="{checked}" '
+            f'onclick="toggleMemoChip(this)">'
+            f'<span class="memo-chip-rank">{rank}着</span>'
+            f'<span class="memo-chip-name">{name}</span>'
+            + ('<span class="memo-chip-auto">★ 自動</span>' if name in pickup_names else '')
+            + '</div>'
+        )
+    return f'''<div class="section" id="memo-section">
+<h2>&#128204; 次走注目馬メモ</h2>
+<div style="font-size:12px;color:#bdc3c7;margin-bottom:12px;line-height:1.7;
+     padding:10px;background:#0d1117;border-radius:6px;border-left:3px solid #8e44ad">
+  ★印はシステムが自動ピックアップした馬です。クリックで選択・解除できます。<br>
+  選択後「メモに保存」ボタンを押すと <b>memo_horses.json</b> に追記されます。
+</div>
+<div id="memo-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+  {_horse_chips}
+</div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+  <button onclick="saveMemoToFile({_race_info_js})"
+     style="padding:8px 20px;background:linear-gradient(135deg,#8e44ad,#6c3483);
+            color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;
+            cursor:pointer;box-shadow:0 0 8px rgba(142,68,173,0.4)">
+    &#128204; メモに保存（memo_horses.json へ書き込み）
+  </button>
+  <button onclick="selectAllMemo(true)"
+     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+            border-radius:5px;font-size:12px;cursor:pointer">全選択</button>
+  <button onclick="selectAllMemo(false)"
+     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+            border-radius:5px;font-size:12px;cursor:pointer">全解除</button>
+  <span id="memo-save-msg" style="font-size:12px;color:#2ecc71;display:none;margin-left:8px"></span>
+</div>
+<div id="memo-browser-warn" style="display:none;margin-top:10px;padding:8px 12px;
+     background:#3a1a1a;border-radius:6px;font-size:12px;color:#e74c3c">
+  ⚠ このブラウザはFile System Access APIに対応していません。<br>
+  「JSONをダウンロード」ボタンでファイルを保存し、keiba-dashboardフォルダの
+  memo_horses.jsonに手動でマージしてください。
+  <br><button onclick="downloadMemoJson({_race_info_js})"
+    style="margin-top:6px;padding:5px 12px;background:#c0392b;color:#fff;
+           border:none;border-radius:4px;font-size:12px;cursor:pointer">
+    JSONをダウンロード
+  </button>
+</div>
+</div>
+<script>
+(function(){{
+  var MEMO_RACE_INFO = {_race_info_js};
+  // チップの選択状態切り替え
+  window.toggleMemoChip = function(el) {{
+    var sel = el.getAttribute('data-selected') === 'true';
+    el.setAttribute('data-selected', sel ? 'false' : 'true');
+    el.style.opacity = sel ? '0.4' : '1';
+    el.style.boxShadow = sel ? 'none' : '0 0 0 2px #8e44ad';
+  }};
+  window.selectAllMemo = function(flag) {{
+    document.querySelectorAll('.memo-chip').forEach(function(el) {{
+      el.setAttribute('data-selected', flag ? 'true' : 'false');
+      el.style.opacity = flag ? '1' : '0.4';
+      el.style.boxShadow = flag ? '0 0 0 2px #8e44ad' : 'none';
+    }});
+  }};
+  // 初期スタイル適用
+  document.querySelectorAll('.memo-chip').forEach(function(el) {{
+    var sel = el.getAttribute('data-selected') === 'true';
+    el.style.opacity = sel ? '1' : '0.4';
+    el.style.boxShadow = sel ? '0 0 0 2px #8e44ad' : 'none';
+  }});
+  // 選択馬を収集してエントリ配列を返す
+  function collectEntries(raceInfo) {{
+    var today = new Date().toISOString().slice(0,10);
+    var entries = [];
+    document.querySelectorAll('.memo-chip[data-selected="true"]').forEach(function(el) {{
+      entries.push({{
+        '馬名':   el.getAttribute('data-name'),
+        '登録日': today,
+        '元レース': raceInfo,
+        'メモ': ''
+      }});
+    }});
+    return entries;
+  }}
+  // File System Access API で memo_horses.json に追記保存
+  window.saveMemoToFile = async function(raceInfo) {{
+    if (!window.showOpenFilePicker) {{
+      document.getElementById('memo-browser-warn').style.display = 'block';
+      return;
+    }}
+    var newEntries = collectEntries(raceInfo);
+    if (!newEntries.length) {{
+      alert('注目馬が選択されていません。');
+      return;
+    }}
+    try {{
+      var [fh] = await showOpenFilePicker({{
+        types: [{{ description: 'JSON', accept: {{'application/json': ['.json']}} }}],
+        multiple: false
+      }});
+      var f = await fh.getFile();
+      var existing = [];
+      try {{ existing = JSON.parse(await f.text()); }} catch(e) {{ existing = []; }}
+      // 同レースの同名馬は重複登録しない
+      var existingKeys = new Set(existing.map(function(e) {{
+        return e['馬名'] + '|' + (e['元レース']||{{}})['日付'] + '|' + (e['元レース']||{{}})['R'];
+      }}));
+      newEntries.forEach(function(e) {{
+        var key = e['馬名'] + '|' + (e['元レース']||{{}})['日付'] + '|' + (e['元レース']||{{}})['R'];
+        if (!existingKeys.has(key)) {{ existing.push(e); }}
+      }});
+      var writable = await fh.createWritable();
+      await writable.write(JSON.stringify(existing, null, 2));
+      await writable.close();
+      var msg = document.getElementById('memo-save-msg');
+      msg.textContent = '✅ ' + newEntries.length + '頭を保存しました！';
+      msg.style.display = 'inline';
+      setTimeout(function(){{ msg.style.display='none'; }}, 4000);
+    }} catch(e) {{
+      if (e.name !== 'AbortError') alert('保存エラー: ' + e.message);
+    }}
+  }};
+  // フォールバック: JSONダウンロード
+  window.downloadMemoJson = function(raceInfo) {{
+    var entries = collectEntries(raceInfo);
+    var blob = new Blob([JSON.stringify(entries, null, 2)], {{type:'application/json'}});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'memo_additions.json';
+    a.click();
+  }};
+}})();
+</script>'''
+
+memo_section_html = _memo_section_html(_memo_rows_sorted, _pickup_names, race)
 
 # ── 日付・ファイル名 動的生成 ──────────────────────────────────
 import datetime as _dt, re as _re2
@@ -511,6 +702,14 @@ tr:hover td{{background:#1f2f42}}
 .pickup-meta{{font-size:11px;color:#7f8c8d;margin-left:auto}}
 .waku-pill{{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;border:1px solid #333}}
 .pickup-reason{{font-size:12px;color:#bdc3c7;line-height:1.8;padding-left:4px}}
+.memo-chip{{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
+  background:#243447;border:1px solid #2c3e50;cursor:pointer;transition:all 0.15s;
+  font-size:12px;color:#e0e0e0;user-select:none}}
+.memo-chip:hover{{background:#2c3e50}}
+.memo-chip-rank{{font-size:11px;color:#7f8c8d;min-width:24px}}
+.memo-chip-name{{font-weight:700}}
+.memo-chip-auto{{font-size:10px;color:#f1c40f;font-weight:700;margin-left:2px}}
+.memo-pre-selected{{border-color:#8e44ad}}
 </style></head><body>
 <h1>&#127943; レース回顧 &#8212; {_display_name}</h1>
 <div class="subtitle">{race_date_str}・{race['場所']}競馬場 {race['芝ダ']}{race['距離']}m ・{race['クラス名']} ・{race['頭数']}頭立て</div>
@@ -551,7 +750,8 @@ tr:hover td{{background:#1f2f42}}
   </table></div>
 </div>
 {improve_html}
-{pickup_html}"""
+{pickup_html}
+{memo_section_html}"""
 
 
 js = """

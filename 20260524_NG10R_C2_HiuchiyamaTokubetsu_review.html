@@ -42,6 +42,14 @@ tr:hover td{background:#1f2f42}
 .pickup-meta{font-size:11px;color:#7f8c8d;margin-left:auto}
 .waku-pill{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;border:1px solid #333}
 .pickup-reason{font-size:12px;color:#bdc3c7;line-height:1.8;padding-left:4px}
+.memo-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
+  background:#243447;border:1px solid #2c3e50;cursor:pointer;transition:all 0.15s;
+  font-size:12px;color:#e0e0e0;user-select:none}
+.memo-chip:hover{background:#2c3e50}
+.memo-chip-rank{font-size:11px;color:#7f8c8d;min-width:24px}
+.memo-chip-name{font-weight:700}
+.memo-chip-auto{font-size:10px;color:#f1c40f;font-weight:700;margin-left:2px}
+.memo-pre-selected{border-color:#8e44ad}
 </style></head><body>
 <h1>&#127943; レース回顧 &#8212; 火打山特別</h1>
 <div class="subtitle">2026年5月24日（日）・新潟競馬場 ダート1200m ・2勝 ・15頭立て</div>
@@ -121,6 +129,129 @@ tr:hover td{background:#1f2f42}
   <div class="pickup-reason">・前有利の流れ（先行勢が上位を占拠）にもかかわらず、中団策で7着に食い込む</div>
   
 </div></div>
+<div class="section" id="memo-section">
+<h2>&#128204; 次走注目馬メモ</h2>
+<div style="font-size:12px;color:#bdc3c7;margin-bottom:12px;line-height:1.7;
+     padding:10px;background:#0d1117;border-radius:6px;border-left:3px solid #8e44ad">
+  ★印はシステムが自動ピックアップした馬です。クリックで選択・解除できます。<br>
+  選択後「メモに保存」ボタンを押すと <b>memo_horses.json</b> に追記されます。
+</div>
+<div id="memo-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+  <div class="memo-chip" id="chip-テセラリアン" data-name="テセラリアン" data-rank="1" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">1着</span><span class="memo-chip-name">テセラリアン</span></div><div class="memo-chip" id="chip-セルヴァンス" data-name="セルヴァンス" data-rank="2" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">2着</span><span class="memo-chip-name">セルヴァンス</span></div><div class="memo-chip" id="chip-ピコテンダー" data-name="ピコテンダー" data-rank="3" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">3着</span><span class="memo-chip-name">ピコテンダー</span></div><div class="memo-chip memo-pre-selected" id="chip-ミスエル" data-name="ミスエル" data-rank="4" data-selected="true" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">4着</span><span class="memo-chip-name">ミスエル</span><span class="memo-chip-auto">★ 自動</span></div><div class="memo-chip memo-pre-selected" id="chip-レイアポポ" data-name="レイアポポ" data-rank="5" data-selected="true" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">5着</span><span class="memo-chip-name">レイアポポ</span><span class="memo-chip-auto">★ 自動</span></div><div class="memo-chip memo-pre-selected" id="chip-セレジェイラ" data-name="セレジェイラ" data-rank="6" data-selected="true" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">6着</span><span class="memo-chip-name">セレジェイラ</span><span class="memo-chip-auto">★ 自動</span></div><div class="memo-chip memo-pre-selected" id="chip-シルフズミスチーフ" data-name="シルフズミスチーフ" data-rank="7" data-selected="true" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">7着</span><span class="memo-chip-name">シルフズミスチーフ</span><span class="memo-chip-auto">★ 自動</span></div><div class="memo-chip" id="chip-ゲーベル" data-name="ゲーベル" data-rank="8" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">8着</span><span class="memo-chip-name">ゲーベル</span></div><div class="memo-chip" id="chip-ロッカバイベイビー" data-name="ロッカバイベイビー" data-rank="9" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">9着</span><span class="memo-chip-name">ロッカバイベイビー</span></div><div class="memo-chip" id="chip-ビッグドリーム" data-name="ビッグドリーム" data-rank="10" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">10着</span><span class="memo-chip-name">ビッグドリーム</span></div><div class="memo-chip" id="chip-キングクー" data-name="キングクー" data-rank="11" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">11着</span><span class="memo-chip-name">キングクー</span></div><div class="memo-chip" id="chip-シュバルツガイスト" data-name="シュバルツガイスト" data-rank="12" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">12着</span><span class="memo-chip-name">シュバルツガイスト</span></div><div class="memo-chip" id="chip-ダズリングダンス" data-name="ダズリングダンス" data-rank="13" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">13着</span><span class="memo-chip-name">ダズリングダンス</span></div><div class="memo-chip" id="chip-バンディート" data-name="バンディート" data-rank="14" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">14着</span><span class="memo-chip-name">バンディート</span></div><div class="memo-chip" id="chip-アイアムイチバン" data-name="アイアムイチバン" data-rank="15" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">15着</span><span class="memo-chip-name">アイアムイチバン</span></div>
+</div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+  <button onclick="saveMemoToFile({"日付": "2026/05/24", "場所": "新潟", "R": 10, "レース名": "火打山特別", "クラス": "2勝"})"
+     style="padding:8px 20px;background:linear-gradient(135deg,#8e44ad,#6c3483);
+            color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;
+            cursor:pointer;box-shadow:0 0 8px rgba(142,68,173,0.4)">
+    &#128204; メモに保存（memo_horses.json へ書き込み）
+  </button>
+  <button onclick="selectAllMemo(true)"
+     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+            border-radius:5px;font-size:12px;cursor:pointer">全選択</button>
+  <button onclick="selectAllMemo(false)"
+     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+            border-radius:5px;font-size:12px;cursor:pointer">全解除</button>
+  <span id="memo-save-msg" style="font-size:12px;color:#2ecc71;display:none;margin-left:8px"></span>
+</div>
+<div id="memo-browser-warn" style="display:none;margin-top:10px;padding:8px 12px;
+     background:#3a1a1a;border-radius:6px;font-size:12px;color:#e74c3c">
+  ⚠ このブラウザはFile System Access APIに対応していません。<br>
+  「JSONをダウンロード」ボタンでファイルを保存し、keiba-dashboardフォルダの
+  memo_horses.jsonに手動でマージしてください。
+  <br><button onclick="downloadMemoJson({"日付": "2026/05/24", "場所": "新潟", "R": 10, "レース名": "火打山特別", "クラス": "2勝"})"
+    style="margin-top:6px;padding:5px 12px;background:#c0392b;color:#fff;
+           border:none;border-radius:4px;font-size:12px;cursor:pointer">
+    JSONをダウンロード
+  </button>
+</div>
+</div>
+<script>
+(function(){
+  var MEMO_RACE_INFO = {"日付": "2026/05/24", "場所": "新潟", "R": 10, "レース名": "火打山特別", "クラス": "2勝"};
+  // チップの選択状態切り替え
+  window.toggleMemoChip = function(el) {
+    var sel = el.getAttribute('data-selected') === 'true';
+    el.setAttribute('data-selected', sel ? 'false' : 'true');
+    el.style.opacity = sel ? '0.4' : '1';
+    el.style.boxShadow = sel ? 'none' : '0 0 0 2px #8e44ad';
+  };
+  window.selectAllMemo = function(flag) {
+    document.querySelectorAll('.memo-chip').forEach(function(el) {
+      el.setAttribute('data-selected', flag ? 'true' : 'false');
+      el.style.opacity = flag ? '1' : '0.4';
+      el.style.boxShadow = flag ? '0 0 0 2px #8e44ad' : 'none';
+    });
+  };
+  // 初期スタイル適用
+  document.querySelectorAll('.memo-chip').forEach(function(el) {
+    var sel = el.getAttribute('data-selected') === 'true';
+    el.style.opacity = sel ? '1' : '0.4';
+    el.style.boxShadow = sel ? '0 0 0 2px #8e44ad' : 'none';
+  });
+  // 選択馬を収集してエントリ配列を返す
+  function collectEntries(raceInfo) {
+    var today = new Date().toISOString().slice(0,10);
+    var entries = [];
+    document.querySelectorAll('.memo-chip[data-selected="true"]').forEach(function(el) {
+      entries.push({
+        '馬名':   el.getAttribute('data-name'),
+        '登録日': today,
+        '元レース': raceInfo,
+        'メモ': ''
+      });
+    });
+    return entries;
+  }
+  // File System Access API で memo_horses.json に追記保存
+  window.saveMemoToFile = async function(raceInfo) {
+    if (!window.showOpenFilePicker) {
+      document.getElementById('memo-browser-warn').style.display = 'block';
+      return;
+    }
+    var newEntries = collectEntries(raceInfo);
+    if (!newEntries.length) {
+      alert('注目馬が選択されていません。');
+      return;
+    }
+    try {
+      var [fh] = await showOpenFilePicker({
+        types: [{ description: 'JSON', accept: {'application/json': ['.json']} }],
+        multiple: false
+      });
+      var f = await fh.getFile();
+      var existing = [];
+      try { existing = JSON.parse(await f.text()); } catch(e) { existing = []; }
+      // 同レースの同名馬は重複登録しない
+      var existingKeys = new Set(existing.map(function(e) {
+        return e['馬名'] + '|' + (e['元レース']||{})['日付'] + '|' + (e['元レース']||{})['R'];
+      }));
+      newEntries.forEach(function(e) {
+        var key = e['馬名'] + '|' + (e['元レース']||{})['日付'] + '|' + (e['元レース']||{})['R'];
+        if (!existingKeys.has(key)) { existing.push(e); }
+      });
+      var writable = await fh.createWritable();
+      await writable.write(JSON.stringify(existing, null, 2));
+      await writable.close();
+      var msg = document.getElementById('memo-save-msg');
+      msg.textContent = '✅ ' + newEntries.length + '頭を保存しました！';
+      msg.style.display = 'inline';
+      setTimeout(function(){ msg.style.display='none'; }, 4000);
+    } catch(e) {
+      if (e.name !== 'AbortError') alert('保存エラー: ' + e.message);
+    }
+  };
+  // フォールバック: JSONダウンロード
+  window.downloadMemoJson = function(raceInfo) {
+    var entries = collectEntries(raceInfo);
+    var blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'memo_additions.json';
+    a.click();
+  };
+})();
+</script>
 <script>
 const DATA = [{"入線順位": 1, "馬番": 11, "枠番": 6, "馬名": "テセラリアン", "人気": 8, "単勝オッズ": 23.8, "決め手": "逃げ", "タイム": "1.11.3", "着差": "0", "上り3F": 36.4, "通過1": null, "通過2": null, "通過3": 1, "通過4": 1, "体重": 454, "増減": 6, "予想順位": 4, "スコア": 68.3, "予想脚質": "先行", "複勝下限": 4.3, "複勝上限": 5.7, "過去走なし": false, "着差_sec": 0.0}, {"入線順位": 2, "馬番": 10, "枠番": 6, "馬名": "セルヴァンス", "人気": 6, "単勝オッズ": 14.2, "決め手": "先行", "タイム": "1.11.6", "着差": "1 3/4", "上り3F": 36.6, "通過1": null, "通過2": null, "通過3": 2, "通過4": 2, "体重": 430, "増減": -6, "予想順位": 7, "スコア": 48.9, "予想脚質": "先行", "複勝下限": 3.4, "複勝上限": 4.5, "過去走なし": false, "着差_sec": 0.3}, {"入線順位": 3, "馬番": 14, "枠番": 8, "馬名": "ピコテンダー", "人気": 1, "単勝オッズ": 3.2, "決め手": "差し", "タイム": "1.12.0", "着差": "2 1/2", "上り3F": 36.4, "通過1": null, "通過2": null, "通過3": 7, "通過4": 6, "体重": 480, "増減": -2, "予想順位": 1, "スコア": 80.1, "予想脚質": "先行", "複勝下限": 2.2, "複勝上限": 2.7, "過去走なし": false, "着差_sec": 0.7}, {"入線順位": 4, "馬番": 12, "枠番": 7, "馬名": "ミスエル", "人気": 9, "単勝オッズ": 25.6, "決め手": "先行", "タイム": "1.12.2", "着差": "1 1/4", "上り3F": 37.0, "通過1": null, "通過2": null, "通過3": 3, "通過4": 3, "体重": 486, "増減": 4, "予想順位": 9, "スコア": 39.2, "予想脚質": "差し", "複勝下限": 3.9, "複勝上限": 5.1, "過去走なし": false, "着差_sec": 0.9}, {"入線順位": 5, "馬番": 13, "枠番": 7, "馬名": "レイアポポ", "人気": 13, "単勝オッズ": 84.6, "決め手": "中団", "タイム": "1.12.2", "着差": "頭", "上り3F": 36.8, "通過1": null, "通過2": null, "通過3": 5, "通過4": 5, "体重": 488, "増減": 6, "予想順位": 8, "スコア": 39.6, "予想脚質": "先行", "複勝下限": 5.9, "複勝上限": 7.9, "過去走なし": false, "着差_sec": 0.9}, {"入線順位": 6, "馬番": 3, "枠番": 2, "馬名": "セレジェイラ", "人気": 4, "単勝オッズ": 6.4, "決め手": "後方", "タイム": "1.12.5", "着差": "1 3/4", "上り3F": 36.6, "通過1": null, "通過2": null, "通過3": 11, "通過4": 12, "体重": 478, "増減": -6, "予想順位": 3, "スコア": 71.9, "予想脚質": "差し", "複勝下限": 3.8, "複勝上限": 5.0, "過去走なし": false, "着差_sec": 1.2}, {"入線順位": 7, "馬番": 9, "枠番": 5, "馬名": "シルフズミスチーフ", "人気": 2, "単勝オッズ": 4.9, "決め手": "中団", "タイム": "1.12.5", "着差": "ハナ", "上り3F": 36.9, "通過1": null, "通過2": null, "通過3": 7, "通過4": 8, "体重": 462, "増減": 6, "予想順位": 5, "スコア": 66.2, "予想脚質": "先行", "複勝下限": 1.6, "複勝上限": 1.9, "過去走なし": false, "着差_sec": 1.2}, {"入線順位": 8, "馬番": 5, "枠番": 3, "馬名": "ゲーベル", "人気": 10, "単勝オッズ": 37.5, "決め手": "中団", "タイム": "1.12.5", "着差": "クビ", "上り3F": 37.0, "通過1": null, "通過2": null, "通過3": 5, "通過4": 6, "体重": 534, "増減": 6, "予想順位": 11, "スコア": 27.0, "予想脚質": "逃げ", "複勝下限": 8.5, "複勝上限": 11.3, "過去走なし": false, "着差_sec": 1.2}, {"入線順位": 9, "馬番": 8, "枠番": 5, "馬名": "ロッカバイベイビー", "人気": 11, "単勝オッズ": 60.3, "決め手": "中団", "タイム": "1.12.7", "着差": "1", "上り3F": 36.8, "通過1": null, "通過2": null, "通過3": 11, "通過4": 10, "体重": 460, "増減": 10, "予想順位": 12, "スコア": 26.7, "予想脚質": "差し", "複勝下限": 5.2, "複勝上限": 6.9, "過去走なし": false, "着差_sec": 1.4}, {"入線順位": 10, "馬番": 7, "枠番": 4, "馬名": "ビッグドリーム", "人気": 3, "単勝オッズ": 6.4, "決め手": "中団", "タイム": "1.12.7", "着差": "クビ", "上り3F": 37.0, "通過1": null, "通過2": null, "通過3": 9, "通過4": 9, "体重": 536, "増減": -2, "予想順位": 2, "スコア": 78.6, "予想脚質": "逃げ", "複勝下限": 2.6, "複勝上限": 3.3, "過去走なし": false, "着差_sec": 1.4}, {"入線順位": 11, "馬番": 15, "枠番": 8, "馬名": "キングクー", "人気": 12, "単勝オッズ": 83.9, "決め手": "後方", "タイム": "1.12.8", "着差": "クビ", "上り3F": 36.6, "通過1": null, "通過2": null, "通過3": 15, "通過4": 14, "体重": 530, "増減": 0, "予想順位": 13, "スコア": 21.6, "予想脚質": "差し", "複勝下限": 4.2, "複勝上限": 5.6, "過去走なし": false, "着差_sec": 1.5}, {"入線順位": 12, "馬番": 6, "枠番": 4, "馬名": "シュバルツガイスト", "人気": 15, "単勝オッズ": 95.0, "決め手": "後方", "タイム": "1.13.0", "着差": "1 1/2", "上り3F": 36.9, "通過1": null, "通過2": null, "通過3": 14, "通過4": 14, "体重": 498, "増減": 0, "予想順位": 15, "スコア": 1.0, "予想脚質": "差し", "複勝下限": 2.8, "複勝上限": 3.6, "過去走なし": false, "着差_sec": 1.7}, {"入線順位": 13, "馬番": 1, "枠番": 1, "馬名": "ダズリングダンス", "人気": 7, "単勝オッズ": 15.2, "決め手": "先行", "タイム": "1.13.1", "着差": "クビ", "上り3F": 37.9, "通過1": null, "通過2": null, "通過3": 3, "通過4": 3, "体重": 486, "増減": 0, "予想順位": 10, "スコア": 37.9, "予想脚質": "先行", "複勝下限": 3.3, "複勝上限": 4.4, "過去走なし": false, "着差_sec": 1.8}, {"入線順位": 14, "馬番": 4, "枠番": 3, "馬名": "バンディート", "人気": 14, "単勝オッズ": 90.0, "決め手": "中団", "タイム": "1.13.8", "着差": "4", "上り3F": 38.1, "通過1": null, "通過2": null, "通過3": 9, "通過4": 10, "体重": 512, "増減": 4, "予想順位": 14, "スコア": 19.8, "予想脚質": "差し", "複勝下限": 11.5, "複勝上限": 15.3, "過去走なし": false, "着差_sec": 2.5}, {"入線順位": 15, "馬番": 2, "枠番": 2, "馬名": "アイアムイチバン", "人気": 5, "単勝オッズ": 7.9, "決め手": "後方", "タイム": "1.14.1", "着差": "1 3/4", "上り3F": 38.3, "通過1": null, "通過2": null, "通過3": 11, "通過4": 12, "体重": 518, "増減": -2, "予想順位": 6, "スコア": 53.9, "予想脚質": "先行", "複勝下限": 2.9, "複勝上限": 3.8, "過去走なし": false, "着差_sec": 2.8}];
 const RACE = {"レース名": "火打山特別", "場所": "新潟", "距離": 1200, "芝ダ": "ダート", "天候": "曇", "馬場": "稍", "頭数": 15, "前半3F": 34.9, "後半3F": 36.4, "PCI": 45.9, "前後差": 1.5, "最速上3F": 36.4, "通過ラップ": "34.9-47.4-59.3-71.3", "上りラップ": "71.3-59.3-48.5-36.4", "1着タイム": "1.11.3", "R": "10", "クラス名": "2勝", "年": "2026", "月": "5", "日": "24"};

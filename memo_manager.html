@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>メモ馬 管理ページ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#e0e0e0;font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic UI",Meiryo,sans-serif;font-size:14px;line-height:1.5;padding:20px;max-width:900px;margin:0 auto}
+h1{font-size:22px;color:#f1c40f;margin-bottom:6px;font-weight:700}
+.subtitle{font-size:12px;color:#7f8c8d;margin-bottom:20px}
+h2{font-size:16px;color:#f1c40f;margin-bottom:12px;border-left:3px solid #f1c40f;padding-left:8px;font-weight:700}
+.section{background:#1a2332;border-radius:10px;padding:16px;margin-bottom:16px}
+.btn{padding:8px 18px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity 0.15s}
+.btn:hover{opacity:0.85}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,#8e44ad,#6c3483);color:#fff;box-shadow:0 0 8px rgba(142,68,173,0.4)}
+.btn-green{background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff}
+.btn-red{background:#c0392b;color:#fff}
+.btn-gray{background:#243447;color:#bdc3c7;border:1px solid #2c3e50}
+.btn-small{padding:4px 10px;font-size:11px;border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#243447;color:#7f8c8d;padding:8px 10px;text-align:left;border-bottom:1px solid #2c3e50;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #1e2d3d;vertical-align:middle}
+tr:hover td{background:#1f2f42}
+input[type=text],input[type=password]{background:#0d1117;border:1px solid #2c3e50;border-radius:5px;color:#e0e0e0;padding:5px 8px;font-size:13px;width:100%}
+input[type=text]:focus,input[type=password]:focus{outline:none;border-color:#8e44ad}
+.tag-memo{display:inline-block;padding:2px 8px;border-radius:10px;background:#2c3e50;font-size:11px;color:#bdc3c7;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty-msg{text-align:center;color:#7f8c8d;padding:30px;font-size:13px}
+.badge-memo{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#8e44ad,#6c3483);color:#fff}
+#msg{position:fixed;top:16px;right:16px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;display:none;z-index:999;max-width:340px}
+.msg-ok{background:#27ae60;color:#fff}
+.msg-err{background:#c0392b;color:#fff}
+.msg-info{background:#2471a3;color:#fff}
+.add-form{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+.add-form label{font-size:11px;color:#7f8c8d;display:block;margin-bottom:3px}
+@media(max-width:600px){.add-form{grid-template-columns:1fr 1fr}}
+.pat-row{display:flex;gap:8px;align-items:center}
+.pat-row input{flex:1;font-family:monospace;font-size:12px}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot-ok{background:#27ae60}
+.dot-ng{background:#c0392b}
+.dot-none{background:#7f8c8d}
+.info-box{background:#0d2137;border:1px solid #1e4d8c;border-radius:6px;padding:10px 14px;font-size:12px;color:#7fb3d3;margin-top:10px;line-height:1.7}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #ffffff44;border-top:2px solid #fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<h1>📌 メモ馬 管理ページ</h1>
+<div class="subtitle">GitHub上の memo_horses.json をブラウザから直接編集できます</div>
+
+<div id="msg"></div>
+
+<!-- GitHub接続設定 -->
+<div class="section">
+  <h2>🔑 GitHub接続設定</h2>
+  <div class="pat-row">
+    <input type="password" id="pat-input" placeholder="GitHub Personal Access Token (ghp_xxx...)" autocomplete="off">
+    <button class="btn btn-primary" onclick="connectGitHub()">接続</button>
+    <button class="btn btn-gray btn-small" onclick="clearPat()">クリア</button>
+  </div>
+  <div style="margin-top:10px;display:flex;align-items:center;font-size:12px">
+    <span class="status-dot dot-none" id="status-dot"></span>
+    <span id="status-text" style="color:#7f8c8d">未接続</span>
+  </div>
+  <div class="info-box">
+    <strong>PATの取得方法：</strong><br>
+    GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token<br>
+    権限：<code>Contents: Read and write</code>（リポジトリ: <code>oswald1945/keiba-dashboard</code>）<br>
+    ⚠ トークンはこのブラウザの localStorage に保存されます。共有PCでは使用後にクリアしてください。
+  </div>
+</div>
+
+<!-- ファイル操作 -->
+<div class="section">
+  <h2>📂 ファイル操作</h2>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-primary" id="btn-load" onclick="loadFromGitHub()" disabled>☁ GitHubから読み込む</button>
+    <button class="btn btn-green" id="btn-save" onclick="saveToGitHub()" disabled>💾 GitHubに保存</button>
+    <button class="btn btn-gray" onclick="exportDownload()">⬇ JSONをダウンロード</button>
+  </div>
+  <div id="file-info" style="font-size:11px;color:#7f8c8d;margin-top:8px"></div>
+</div>
+
+<!-- 手動追加フォーム -->
+<div class="section">
+  <h2>➕ 馬を手動で追加</h2>
+  <div class="add-form">
+    <div>
+      <label>馬名 <span style="color:#e74c3c">*</span></label>
+      <input type="text" id="add-name" placeholder="例：セイプリーズ">
+    </div>
+    <div>
+      <label>レース日 (YYYY/MM/DD)</label>
+      <input type="text" id="add-date" placeholder="例：2026/05/24">
+    </div>
+    <div>
+      <label>場所・R番号</label>
+      <input type="text" id="add-place" placeholder="例：新潟 8">
+    </div>
+    <div>
+      <label>レース名/クラス</label>
+      <input type="text" id="add-rname" placeholder="例：C1 / 聖護院特別">
+    </div>
+    <div>
+      <button class="btn btn-green" onclick="addHorse()" style="margin-top:16px">追加</button>
+    </div>
+  </div>
+  <div style="margin-top:8px">
+    <label style="font-size:11px;color:#7f8c8d;display:block;margin-bottom:3px">メモ</label>
+    <input type="text" id="add-memo" placeholder="自由記述（例：差しで末脚光る、次走距離短縮で注目）">
+  </div>
+</div>
+
+<!-- 一覧テーブル -->
+<div class="section">
+  <h2>📋 登録馬一覧 <span id="count-badge" style="font-size:13px;color:#7f8c8d;font-weight:400"></span></h2>
+  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+    <input type="text" id="search" placeholder="馬名で検索..." style="max-width:220px" oninput="renderTable()">
+    <button class="btn btn-gray btn-small" onclick="sortBy('登録日')">日付順</button>
+    <button class="btn btn-gray btn-small" onclick="sortBy('馬名')">馬名順</button>
+    <button class="btn btn-red btn-small" onclick="deleteSelected()">選択馬を削除</button>
+  </div>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="check-all" onchange="toggleAll(this.checked)"></th>
+          <th>馬名</th>
+          <th>登録日</th>
+          <th>元レース</th>
+          <th>メモ</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+    <div id="empty-msg" class="empty-msg" style="display:none">
+      まだメモ馬が登録されていません。<br>
+      回顧HTMLの「次走注目馬メモ」セクション、または上のフォームから追加してください。
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 定数 ──────────────────────────────────────────────────────
+const OWNER   = 'oswald1945';
+const REPO    = 'keiba-dashboard';
+const BRANCH  = 'main';
+const FILE    = 'memo_horses.json';
+const API_URL = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+
+// ── 状態 ──────────────────────────────────────────────────────
+let memoData = [];
+let currentSha = null;       // GitHub上の現在のファイルSHA（更新に必要）
+let pat = '';
+let sortKey = '登録日';
+let sortAsc = false;
+let dirty = false;           // 未保存変更フラグ
+
+// ── 起動時: localStorage から PAT を復元 ─────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('gh_pat_keiba');
+  if (saved) {
+    pat = saved;
+    document.getElementById('pat-input').value = saved;
+    setStatus('ok', 'トークン読み込み済 — 「GitHubから読み込む」を押してください');
+    document.getElementById('btn-load').disabled = false;
+    document.getElementById('btn-save').disabled = false;
+  }
+  renderTable();
+});
+
+// ── GitHub接続 ────────────────────────────────────────────────
+async function connectGitHub() {
+  const val = document.getElementById('pat-input').value.trim();
+  if (!val) { showMsg('トークンを入力してください', 'err'); return; }
+  setStatus('none', '接続確認中...');
+  try {
+    const r = await ghFetch('https://api.github.com/user', 'GET');
+    if (!r.ok) throw new Error('認証失敗 (status ' + r.status + ')');
+    const u = await r.json();
+    pat = val;
+    localStorage.setItem('gh_pat_keiba', pat);
+    setStatus('ok', `接続OK — ${u.login} としてログイン中`);
+    document.getElementById('btn-load').disabled = false;
+    document.getElementById('btn-save').disabled = false;
+    showMsg('接続しました。「GitHubから読み込む」を押してください', 'ok');
+  } catch(e) {
+    setStatus('ng', '接続失敗: ' + e.message);
+    showMsg('接続失敗: ' + e.message, 'err');
+  }
+}
+
+function clearPat() {
+  localStorage.removeItem('gh_pat_keiba');
+  pat = '';
+  document.getElementById('pat-input').value = '';
+  setStatus('none', '未接続');
+  document.getElementById('btn-load').disabled = true;
+  document.getElementById('btn-save').disabled = true;
+  showMsg('トークンをクリアしました', 'info');
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('status-dot');
+  dot.className = 'status-dot ' + (state==='ok'?'dot-ok':state==='ng'?'dot-ng':'dot-none');
+  document.getElementById('status-text').textContent = text;
+}
+
+// ── GitHub API 読み込み ───────────────────────────────────────
+async function loadFromGitHub() {
+  if (!pat) { showMsg('先にトークンを接続してください', 'err'); return; }
+  setBtnLoading('btn-load', true, '読み込み中...');
+  try {
+    const r = await ghFetch(API_URL + '?ref=' + BRANCH, 'GET');
+    if (r.status === 404) {
+      memoData = []; currentSha = null; dirty = false;
+      renderTable();
+      showMsg('memo_horses.json がまだ存在しません。追加後に保存してください', 'info');
+      document.getElementById('file-info').textContent = '新規ファイル（未作成）';
+      return;
+    }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const meta = await r.json();
+    currentSha = meta.sha;
+    const json = atob(meta.content.replace(/\n/g,''));
+    memoData = JSON.parse(json || '[]');
+    dirty = false;
+    renderTable();
+    const ts = new Date().toLocaleTimeString('ja-JP');
+    document.getElementById('file-info').textContent =
+      `📄 ${FILE}  SHA: ${currentSha.slice(0,7)}  読み込み: ${ts}  （${memoData.length}頭）`;
+    showMsg(`読み込み完了：${memoData.length}頭`, 'ok');
+  } catch(e) {
+    showMsg('読み込みエラー: ' + e.message, 'err');
+  } finally {
+    setBtnLoading('btn-load', false, '☁ GitHubから読み込む');
+  }
+}
+
+// ── GitHub API 保存 ───────────────────────────────────────────
+async function saveToGitHub() {
+  if (!pat) { showMsg('先にトークンを接続してください', 'err'); return; }
+  setBtnLoading('btn-save', true, '保存中...');
+  try {
+    const content = btoa(unescape(encodeURIComponent(
+      JSON.stringify(memoData, null, 2)
+    )));
+    const body = {
+      message: `memo: update memo_horses.json (${memoData.length}頭)`,
+      content,
+      branch: BRANCH,
+    };
+    if (currentSha) body.sha = currentSha;
+
+    const r = await ghFetch(API_URL, 'PUT', body);
+    if (!r.ok) {
+      const err = await r.json().catch(()=>({}));
+      throw new Error((err.message || 'HTTP ' + r.status));
+    }
+    const res = await r.json();
+    currentSha = res.content.sha;
+    dirty = false;
+    const ts = new Date().toLocaleTimeString('ja-JP');
+    document.getElementById('file-info').textContent =
+      `📄 ${FILE}  SHA: ${currentSha.slice(0,7)}  保存: ${ts}  （${memoData.length}頭）`;
+    showMsg(`GitHubに保存しました（${memoData.length}頭）`, 'ok');
+  } catch(e) {
+    showMsg('保存エラー: ' + e.message, 'err');
+  } finally {
+    setBtnLoading('btn-save', false, '💾 GitHubに保存');
+  }
+}
+
+// ── ダウンロード（フォールバック） ────────────────────────────
+function exportDownload() {
+  const blob = new Blob([JSON.stringify(memoData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = FILE;
+  a.click();
+}
+
+// ── 共通 fetch ────────────────────────────────────────────────
+function ghFetch(url, method, body) {
+  const opts = {
+    method,
+    headers: {
+      'Authorization': 'Bearer ' + pat,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    }
+  };
+  if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  return fetch(url, opts);
+}
+
+// ── 馬の追加 ─────────────────────────────────────────────────
+function addHorse() {
+  const name = document.getElementById('add-name').value.trim();
+  if (!name) { showMsg('馬名を入力してください', 'err'); return; }
+  const dateStr = document.getElementById('add-date').value.trim();
+  const placeRaw = document.getElementById('add-place').value.trim();
+  const rname = document.getElementById('add-rname').value.trim();
+  const memo  = document.getElementById('add-memo').value.trim();
+
+  const placeMatch = placeRaw.match(/^(.+?)\s*(\d+)$/);
+  const place = placeMatch ? placeMatch[1].trim() : placeRaw;
+  const rnum  = placeMatch ? parseInt(placeMatch[2]) : '';
+
+  const today = new Date().toISOString().slice(0,10);
+  const entry = {
+    '馬名': name,
+    '登録日': today,
+    '元レース': { '日付': dateStr, '場所': place, 'R': rnum, 'レース名': rname, 'クラス': '' },
+    'メモ': memo
+  };
+  memoData.push(entry);
+  dirty = true;
+  renderTable();
+  ['add-name','add-date','add-place','add-rname','add-memo'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  showMsg(name + ' を追加しました（まだ未保存）', 'info');
+}
+
+// ── 削除 ─────────────────────────────────────────────────────
+function deleteHorse(idx) {
+  if (!confirm(memoData[idx]['馬名'] + ' をメモから削除しますか？')) return;
+  memoData.splice(idx, 1);
+  dirty = true;
+  renderTable();
+  showMsg('削除しました（まだ未保存）', 'info');
+}
+
+function deleteSelected() {
+  const checked = Array.from(document.querySelectorAll('.row-check:checked'))
+    .map(cb => parseInt(cb.dataset.idx)).sort((a,b) => b-a);
+  if (!checked.length) { showMsg('削除する馬を選択してください', 'err'); return; }
+  if (!confirm(checked.length + '頭を削除しますか？')) return;
+  checked.forEach(i => memoData.splice(i, 1));
+  dirty = true;
+  renderTable();
+  showMsg(checked.length + '頭を削除しました（まだ未保存）', 'info');
+}
+
+function toggleAll(flag) {
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = flag);
+}
+
+// ── メモ編集（インライン） ────────────────────────────────────
+function editMemo(idx) {
+  const cell = document.getElementById('memo-cell-' + idx);
+  const cur = memoData[idx]['メモ'] || '';
+  cell.innerHTML = `<input type="text" value="${cur.replace(/"/g,'&quot;')}"
+    style="width:180px;background:#0d1117;border:1px solid #8e44ad;border-radius:4px;color:#e0e0e0;padding:3px 6px;font-size:12px"
+    onblur="saveMemo(${idx},this.value)" onkeydown="if(event.key==='Enter')this.blur()">`;
+  cell.querySelector('input').focus();
+}
+
+function saveMemo(idx, val) {
+  memoData[idx]['メモ'] = val;
+  dirty = true;
+  renderTable();
+}
+
+// ── テーブル描画 ──────────────────────────────────────────────
+function sortBy(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = true; }
+  renderTable();
+}
+
+function renderTable() {
+  const query = document.getElementById('search').value.trim().toLowerCase();
+  let filtered = memoData.map((e, i) => ({ ...e, _idx: i }))
+    .filter(e => !query || (e['馬名'] || '').toLowerCase().includes(query));
+
+  filtered.sort((a, b) => {
+    let va = a[sortKey] || '', vb = b[sortKey] || '';
+    return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+
+  const tbody = document.getElementById('tbl-body');
+  const empty = document.getElementById('empty-msg');
+
+  const dirtyMark = dirty ? ' <span style="color:#e67e22;font-size:11px">● 未保存あり</span>' : '';
+  document.getElementById('count-badge').innerHTML = `（${memoData.length}頭）${dirtyMark}`;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(e => {
+    const idx = e._idx;
+    const ri = e['元レース'] || {};
+    const rdate = ri['日付'] || '';
+    const rplace = ri['場所'] || '';
+    const rnum   = ri['R']   || '';
+    const rname  = ri['レース名'] || ri['クラス'] || '';
+    const rLabel = [rdate, rplace + (rnum ? rnum + 'R' : ''), rname].filter(Boolean).join(' ');
+    const memo   = e['メモ'] || '';
+    return `<tr>
+      <td><input type="checkbox" class="row-check" data-idx="${idx}"></td>
+      <td><span class="badge-memo">📌 ${e['馬名']}</span></td>
+      <td style="white-space:nowrap;font-size:12px;color:#7f8c8d">${e['登録日'] || ''}</td>
+      <td style="font-size:12px;color:#bdc3c7;white-space:nowrap">${rLabel}</td>
+      <td id="memo-cell-${idx}">
+        <span class="tag-memo" title="${memo}" onclick="editMemo(${idx})" style="cursor:pointer">
+          ${memo || '<span style="color:#555">クリックして編集</span>'}
+        </span>
+      </td>
+      <td><button class="btn btn-red btn-small" onclick="deleteHorse(${idx})">削除</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ボタンローディング状態 ────────────────────────────────────
+function setBtnLoading(id, loading, label) {
+  const btn = document.getElementById(id);
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? '<span class="spinner"></span>' + label
+    : label;
+}
+
+// ── メッセージ表示 ────────────────────────────────────────────
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = type === 'ok' ? 'msg-ok' : type === 'info' ? 'msg-info' : 'msg-err';
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// 初期表示
+renderTable();
+</script>
+</body>
+</html>

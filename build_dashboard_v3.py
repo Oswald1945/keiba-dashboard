@@ -21,6 +21,17 @@ with open(args.json, encoding='utf-8') as f:
 horses = data['horses']
 meta   = data['meta']
 
+# ── メモ馬リスト読み込み（_date_p 確定後に実施）─────────────
+import pathlib as _memo_pl
+_memo_path = _memo_pl.Path(args.json).parent / 'memo_horses.json'
+try:
+    with open(_memo_path, encoding='utf-8') as _mf:
+        _memo_list = json.load(_mf)
+except Exception:
+    _memo_list = []
+# ※ _memo_map は _date_p 確定後（下部）で構築する
+_memo_map = {}  # placeholder（後で上書き）
+
 # ── レース情報（出馬表から取得、なければデフォルト）───────────
 _ri          = meta.get('race_info') or {}
 race_name    = _ri.get('レース名', 'レース名不明')
@@ -75,6 +86,28 @@ def _rname_to_romaji(s):
 
 _rname_raw = str(_ri.get('レース名', '')).strip()
 _date_p  = f"{str(_year).zfill(4)}{str(_month).zfill(2)}{str(_day).zfill(2)}" if _year else ''
+
+# ── メモ馬マップ構築（現在レース日付が確定してから） ─────────────
+# 条件: 元レース日付 < 現在レース日付（同日・未来は除外）
+# 同一馬が複数エントリある場合は最新の過去レースを1件に統合
+def _memo_date_key(entry):
+    """元レース.日付（YYYY/MM/DD）をYYYYMMDD数値に変換"""
+    d = entry.get('元レース', {}).get('日付', '')
+    return d.replace('/', '') if d else ''
+
+_memo_map = {}
+for _me in _memo_list:
+    _mname = _me.get('馬名', '')
+    if not _mname:
+        continue
+    _mdk = _memo_date_key(_me)
+    # 現在レース日付より前のメモのみ（同日・未来は除外）
+    if _date_p and _mdk >= _date_p:
+        continue
+    # 同一馬で複数エントリある場合は日付が新しい方を採用
+    if _mname not in _memo_map or _mdk > _memo_date_key(_memo_map[_mname]):
+        _memo_map[_mname] = _me
+
 _venue_p = f"{_VENUE_CODE.get(race_place, race_place)}{race_r}R" if race_place else ''
 _cls_n   = _uc.normalize('NFKC', race_class)
 _cls_p   = _CLASS_CODE.get(_cls_n, _CLASS_CODE.get(race_class, _re.sub(r'[^A-Za-z0-9]','',_cls_n)))
@@ -326,6 +359,31 @@ for idx, h in enumerate(horses):
     ref_badge   = ('<span class="adj-badge" style="background:#7f8c8d;font-size:10px;">参考スコア</span>'
                    if no_past else '')
 
+    # メモ馬バッジ
+    _memo_entry = _memo_map.get(name)
+    if _memo_entry:
+        _mo = _memo_entry.get('元レース', {})
+        _mo_date  = _memo_entry.get('登録日', '')
+        _mo_place = _mo.get('場所', '')
+        _mo_r     = _mo.get('R', '')
+        _mo_rname = _mo.get('レース名', '') or _mo.get('クラス', '')
+        _mo_label = f'{_mo_date} {_mo_place}{_mo_r}R'
+        if _mo_rname and str(_mo_rname) not in ('nan', 'None', ''):
+            _mo_label += f' {_mo_rname}'
+        _memo_note = _memo_entry.get('メモ', '')
+        _memo_title = f'title="{_memo_note}"' if _memo_note else ''
+        _memo_badge = (
+            f'<span {_memo_title} style="display:inline-flex;align-items:center;gap:4px;'
+            f'padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;'
+            f'background:linear-gradient(135deg,#8e44ad,#6c3483);color:#fff;'
+            f'box-shadow:0 0 6px rgba(142,68,173,0.5);white-space:nowrap;">'
+            f'📌 メモ馬'
+            f'<span style="font-size:9px;font-weight:400;opacity:0.85;margin-left:2px">'
+            f'({_mo_label})</span></span>'
+        )
+    else:
+        _memo_badge = ''
+
     horse_cards += f'''
 <div class="horse-card rank-{min(rank,4)}" data-rank="{rank}" data-leg="{leg}">
   <div class="rank-badge" style="background:{color}">
@@ -337,6 +395,7 @@ for idx, h in enumerate(horses):
       <h3>{name}</h3>
       <span class="leg-badge" style="background:{leg_color(leg)}">{leg}</span>
       {ref_badge}{_trust_badge(h)}{adj_badges}
+      {_memo_badge}
       <span class="meta-info">{h["性別"]}{h["年齢"]} / {h["騎手"]} / {n}走</span>
       <button class="drill-btn" onclick="toggleDrill('{horse_id}', this)">📋 過去走</button>
     </div>

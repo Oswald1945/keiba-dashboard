@@ -3067,7 +3067,7 @@ function renderRows(rows) {
         <div>${probPct}</div>
         <div class="ev-bar" style="background:${barColor};width:${barWidth}%"></div>
       </td>
-      <td style="text-align:center">${beCell}</td>
+      <td style="text-align:center;display:${isFuku ? 'none' : ''}">${beCell}</td>
       <td>${oddsCell}</td>
       <td class="${evCls}">${evStr}</td>
       <td class="${evCls}">${judgement}</td>

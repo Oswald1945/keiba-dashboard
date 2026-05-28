@@ -111,9 +111,9 @@
   #evHead th { cursor:pointer; user-select:none; white-space:nowrap; }
   #evHead th:hover { background:#3d5166; }
   .ev-table-wrap { overflow-x: auto; }
-  .ev-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ev-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
   .ev-table th, .ev-table td {
-    padding: 8px 12px; text-align: center;
+    padding: 5px 8px; text-align: center;
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }
   .ev-table th { background: rgba(255,255,255,0.05); color: #f1c40f; }
@@ -3307,7 +3307,7 @@ function renderRows(rows) {
       : '<span style="color:#555">-</span>';
     return `<tr>
       <td>${waku_b}</td>
-      <td><b>${h['馬名']}</b>${h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}${h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}${h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}</td>
+      <td style="white-space:nowrap"><b style="font-size:13px">${h['馬名']}</b>${h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}${h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}${h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}</td>
       <td>${h['脚質']}</td>
       <td>${h['スコア'].toFixed(1)}</td>
       <td>${h['順位予想']}</td>

@@ -341,6 +341,7 @@
   <div class="shutuba-banner">
       ✅ 出馬表データ反映済み（枠番・馬番・騎手・斤量・オッズが最新です）
     </div>
+  
 
   <div class="section">
     <h2>🏆 上位3頭 予想</h2>
@@ -799,6 +800,10 @@
         <div class="adj-dot" style="background:#f39c12"></div>
         <span><b>SmartRC評価補正</b>（−4.5〜+4.5pt）: 過去5走の馬場・展開有利不利評価（h1〜h5_fr_baba）を加重平均（前走×1.0/前々走×0.6/以降逓減）。A=+4.5/B=+2.5pt 上方修正、D=−2.5/E=−4.5pt 下方修正、C=0pt</span>
       </div>
+      <div class="adj-legend-item">
+        <div class="adj-dot" style="background:#16a085"></div>
+        <span><b>馬場適性</b>（−2〜+3pt）: 過去走の同馬場条件（良/稍重/重/不良）における勝率・複勝率・平均着順率を算出。同馬場2走未満の場合は隣接馬場の成績を0.5倍で補完</span>
+      </div>
     </div>
   </div>
 
@@ -815,6 +820,8 @@
       <h3>キョウエイフロイデ</h3>
       <span class="leg-badge" style="background:#9b59b6">追込</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#17becf">コース +4.0</span><span class="adj-badge" style="background:#dbdb8d">着差 +0.9</span>
+      
+      
       <span class="meta-info">牝5 / 原優介 / 23走</span>
       <button class="drill-btn" onclick="toggleDrill('h0', this)">📋 過去走</button>
     </div>
@@ -884,6 +891,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
           <span class="val">+0.0/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -938,6 +950,8 @@
       <h3>パイシャオピン</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#c0392b">コース -0.5</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +2.0</span>
+      
+      
       <span class="meta-info">牝4 / 横山武史 / 10走</span>
       <button class="drill-btn" onclick="toggleDrill('h1', this)">📋 過去走</button>
     </div>
@@ -1007,6 +1021,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
           <span class="val">+0.0/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -1061,6 +1080,8 @@
       <h3>タマモカンパネラ</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +3.5</span><span class="adj-badge" style="background:#aec7e8">騎手 +1.1</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span>
+      
+      <span title="SmartRC推定人気が下位・モデルスコア3位以内・適性系プラス" style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff;box-shadow:0 0 6px rgba(231,76,60,0.5);white-space:nowrap;">🎯 注目穴馬<span style="font-size:9px;font-weight:400;opacity:0.85;margin-left:2px">(SmartRC9番人気/適性+4.0pt)</span></span>
       <span class="meta-info">牝4 / 谷原柚希 / 12走</span>
       <button class="drill-btn" onclick="toggleDrill('h2', this)">📋 過去走</button>
     </div>
@@ -1130,6 +1151,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:25%"></div></div>
           <span class="val">+0.5/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -1184,6 +1210,8 @@
       <h3>マジックローズ</h3>
       <span class="leg-badge" style="background:#e74c3c">逃げ</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">コース -0.8</span><span class="adj-badge" style="background:#c0392b">休養 -1.2</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.1</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span>
+      
+      
       <span class="meta-info">牝4 / 荻野極 / 7走</span>
       <button class="drill-btn" onclick="toggleDrill('h3', this)">📋 過去走</button>
     </div>
@@ -1253,6 +1281,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:75%"></div></div>
           <span class="val">+1.5/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -1307,6 +1340,8 @@
       <h3>エーリアル</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#c0392b">コース -0.7</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.1</span><span class="adj-badge" style="background:#c0392b">着差 -2.0</span>
+      
+      
       <span class="meta-info">牝5 / ディー / 17走</span>
       <button class="drill-btn" onclick="toggleDrill('h4', this)">📋 過去走</button>
     </div>
@@ -1376,6 +1411,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
           <span class="val">+0.0/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -1430,6 +1470,8 @@
       <h3>カーラデマドレ</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +2.2</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.1</span><span class="adj-badge" style="background:#c0392b">着差 -2.0</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span>
+      
+      
       <span class="meta-info">牝4 / レーン / 8走</span>
       <button class="drill-btn" onclick="toggleDrill('h5', this)">📋 過去走</button>
     </div>
@@ -1499,6 +1541,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:75%"></div></div>
           <span class="val">+1.5/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -1553,6 +1600,8 @@
       <h3>ルトゥール</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +0.7</span><span class="adj-badge" style="background:#8c564b">休養 +1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.5</span>
+      
+      
       <span class="meta-info">牝5 / 佐々木大 / 14走</span>
       <button class="drill-btn" onclick="toggleDrill('h6', this)">📋 過去走</button>
     </div>
@@ -1622,6 +1671,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
           <span class="val">+0.0/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -1676,6 +1730,8 @@
       <h3>ネクストダンサー</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">コース -0.4</span><span class="adj-badge" style="background:#c0392b">騎手 -0.6</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#c0392b">着差 -2.0</span>
+      
+      
       <span class="meta-info">牝4 / 佐藤翔馬 / 11走</span>
       <button class="drill-btn" onclick="toggleDrill('h7', this)">📋 過去走</button>
     </div>
@@ -1745,6 +1801,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
           <span class="val">+0.0/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -1799,6 +1860,8 @@
       <h3>スカイビート</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +3.8</span><span class="adj-badge" style="background:#c0392b">騎手 -0.7</span>
+      
+      
       <span class="meta-info">牝4 / 石橋脩 / 9走</span>
       <button class="drill-btn" onclick="toggleDrill('h8', this)">📋 過去走</button>
     </div>
@@ -1868,6 +1931,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
           <span class="val">+0.0/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -1922,6 +1990,8 @@
       <h3>フィールオーサム</h3>
       <span class="leg-badge" style="background:#e74c3c">逃げ</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">コース -1.5</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.3</span><span class="adj-badge" style="background:#dbdb8d">着差 +0.9</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span>
+      
+      
       <span class="meta-info">牝4 / ルメール / 13走</span>
       <button class="drill-btn" onclick="toggleDrill('h9', this)">📋 過去走</button>
     </div>
@@ -1991,6 +2061,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:75%"></div></div>
           <span class="val">+1.5/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -2045,6 +2120,8 @@
       <h3>レーヴドレフォン</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">コース -0.9</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.1</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span>
+      
+      
       <span class="meta-info">牝5 / 吉田豊 / 22走</span>
       <button class="drill-btn" onclick="toggleDrill('h10', this)">📋 過去走</button>
     </div>
@@ -2114,6 +2191,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
           <span class="val">+0.0/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -2168,6 +2250,8 @@
       <h3>オーケアニス</h3>
       <span class="leg-badge" style="background:#e74c3c">逃げ</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">コース -0.2</span><span class="adj-badge" style="background:#8c564b">休養 +1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.1</span><span class="adj-badge" style="background:#c0392b">着差 -2.0</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span>
+      
+      
       <span class="meta-info">牝4 / 石川裕紀 / 6走</span>
       <button class="drill-btn" onclick="toggleDrill('h11', this)">📋 過去走</button>
     </div>
@@ -2237,6 +2321,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:75%"></div></div>
           <span class="val">+1.5/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -2291,6 +2380,8 @@
       <h3>マフィン</h3>
       <span class="leg-badge" style="background:#9b59b6">追込</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">距離 -2.0</span><span class="adj-badge" style="background:#17becf">コース +1.1</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.2</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span>
+      
+      
       <span class="meta-info">牝5 / 長浜鴻緒 / 20走</span>
       <button class="drill-btn" onclick="toggleDrill('h12', this)">📋 過去走</button>
     </div>
@@ -2360,6 +2451,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:25%"></div></div>
           <span class="val">+0.5/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -2414,6 +2510,8 @@
       <h3>エンプレスフレーム</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +0.4</span><span class="adj-badge" style="background:#8c564b">休養 +1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.8</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#c0392b">着差 -2.0</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span>
+      
+      
       <span class="meta-info">牝4 / 原田和真 / 16走</span>
       <button class="drill-btn" onclick="toggleDrill('h13', this)">📋 過去走</button>
     </div>
@@ -2483,6 +2581,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:75%"></div></div>
           <span class="val">+1.5/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -2537,6 +2640,8 @@
       <h3>エターナルプロミス</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">コース -0.5</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.3</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span>
+      
+      
       <span class="meta-info">牝4 / 国分優作 / 6走</span>
       <button class="drill-btn" onclick="toggleDrill('h14', this)">📋 過去走</button>
     </div>
@@ -2606,6 +2711,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:25%"></div></div>
           <span class="val">+0.5/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -2660,6 +2770,8 @@
       <h3>ゴーソーファー</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +0.2</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -1.4</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span>
+      
+      
       <span class="meta-info">牝4 / 津村明秀 / 10走</span>
       <button class="drill-btn" onclick="toggleDrill('h15', this)">📋 過去走</button>
     </div>
@@ -2729,6 +2841,11 @@
           <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
           <span class="val">+0.0/±2</span>
         </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
       </div>
     </div>
     <div class="extra-info">
@@ -2792,7 +2909,7 @@ function toggleDrill(id, btn) {
 }
 
 // ── 期待値シミュレーター ─────────────────────────────────
-const EV_DATA = [{"馬名": "キョウエイフロイデ", "馬番": 4, "枠番": 2, "スコア": 67.8, "順位予想": 1, "オッズ": 4.3, "複勝下限": 1.5, "複勝上限": 1.8, "人気": 2, "脚質": "追込", "SmartRC推定人気順": "2", "乖離度": 1}, {"馬名": "パイシャオピン", "馬番": 3, "枠番": 2, "スコア": 67.6, "順位予想": 2, "オッズ": 3.4, "複勝下限": 1.8, "複勝上限": 2.4, "人気": 1, "脚質": "差し", "SmartRC推定人気順": "1", "乖離度": -1}, {"馬名": "タマモカンパネラ", "馬番": 10, "枠番": 5, "スコア": 63.8, "順位予想": 3, "オッズ": 6.8, "複勝下限": 1.9, "複勝上限": 2.5, "人気": 4, "脚質": "差し", "SmartRC推定人気順": "9", "乖離度": 6}, {"馬名": "マジックローズ", "馬番": 14, "枠番": 7, "スコア": 54.3, "順位予想": 4, "オッズ": 6.0, "複勝下限": 3.3, "複勝上限": 4.5, "人気": 3, "脚質": "逃げ", "SmartRC推定人気順": "5", "乖離度": 1}, {"馬名": "エーリアル", "馬番": 5, "枠番": 3, "スコア": 49.8, "順位予想": 5, "オッズ": 22.1, "複勝下限": 3.4, "複勝上限": 4.7, "人気": 9, "脚質": "先行", "SmartRC推定人気順": "6", "乖離度": 1}, {"馬名": "カーラデマドレ", "馬番": 15, "枠番": 8, "スコア": 48.2, "順位予想": 6, "オッズ": 14.7, "複勝下限": 4.4, "複勝上限": 6.1, "人気": 6, "脚質": "先行", "SmartRC推定人気順": "4", "乖離度": -2}, {"馬名": "ルトゥール", "馬番": 2, "枠番": 1, "スコア": 43.9, "順位予想": 7, "オッズ": 87.7, "複勝下限": 4.5, "複勝上限": 6.3, "人気": 14, "脚質": "差し", "SmartRC推定人気順": "10", "乖離度": 3}, {"馬名": "ネクストダンサー", "馬番": 7, "枠番": 4, "スコア": 37.5, "順位予想": 8, "オッズ": 115.6, "複勝下限": 11.9, "複勝上限": 17.0, "人気": 16, "脚質": "先行", "SmartRC推定人気順": "16", "乖離度": 8}, {"馬名": "スカイビート", "馬番": 6, "枠番": 3, "スコア": 36.4, "順位予想": 9, "オッズ": 40.3, "複勝下限": 11.0, "複勝上限": 15.7, "人気": 11, "脚質": "差し", "SmartRC推定人気順": "8", "乖離度": -1}, {"馬名": "フィールオーサム", "馬番": 9, "枠番": 5, "スコア": 33.2, "順位予想": 10, "オッズ": 20.6, "複勝下限": 4.4, "複勝上限": 6.2, "人気": 8, "脚質": "逃げ", "SmartRC推定人気順": "3", "乖離度": -7}, {"馬名": "レーヴドレフォン", "馬番": 1, "枠番": 1, "スコア": 31.9, "順位予想": 11, "オッズ": 54.1, "複勝下限": 10.7, "複勝上限": 15.3, "人気": 12, "脚質": "差し", "SmartRC推定人気順": "12", "乖離度": 1}, {"馬名": "オーケアニス", "馬番": 11, "枠番": 6, "スコア": 28.7, "順位予想": 12, "オッズ": 14.0, "複勝下限": 3.3, "複勝上限": 4.5, "人気": 5, "脚質": "逃げ", "SmartRC推定人気順": "7", "乖離度": -5}, {"馬名": "マフィン", "馬番": 16, "枠番": 8, "スコア": 21.9, "順位予想": 13, "オッズ": 60.5, "複勝下限": 4.9, "複勝上限": 6.8, "人気": 13, "脚質": "追込", "SmartRC推定人気順": "14", "乖離度": 1}, {"馬名": "エンプレスフレーム", "馬番": 13, "枠番": 7, "スコア": 21.7, "順位予想": 14, "オッズ": 106.0, "複勝下限": 12.6, "複勝上限": 18.0, "人気": 15, "脚質": "先行", "SmartRC推定人気順": "15", "乖離度": 1}, {"馬名": "エターナルプロミス", "馬番": 12, "枠番": 6, "スコア": 12.8, "順位予想": 15, "オッズ": 17.9, "複勝下限": 4.2, "複勝上限": 5.9, "人気": 7, "脚質": "差し", "SmartRC推定人気順": "13", "乖離度": -2}, {"馬名": "ゴーソーファー", "馬番": 8, "枠番": 4, "スコア": 8.3, "順位予想": 16, "オッズ": 24.9, "複勝下限": 3.5, "複勝上限": 4.9, "人気": 10, "脚質": "差し", "SmartRC推定人気順": "11", "乖離度": -5}];
+const EV_DATA = [{"馬名": "キョウエイフロイデ", "馬番": 4, "枠番": 2, "スコア": 67.8, "順位予想": 1, "オッズ": 4.3, "複勝下限": 1.5, "複勝上限": 1.8, "人気": 2, "脚質": "追込", "SmartRC推定人気順": "2", "乖離度": 1, "is_memo": false, "is_ana": false}, {"馬名": "パイシャオピン", "馬番": 3, "枠番": 2, "スコア": 67.6, "順位予想": 2, "オッズ": 3.4, "複勝下限": 1.8, "複勝上限": 2.4, "人気": 1, "脚質": "差し", "SmartRC推定人気順": "1", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "タマモカンパネラ", "馬番": 10, "枠番": 5, "スコア": 63.8, "順位予想": 3, "オッズ": 6.8, "複勝下限": 1.9, "複勝上限": 2.5, "人気": 4, "脚質": "差し", "SmartRC推定人気順": "9", "乖離度": 6, "is_memo": false, "is_ana": true}, {"馬名": "マジックローズ", "馬番": 14, "枠番": 7, "スコア": 54.3, "順位予想": 4, "オッズ": 6.0, "複勝下限": 3.3, "複勝上限": 4.5, "人気": 3, "脚質": "逃げ", "SmartRC推定人気順": "5", "乖離度": 1, "is_memo": false, "is_ana": false}, {"馬名": "エーリアル", "馬番": 5, "枠番": 3, "スコア": 49.8, "順位予想": 5, "オッズ": 22.1, "複勝下限": 3.4, "複勝上限": 4.7, "人気": 9, "脚質": "先行", "SmartRC推定人気順": "6", "乖離度": 1, "is_memo": false, "is_ana": false}, {"馬名": "カーラデマドレ", "馬番": 15, "枠番": 8, "スコア": 48.2, "順位予想": 6, "オッズ": 14.7, "複勝下限": 4.4, "複勝上限": 6.1, "人気": 6, "脚質": "先行", "SmartRC推定人気順": "4", "乖離度": -2, "is_memo": false, "is_ana": false}, {"馬名": "ルトゥール", "馬番": 2, "枠番": 1, "スコア": 43.9, "順位予想": 7, "オッズ": 87.7, "複勝下限": 4.5, "複勝上限": 6.3, "人気": 14, "脚質": "差し", "SmartRC推定人気順": "10", "乖離度": 3, "is_memo": false, "is_ana": false}, {"馬名": "ネクストダンサー", "馬番": 7, "枠番": 4, "スコア": 37.5, "順位予想": 8, "オッズ": 115.6, "複勝下限": 11.9, "複勝上限": 17.0, "人気": 16, "脚質": "先行", "SmartRC推定人気順": "16", "乖離度": 8, "is_memo": false, "is_ana": false}, {"馬名": "スカイビート", "馬番": 6, "枠番": 3, "スコア": 36.4, "順位予想": 9, "オッズ": 40.3, "複勝下限": 11.0, "複勝上限": 15.7, "人気": 11, "脚質": "差し", "SmartRC推定人気順": "8", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "フィールオーサム", "馬番": 9, "枠番": 5, "スコア": 33.2, "順位予想": 10, "オッズ": 20.6, "複勝下限": 4.4, "複勝上限": 6.2, "人気": 8, "脚質": "逃げ", "SmartRC推定人気順": "3", "乖離度": -7, "is_memo": false, "is_ana": false}, {"馬名": "レーヴドレフォン", "馬番": 1, "枠番": 1, "スコア": 31.9, "順位予想": 11, "オッズ": 54.1, "複勝下限": 10.7, "複勝上限": 15.3, "人気": 12, "脚質": "差し", "SmartRC推定人気順": "12", "乖離度": 1, "is_memo": false, "is_ana": false}, {"馬名": "オーケアニス", "馬番": 11, "枠番": 6, "スコア": 28.7, "順位予想": 12, "オッズ": 14.0, "複勝下限": 3.3, "複勝上限": 4.5, "人気": 5, "脚質": "逃げ", "SmartRC推定人気順": "7", "乖離度": -5, "is_memo": false, "is_ana": false}, {"馬名": "マフィン", "馬番": 16, "枠番": 8, "スコア": 21.9, "順位予想": 13, "オッズ": 60.5, "複勝下限": 4.9, "複勝上限": 6.8, "人気": 13, "脚質": "追込", "SmartRC推定人気順": "14", "乖離度": 1, "is_memo": false, "is_ana": false}, {"馬名": "エンプレスフレーム", "馬番": 13, "枠番": 7, "スコア": 21.7, "順位予想": 14, "オッズ": 106.0, "複勝下限": 12.6, "複勝上限": 18.0, "人気": 15, "脚質": "先行", "SmartRC推定人気順": "15", "乖離度": 1, "is_memo": false, "is_ana": false}, {"馬名": "エターナルプロミス", "馬番": 12, "枠番": 6, "スコア": 12.8, "順位予想": 15, "オッズ": 17.9, "複勝下限": 4.2, "複勝上限": 5.9, "人気": 7, "脚質": "差し", "SmartRC推定人気順": "13", "乖離度": -2, "is_memo": false, "is_ana": false}, {"馬名": "ゴーソーファー", "馬番": 8, "枠番": 4, "スコア": 8.3, "順位予想": 16, "オッズ": 24.9, "複勝下限": 3.5, "複勝上限": 4.9, "人気": 10, "脚質": "差し", "SmartRC推定人気順": "11", "乖離度": -5, "is_memo": false, "is_ana": false}];
 let currentTab = 'tansho';
 let sortCol    = 'score';
 let sortAsc    = false;   // default: スコア降順
@@ -2930,7 +3047,7 @@ function renderRows(rows) {
       : '<span style="color:#555">-</span>';
     return `<tr>
       <td>${waku_b}</td>
-      <td><b>${h['馬名']}</b>${h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}</td>
+      <td><b>${h['馬名']}</b>${h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}${h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}${h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}</td>
       <td>${h['脚質']}</td>
       <td>${h['スコア'].toFixed(1)}</td>
       <td>${h['順位予想']}</td>
@@ -2999,7 +3116,7 @@ slider.addEventListener('input', () => {
 computeEV(20);
 
 // ── 積み上げチャート ─────────────────────────────
-const STACK_DATA = {"labels": ["1位 キョウエイフロイデ", "2位 パイシャオピン", "3位 タマモカンパネラ", "4位 マジックローズ", "5位 エーリアル", "6位 カーラデマドレ", "7位 ルトゥール", "8位 ネクストダンサー", "9位 スカイビート", "10位 フィールオーサム", "11位 レーヴドレフォン", "12位 オーケアニス", "13位 マフィン", "14位 エンプレスフレーム", "15位 エターナルプロミス", "16位 ゴーソーファー"], "datasets": [{"label": "最高出力", "data": [29.7, 22.0, 21.1, 21.9, 19.0, 18.9, 18.8, 17.4, 18.9, 0.0, 15.1, 0.0, 18.2, 11.3, 14.1, 11.7], "backgroundColor": "#d62728", "stack": "adj"}, {"label": "クラス", "data": [18.4, 25.0, 21.6, 12.9, 18.5, 14.7, 10.9, 9.4, 4.8, 19.4, 12.9, 17.6, 1.5, 3.5, 1.5, 1.2], "backgroundColor": "#ff7f0e", "stack": "adj"}, {"label": "タイム", "data": [13.4, 19.5, 17.1, 18.1, 13.9, 14.3, 11.3, 11.0, 8.4, 11.5, 8.9, 10.1, 5.7, 5.7, 0.0, 0.0], "backgroundColor": "#1f77b4", "stack": "adj"}, {"label": "展開", "data": [0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, -1, 0, 0, 0], "backgroundColor": "#9467bd", "stack": "adj"}, {"label": "斤量", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#2ca02c", "stack": "adj"}, {"label": "距離", "data": [2.0, 2.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.0, 0.0, 0.0, 0.0], "backgroundColor": "#e377c2", "stack": "adj"}, {"label": "コース", "data": [4.0, -0.5, 3.5, -0.8, -0.7, 2.2, 0.7, -0.4, 3.8, -1.5, -0.9, -0.2, 1.1, 0.4, -0.5, 0.2], "backgroundColor": "#17becf", "stack": "adj"}, {"label": "臨戦", "data": [0.0, -1.0, 0.0, -1.2, -1.0, -1.0, 1.0, 0.0, 0.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0], "backgroundColor": "#8c564b", "stack": "adj"}, {"label": "人気補正", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#bcbd22", "stack": "adj"}, {"label": "騎手", "data": [0.0, 2.0, 1.1, 0.1, 0.1, 0.1, -0.5, -0.6, -0.7, 0.3, 0.1, 0.1, 0.2, -0.8, -0.3, -1.4], "backgroundColor": "#aec7e8", "stack": "adj"}, {"label": "馬体重", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#7f7f7f", "stack": "adj"}, {"label": "継続", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0], "backgroundColor": "#98df8a", "stack": "adj"}, {"label": "着差", "data": [0.9, 0.0, -1.0, 0.0, -2.0, -2.0, 0.0, -2.0, 0.0, 0.9, -1.0, -2.0, -1.0, -2.0, -1.0, -1.0], "backgroundColor": "#dbdb8d", "stack": "adj"}, {"label": "枠順", "data": [0.0, 0.0, 0.5, 1.5, 0.0, 1.5, 0.0, 0.0, 0.0, 1.5, 0.0, 1.5, 0.5, 1.5, 0.5, 0.0], "backgroundColor": "#9edae5", "stack": "adj"}, {"label": "昇級", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#c5b0d5", "stack": "adj"}, {"label": "SmartRC評価", "data": [-0.3, -1.6, -0.1, 1.5, -0.9, -0.7, 1.2, 0.8, 0.8, 0.7, -2.8, -0.3, -0.6, -0.3, -0.3, -1.0], "backgroundColor": "#f39c12", "stack": "adj"}]};
+const STACK_DATA = {"labels": ["1位 キョウエイフロイデ", "2位 パイシャオピン", "3位 タマモカンパネラ", "4位 マジックローズ", "5位 エーリアル", "6位 カーラデマドレ", "7位 ルトゥール", "8位 ネクストダンサー", "9位 スカイビート", "10位 フィールオーサム", "11位 レーヴドレフォン", "12位 オーケアニス", "13位 マフィン", "14位 エンプレスフレーム", "15位 エターナルプロミス", "16位 ゴーソーファー"], "datasets": [{"label": "最高出力", "data": [29.7, 22.0, 21.1, 21.9, 19.0, 18.9, 18.8, 17.4, 18.9, 0.0, 15.1, 0.0, 18.2, 11.3, 14.1, 11.7], "backgroundColor": "#d62728", "stack": "adj"}, {"label": "クラス", "data": [18.4, 25.0, 21.6, 12.9, 18.5, 14.7, 10.9, 9.4, 4.8, 19.4, 12.9, 17.6, 1.5, 3.5, 1.5, 1.2], "backgroundColor": "#ff7f0e", "stack": "adj"}, {"label": "タイム", "data": [13.4, 19.5, 17.1, 18.1, 13.9, 14.3, 11.3, 11.0, 8.4, 11.5, 8.9, 10.1, 5.7, 5.7, 0.0, 0.0], "backgroundColor": "#1f77b4", "stack": "adj"}, {"label": "展開", "data": [0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, -1, 0, 0, 0], "backgroundColor": "#9467bd", "stack": "adj"}, {"label": "斤量", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#2ca02c", "stack": "adj"}, {"label": "距離", "data": [2.0, 2.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.0, 0.0, 0.0, 0.0], "backgroundColor": "#e377c2", "stack": "adj"}, {"label": "コース", "data": [4.0, -0.5, 3.5, -0.8, -0.7, 2.2, 0.7, -0.4, 3.8, -1.5, -0.9, -0.2, 1.1, 0.4, -0.5, 0.2], "backgroundColor": "#17becf", "stack": "adj"}, {"label": "臨戦", "data": [0.0, -1.0, 0.0, -1.2, -1.0, -1.0, 1.0, 0.0, 0.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0], "backgroundColor": "#8c564b", "stack": "adj"}, {"label": "人気補正", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#bcbd22", "stack": "adj"}, {"label": "騎手", "data": [0.0, 2.0, 1.1, 0.1, 0.1, 0.1, -0.5, -0.6, -0.7, 0.3, 0.1, 0.1, 0.2, -0.8, -0.3, -1.4], "backgroundColor": "#aec7e8", "stack": "adj"}, {"label": "馬体重", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#7f7f7f", "stack": "adj"}, {"label": "継続", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0], "backgroundColor": "#98df8a", "stack": "adj"}, {"label": "着差", "data": [0.9, 0.0, -1.0, 0.0, -2.0, -2.0, 0.0, -2.0, 0.0, 0.9, -1.0, -2.0, -1.0, -2.0, -1.0, -1.0], "backgroundColor": "#dbdb8d", "stack": "adj"}, {"label": "枠順", "data": [0.0, 0.0, 0.5, 1.5, 0.0, 1.5, 0.0, 0.0, 0.0, 1.5, 0.0, 1.5, 0.5, 1.5, 0.5, 0.0], "backgroundColor": "#9edae5", "stack": "adj"}, {"label": "昇級", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#c5b0d5", "stack": "adj"}, {"label": "SmartRC評価", "data": [-0.3, -1.6, -0.1, 1.5, -0.9, -0.7, 1.2, 0.8, 0.8, 0.7, -2.8, -0.3, -0.6, -0.3, -0.3, -1.0], "backgroundColor": "#f39c12", "stack": "adj"}, {"label": "馬場適性", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "backgroundColor": "#16a085", "stack": "adj"}]};
 const stackCtx = document.getElementById('scoreStackChart');
 if (stackCtx) {
   new Chart(stackCtx.getContext('2d'), {
@@ -3034,7 +3151,7 @@ if (stackCtx) {
 
 // ── 補正項目別ランキング ──────────────────────────────────────────
 (function() {
-  const ITEM_RANKINGS = [{"label": "最高出力", "color": "#d62728", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 29.7}, {"umaban": 3, "name": "パイシャオピン", "val": 22.0}, {"umaban": 14, "name": "マジックローズ", "val": 21.9}, {"umaban": 10, "name": "タマモカンパネラ", "val": 21.1}, {"umaban": 5, "name": "エーリアル", "val": 19.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 18.9}, {"umaban": 6, "name": "スカイビート", "val": 18.9}, {"umaban": 2, "name": "ルトゥール", "val": 18.8}, {"umaban": 16, "name": "マフィン", "val": 18.2}, {"umaban": 7, "name": "ネクストダンサー", "val": 17.4}, {"umaban": 1, "name": "レーヴドレフォン", "val": 15.1}, {"umaban": 12, "name": "エターナルプロミス", "val": 14.1}, {"umaban": 8, "name": "ゴーソーファー", "val": 11.7}, {"umaban": 13, "name": "エンプレスフレーム", "val": 11.3}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}]}, {"label": "クラス", "color": "#ff7f0e", "ranked": [{"umaban": 3, "name": "パイシャオピン", "val": 25.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 21.6}, {"umaban": 9, "name": "フィールオーサム", "val": 19.4}, {"umaban": 5, "name": "エーリアル", "val": 18.5}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 18.4}, {"umaban": 11, "name": "オーケアニス", "val": 17.6}, {"umaban": 15, "name": "カーラデマドレ", "val": 14.7}, {"umaban": 14, "name": "マジックローズ", "val": 12.9}, {"umaban": 1, "name": "レーヴドレフォン", "val": 12.9}, {"umaban": 2, "name": "ルトゥール", "val": 10.9}, {"umaban": 7, "name": "ネクストダンサー", "val": 9.4}, {"umaban": 6, "name": "スカイビート", "val": 4.8}, {"umaban": 13, "name": "エンプレスフレーム", "val": 3.5}, {"umaban": 16, "name": "マフィン", "val": 1.5}, {"umaban": 12, "name": "エターナルプロミス", "val": 1.5}, {"umaban": 8, "name": "ゴーソーファー", "val": 1.2}]}, {"label": "タイム", "color": "#1f77b4", "ranked": [{"umaban": 3, "name": "パイシャオピン", "val": 19.5}, {"umaban": 14, "name": "マジックローズ", "val": 18.1}, {"umaban": 10, "name": "タマモカンパネラ", "val": 17.1}, {"umaban": 15, "name": "カーラデマドレ", "val": 14.3}, {"umaban": 5, "name": "エーリアル", "val": 13.9}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 13.4}, {"umaban": 9, "name": "フィールオーサム", "val": 11.5}, {"umaban": 2, "name": "ルトゥール", "val": 11.3}, {"umaban": 7, "name": "ネクストダンサー", "val": 11.0}, {"umaban": 11, "name": "オーケアニス", "val": 10.1}, {"umaban": 1, "name": "レーヴドレフォン", "val": 8.9}, {"umaban": 6, "name": "スカイビート", "val": 8.4}, {"umaban": 16, "name": "マフィン", "val": 5.7}, {"umaban": 13, "name": "エンプレスフレーム", "val": 5.7}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "展開", "color": "#9467bd", "ranked": [{"umaban": 5, "name": "エーリアル", "val": 1.0}, {"umaban": 2, "name": "ルトゥール", "val": 1.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 1.0}, {"umaban": 9, "name": "フィールオーサム", "val": 1.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 1.0}, {"umaban": 11, "name": "オーケアニス", "val": 1.0}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": -1.0}]}, {"label": "斤量", "color": "#2ca02c", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "距離", "color": "#e377c2", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 2.0}, {"umaban": 3, "name": "パイシャオピン", "val": 2.0}, {"umaban": 5, "name": "エーリアル", "val": 2.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": -2.0}]}, {"label": "コース", "color": "#17becf", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 4.0}, {"umaban": 6, "name": "スカイビート", "val": 3.8}, {"umaban": 10, "name": "タマモカンパネラ", "val": 3.5}, {"umaban": 15, "name": "カーラデマドレ", "val": 2.2}, {"umaban": 16, "name": "マフィン", "val": 1.1}, {"umaban": 2, "name": "ルトゥール", "val": 0.7}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.4}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.2}, {"umaban": 11, "name": "オーケアニス", "val": -0.2}, {"umaban": 7, "name": "ネクストダンサー", "val": -0.4}, {"umaban": 3, "name": "パイシャオピン", "val": -0.5}, {"umaban": 12, "name": "エターナルプロミス", "val": -0.5}, {"umaban": 5, "name": "エーリアル", "val": -0.7}, {"umaban": 14, "name": "マジックローズ", "val": -0.8}, {"umaban": 1, "name": "レーヴドレフォン", "val": -0.9}, {"umaban": 9, "name": "フィールオーサム", "val": -1.5}]}, {"label": "臨戦", "color": "#8c564b", "ranked": [{"umaban": 2, "name": "ルトゥール", "val": 1.0}, {"umaban": 11, "name": "オーケアニス", "val": 1.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 1.0}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": -1.0}, {"umaban": 5, "name": "エーリアル", "val": -1.0}, {"umaban": 15, "name": "カーラデマドレ", "val": -1.0}, {"umaban": 9, "name": "フィールオーサム", "val": -1.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": -1.0}, {"umaban": 16, "name": "マフィン", "val": -1.0}, {"umaban": 12, "name": "エターナルプロミス", "val": -1.0}, {"umaban": 8, "name": "ゴーソーファー", "val": -1.0}, {"umaban": 14, "name": "マジックローズ", "val": -1.2}]}, {"label": "人気補正", "color": "#bcbd22", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "騎手", "color": "#aec7e8", "ranked": [{"umaban": 3, "name": "パイシャオピン", "val": 2.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 1.1}, {"umaban": 9, "name": "フィールオーサム", "val": 0.3}, {"umaban": 16, "name": "マフィン", "val": 0.2}, {"umaban": 14, "name": "マジックローズ", "val": 0.1}, {"umaban": 5, "name": "エーリアル", "val": 0.1}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.1}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.1}, {"umaban": 11, "name": "オーケアニス", "val": 0.1}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": -0.3}, {"umaban": 2, "name": "ルトゥール", "val": -0.5}, {"umaban": 7, "name": "ネクストダンサー", "val": -0.6}, {"umaban": 6, "name": "スカイビート", "val": -0.7}, {"umaban": 13, "name": "エンプレスフレーム", "val": -0.8}, {"umaban": 8, "name": "ゴーソーファー", "val": -1.4}]}, {"label": "馬体重", "color": "#7f7f7f", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "継続", "color": "#98df8a", "ranked": [{"umaban": 7, "name": "ネクストダンサー", "val": 1.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 1.0}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "着差", "color": "#dbdb8d", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.9}, {"umaban": 9, "name": "フィールオーサム", "val": 0.9}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": -1.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": -1.0}, {"umaban": 16, "name": "マフィン", "val": -1.0}, {"umaban": 12, "name": "エターナルプロミス", "val": -1.0}, {"umaban": 8, "name": "ゴーソーファー", "val": -1.0}, {"umaban": 5, "name": "エーリアル", "val": -2.0}, {"umaban": 15, "name": "カーラデマドレ", "val": -2.0}, {"umaban": 7, "name": "ネクストダンサー", "val": -2.0}, {"umaban": 11, "name": "オーケアニス", "val": -2.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": -2.0}]}, {"label": "枠順", "color": "#9edae5", "ranked": [{"umaban": 14, "name": "マジックローズ", "val": 1.5}, {"umaban": 15, "name": "カーラデマドレ", "val": 1.5}, {"umaban": 9, "name": "フィールオーサム", "val": 1.5}, {"umaban": 11, "name": "オーケアニス", "val": 1.5}, {"umaban": 13, "name": "エンプレスフレーム", "val": 1.5}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.5}, {"umaban": 16, "name": "マフィン", "val": 0.5}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.5}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "昇級", "color": "#c5b0d5", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "SmartRC評価", "color": "#f39c12", "ranked": [{"umaban": 14, "name": "マジックローズ", "val": 1.5}, {"umaban": 2, "name": "ルトゥール", "val": 1.2}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.8}, {"umaban": 6, "name": "スカイビート", "val": 0.8}, {"umaban": 9, "name": "フィールオーサム", "val": 0.7}, {"umaban": 10, "name": "タマモカンパネラ", "val": -0.1}, {"umaban": 4, "name": "キョウエイフロイデ", "val": -0.3}, {"umaban": 11, "name": "オーケアニス", "val": -0.3}, {"umaban": 13, "name": "エンプレスフレーム", "val": -0.3}, {"umaban": 12, "name": "エターナルプロミス", "val": -0.3}, {"umaban": 16, "name": "マフィン", "val": -0.6}, {"umaban": 15, "name": "カーラデマドレ", "val": -0.7}, {"umaban": 5, "name": "エーリアル", "val": -0.9}, {"umaban": 8, "name": "ゴーソーファー", "val": -1.0}, {"umaban": 3, "name": "パイシャオピン", "val": -1.6}, {"umaban": 1, "name": "レーヴドレフォン", "val": -2.8}]}];
+  const ITEM_RANKINGS = [{"label": "最高出力", "color": "#d62728", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 29.7}, {"umaban": 3, "name": "パイシャオピン", "val": 22.0}, {"umaban": 14, "name": "マジックローズ", "val": 21.9}, {"umaban": 10, "name": "タマモカンパネラ", "val": 21.1}, {"umaban": 5, "name": "エーリアル", "val": 19.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 18.9}, {"umaban": 6, "name": "スカイビート", "val": 18.9}, {"umaban": 2, "name": "ルトゥール", "val": 18.8}, {"umaban": 16, "name": "マフィン", "val": 18.2}, {"umaban": 7, "name": "ネクストダンサー", "val": 17.4}, {"umaban": 1, "name": "レーヴドレフォン", "val": 15.1}, {"umaban": 12, "name": "エターナルプロミス", "val": 14.1}, {"umaban": 8, "name": "ゴーソーファー", "val": 11.7}, {"umaban": 13, "name": "エンプレスフレーム", "val": 11.3}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}]}, {"label": "クラス", "color": "#ff7f0e", "ranked": [{"umaban": 3, "name": "パイシャオピン", "val": 25.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 21.6}, {"umaban": 9, "name": "フィールオーサム", "val": 19.4}, {"umaban": 5, "name": "エーリアル", "val": 18.5}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 18.4}, {"umaban": 11, "name": "オーケアニス", "val": 17.6}, {"umaban": 15, "name": "カーラデマドレ", "val": 14.7}, {"umaban": 14, "name": "マジックローズ", "val": 12.9}, {"umaban": 1, "name": "レーヴドレフォン", "val": 12.9}, {"umaban": 2, "name": "ルトゥール", "val": 10.9}, {"umaban": 7, "name": "ネクストダンサー", "val": 9.4}, {"umaban": 6, "name": "スカイビート", "val": 4.8}, {"umaban": 13, "name": "エンプレスフレーム", "val": 3.5}, {"umaban": 16, "name": "マフィン", "val": 1.5}, {"umaban": 12, "name": "エターナルプロミス", "val": 1.5}, {"umaban": 8, "name": "ゴーソーファー", "val": 1.2}]}, {"label": "タイム", "color": "#1f77b4", "ranked": [{"umaban": 3, "name": "パイシャオピン", "val": 19.5}, {"umaban": 14, "name": "マジックローズ", "val": 18.1}, {"umaban": 10, "name": "タマモカンパネラ", "val": 17.1}, {"umaban": 15, "name": "カーラデマドレ", "val": 14.3}, {"umaban": 5, "name": "エーリアル", "val": 13.9}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 13.4}, {"umaban": 9, "name": "フィールオーサム", "val": 11.5}, {"umaban": 2, "name": "ルトゥール", "val": 11.3}, {"umaban": 7, "name": "ネクストダンサー", "val": 11.0}, {"umaban": 11, "name": "オーケアニス", "val": 10.1}, {"umaban": 1, "name": "レーヴドレフォン", "val": 8.9}, {"umaban": 6, "name": "スカイビート", "val": 8.4}, {"umaban": 16, "name": "マフィン", "val": 5.7}, {"umaban": 13, "name": "エンプレスフレーム", "val": 5.7}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "展開", "color": "#9467bd", "ranked": [{"umaban": 5, "name": "エーリアル", "val": 1.0}, {"umaban": 2, "name": "ルトゥール", "val": 1.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 1.0}, {"umaban": 9, "name": "フィールオーサム", "val": 1.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 1.0}, {"umaban": 11, "name": "オーケアニス", "val": 1.0}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": -1.0}]}, {"label": "斤量", "color": "#2ca02c", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "距離", "color": "#e377c2", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 2.0}, {"umaban": 3, "name": "パイシャオピン", "val": 2.0}, {"umaban": 5, "name": "エーリアル", "val": 2.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": -2.0}]}, {"label": "コース", "color": "#17becf", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 4.0}, {"umaban": 6, "name": "スカイビート", "val": 3.8}, {"umaban": 10, "name": "タマモカンパネラ", "val": 3.5}, {"umaban": 15, "name": "カーラデマドレ", "val": 2.2}, {"umaban": 16, "name": "マフィン", "val": 1.1}, {"umaban": 2, "name": "ルトゥール", "val": 0.7}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.4}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.2}, {"umaban": 11, "name": "オーケアニス", "val": -0.2}, {"umaban": 7, "name": "ネクストダンサー", "val": -0.4}, {"umaban": 3, "name": "パイシャオピン", "val": -0.5}, {"umaban": 12, "name": "エターナルプロミス", "val": -0.5}, {"umaban": 5, "name": "エーリアル", "val": -0.7}, {"umaban": 14, "name": "マジックローズ", "val": -0.8}, {"umaban": 1, "name": "レーヴドレフォン", "val": -0.9}, {"umaban": 9, "name": "フィールオーサム", "val": -1.5}]}, {"label": "臨戦", "color": "#8c564b", "ranked": [{"umaban": 2, "name": "ルトゥール", "val": 1.0}, {"umaban": 11, "name": "オーケアニス", "val": 1.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 1.0}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": -1.0}, {"umaban": 5, "name": "エーリアル", "val": -1.0}, {"umaban": 15, "name": "カーラデマドレ", "val": -1.0}, {"umaban": 9, "name": "フィールオーサム", "val": -1.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": -1.0}, {"umaban": 16, "name": "マフィン", "val": -1.0}, {"umaban": 12, "name": "エターナルプロミス", "val": -1.0}, {"umaban": 8, "name": "ゴーソーファー", "val": -1.0}, {"umaban": 14, "name": "マジックローズ", "val": -1.2}]}, {"label": "人気補正", "color": "#bcbd22", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "騎手", "color": "#aec7e8", "ranked": [{"umaban": 3, "name": "パイシャオピン", "val": 2.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 1.1}, {"umaban": 9, "name": "フィールオーサム", "val": 0.3}, {"umaban": 16, "name": "マフィン", "val": 0.2}, {"umaban": 14, "name": "マジックローズ", "val": 0.1}, {"umaban": 5, "name": "エーリアル", "val": 0.1}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.1}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.1}, {"umaban": 11, "name": "オーケアニス", "val": 0.1}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": -0.3}, {"umaban": 2, "name": "ルトゥール", "val": -0.5}, {"umaban": 7, "name": "ネクストダンサー", "val": -0.6}, {"umaban": 6, "name": "スカイビート", "val": -0.7}, {"umaban": 13, "name": "エンプレスフレーム", "val": -0.8}, {"umaban": 8, "name": "ゴーソーファー", "val": -1.4}]}, {"label": "馬体重", "color": "#7f7f7f", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "継続", "color": "#98df8a", "ranked": [{"umaban": 7, "name": "ネクストダンサー", "val": 1.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 1.0}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "着差", "color": "#dbdb8d", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.9}, {"umaban": 9, "name": "フィールオーサム", "val": 0.9}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": -1.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": -1.0}, {"umaban": 16, "name": "マフィン", "val": -1.0}, {"umaban": 12, "name": "エターナルプロミス", "val": -1.0}, {"umaban": 8, "name": "ゴーソーファー", "val": -1.0}, {"umaban": 5, "name": "エーリアル", "val": -2.0}, {"umaban": 15, "name": "カーラデマドレ", "val": -2.0}, {"umaban": 7, "name": "ネクストダンサー", "val": -2.0}, {"umaban": 11, "name": "オーケアニス", "val": -2.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": -2.0}]}, {"label": "枠順", "color": "#9edae5", "ranked": [{"umaban": 14, "name": "マジックローズ", "val": 1.5}, {"umaban": 15, "name": "カーラデマドレ", "val": 1.5}, {"umaban": 9, "name": "フィールオーサム", "val": 1.5}, {"umaban": 11, "name": "オーケアニス", "val": 1.5}, {"umaban": 13, "name": "エンプレスフレーム", "val": 1.5}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.5}, {"umaban": 16, "name": "マフィン", "val": 0.5}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.5}, {"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "昇級", "color": "#c5b0d5", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}, {"label": "SmartRC評価", "color": "#f39c12", "ranked": [{"umaban": 14, "name": "マジックローズ", "val": 1.5}, {"umaban": 2, "name": "ルトゥール", "val": 1.2}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.8}, {"umaban": 6, "name": "スカイビート", "val": 0.8}, {"umaban": 9, "name": "フィールオーサム", "val": 0.7}, {"umaban": 10, "name": "タマモカンパネラ", "val": -0.1}, {"umaban": 4, "name": "キョウエイフロイデ", "val": -0.3}, {"umaban": 11, "name": "オーケアニス", "val": -0.3}, {"umaban": 13, "name": "エンプレスフレーム", "val": -0.3}, {"umaban": 12, "name": "エターナルプロミス", "val": -0.3}, {"umaban": 16, "name": "マフィン", "val": -0.6}, {"umaban": 15, "name": "カーラデマドレ", "val": -0.7}, {"umaban": 5, "name": "エーリアル", "val": -0.9}, {"umaban": 8, "name": "ゴーソーファー", "val": -1.0}, {"umaban": 3, "name": "パイシャオピン", "val": -1.6}, {"umaban": 1, "name": "レーヴドレフォン", "val": -2.8}]}, {"label": "馬場適性", "color": "#16a085", "ranked": [{"umaban": 4, "name": "キョウエイフロイデ", "val": 0.0}, {"umaban": 3, "name": "パイシャオピン", "val": 0.0}, {"umaban": 10, "name": "タマモカンパネラ", "val": 0.0}, {"umaban": 14, "name": "マジックローズ", "val": 0.0}, {"umaban": 5, "name": "エーリアル", "val": 0.0}, {"umaban": 15, "name": "カーラデマドレ", "val": 0.0}, {"umaban": 2, "name": "ルトゥール", "val": 0.0}, {"umaban": 7, "name": "ネクストダンサー", "val": 0.0}, {"umaban": 6, "name": "スカイビート", "val": 0.0}, {"umaban": 9, "name": "フィールオーサム", "val": 0.0}, {"umaban": 1, "name": "レーヴドレフォン", "val": 0.0}, {"umaban": 11, "name": "オーケアニス", "val": 0.0}, {"umaban": 16, "name": "マフィン", "val": 0.0}, {"umaban": 13, "name": "エンプレスフレーム", "val": 0.0}, {"umaban": 12, "name": "エターナルプロミス", "val": 0.0}, {"umaban": 8, "name": "ゴーソーファー", "val": 0.0}]}];
   const grid = document.getElementById('itemRankingGrid');
   if (!grid) return;
   const RANK_ICONS = ['🥇','🥈','🥉'];

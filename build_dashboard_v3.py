@@ -13,7 +13,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--json',   default='horses_data.json')
 parser.add_argument('--out',    default=None)   # 出力ファイルのフルパス
 parser.add_argument('--outdir', default=None)   # 出力ディレクトリ（--out未指定時に使用）
+parser.add_argument('--baba-json', default=None, dest='baba_json',
+                    help='馬場情報JSON (fetch_baba.py --out で生成)')
 args, _ = parser.parse_known_args()
+
+# 馬場情報ロード
+_baba_info = {}
+if args.baba_json:
+    try:
+        import pathlib as _pl
+        _baba_info = json.loads(_pl.Path(args.baba_json).read_text(encoding='utf-8'))
+    except Exception as _e:
+        print(f'[baba_json] 読み込み失敗: {_e}')
 
 with open(args.json, encoding='utf-8') as f:
     data = json.load(f)
@@ -325,6 +336,7 @@ for idx, h in enumerate(horses):
     keizoku_pts    = h.get('継続pts', 0)
     chakusa_pts    = h.get('着差pts', 0)
     wakuban_pts    = h.get('枠順pts', 0)
+    baba_apt_pts   = h.get('馬場適性pts', 0)
 
     # 補正バッジ
     adj_badges = ''
@@ -339,6 +351,7 @@ for idx, h in enumerate(horses):
         (keizoku_pts,    '継続騎乗','#98df8a'),  # ライトグリーン
         (chakusa_pts,    '着差',    '#dbdb8d'),  # ライトイエロー
         (wakuban_pts,    '枠順',    '#9edae5'),  # ライトシアン
+        (baba_apt_pts,   '馬場適性', '#16a085'),  # エメラルド
     ]:
         if val != 0:
             c = base_color if val > 0 else '#c0392b'
@@ -384,6 +397,26 @@ for idx, h in enumerate(horses):
     else:
         _memo_badge = ''
 
+    # 注目穴馬バッジ
+    _sr_rank = h.get('SmartRC推定人気順')
+    _sr_int  = int(_sr_rank) if _sr_rank is not None else None
+    _apt_sum = (h.get('コース適性pts', 0) + h.get('馬場適性pts', 0)
+               + h.get('距離pts', 0) + h.get('展開pts', 0) + h.get('枠順pts', 0))
+    _is_ana  = (_sr_int is not None
+                and _sr_int > len(horses) // 2
+                and rank <= 3
+                and _apt_sum > 0)
+    _ana_badge = (
+        '<span title="SmartRC推定人気が下位・モデルスコア3位以内・適性系プラス"'
+        ' style="display:inline-flex;align-items:center;gap:3px;'
+        'padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;'
+        'background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff;'
+        'box-shadow:0 0 6px rgba(231,76,60,0.5);white-space:nowrap;">'
+        '🎯 注目穴馬'
+        f'<span style="font-size:9px;font-weight:400;opacity:0.85;margin-left:2px">'
+        f'(SmartRC{_sr_int}番人気/適性{_apt_sum:+.1f}pt)</span></span>'
+    ) if _is_ana else ''
+
     horse_cards += f'''
 <div class="horse-card rank-{min(rank,4)}" data-rank="{rank}" data-leg="{leg}">
   <div class="rank-badge" style="background:{color}">
@@ -396,6 +429,7 @@ for idx, h in enumerate(horses):
       <span class="leg-badge" style="background:{leg_color(leg)}">{leg}</span>
       {ref_badge}{_trust_badge(h)}{adj_badges}
       {_memo_badge}
+      {_ana_badge}
       <span class="meta-info">{h["性別"]}{h["年齢"]} / {h["騎手"]} / {n}走</span>
       <button class="drill-btn" onclick="toggleDrill('{horse_id}', this)">📋 過去走</button>
     </div>
@@ -464,6 +498,11 @@ for idx, h in enumerate(horses):
           <label>枠順補正</label>
           <div class="bar bipolar">{bipolar_bar(wakuban_pts, 2)}</div>
           <span class="val">{wakuban_pts:+.1f}/±2</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar">{bipolar_bar(baba_apt_pts, 3)}</div>
+          <span class="val">{baba_apt_pts:+.1f}/±3</span>
         </div>
       </div>
     </div>
@@ -558,6 +597,27 @@ else:
       ⚠️ 出馬表未反映（騎手・オッズ・枠番は過去データの最終走値です）
     </div>'''
 
+# ── 馬場状態バナー ─────────────────────────────────────────────────
+_baba_color_map = {'良': '#27ae60', '稍重': '#e67e22', '重': '#c0392b', '不良': '#8e44ad'}
+_est_shiba = _baba_info.get('推定馬場_芝')
+_est_dart  = _baba_info.get('推定馬場_ダート')
+_baba_venue = _baba_info.get('場所', '')
+if _est_shiba:
+    _shiba_color = _baba_color_map.get(_est_shiba, '#ecf0f1')
+    _dart_color  = _baba_color_map.get(_est_dart,  '#ecf0f1')
+    _cushion_str = (f'　クッション値: {_baba_info["クッション値"]}' if _baba_info.get('クッション値') else '')
+    _rain_str    = (f'　降水量: {_baba_info["降水量_mm"]}mm' if _baba_info.get('降水量_mm') is not None else '')
+    _konkyo_str  = _baba_info.get('推定根拠', '')
+    baba_banner = f'''<div class="shutuba-banner" style="background:linear-gradient(135deg,#1a3a6b 0%,#2c5282 100%);color:#fff;border-left:4px solid #f1c40f;margin-bottom:8px">
+      🌤 <b>推定馬場状態</b>（{_baba_venue}）：
+      芝 <b style="color:{_shiba_color};font-size:15px">{_est_shiba}</b>
+      ／ダート <b style="color:{_dart_color};font-size:15px">{_est_dart}</b>
+      {_cushion_str}{_rain_str}
+      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（{_konkyo_str}）</span>
+    </div>'''
+else:
+    baba_banner = ''
+
 # ── 期待値データ (JSON for JS) ─────────────────────────────────
 # 過去走なしの馬はsoftmax計算に含めると歪むため除外
 ev_data_json = json.dumps([
@@ -574,6 +634,14 @@ ev_data_json = json.dumps([
         '脚質':            h['脚質'],
         'SmartRC推定人気順':  h.get('SmartRC推定人気順'),   # 数字
         '乖離度':          (int(h.get('SmartRC推定人気順') or 99) - h.get('順位予想', 99)) if h.get('SmartRC推定人気順') else None,
+        'is_memo':         h['馬名'] in _memo_map,
+        'is_ana':          (
+            h.get('SmartRC推定人気順') is not None
+            and int(h.get('SmartRC推定人気順')) > len(horses) // 2
+            and h['順位予想'] <= 3
+            and (h.get('コース適性pts', 0) + h.get('馬場適性pts', 0)
+                 + h.get('距離pts', 0) + h.get('展開pts', 0) + h.get('枠順pts', 0)) > 0
+        ),
     }
     for h in horses
     if not h.get('過去走なし', False)
@@ -706,6 +774,7 @@ _comp_fields = [
     ('枠順pts',       '枠順',     '#9edae5'),  # ライトシアン
     ('昇級pts',       '昇級',     '#c5b0d5'),  # ラベンダー
     ('SmartRC評価pts',  'SmartRC評価', '#f39c12'),  # アンバー
+    ('馬場適性pts',       '馬場適性',   '#16a085'),  # エメラルド
 ]
 _chart_horses = sorted(horses, key=lambda h: h['順位予想'])
 _chart_labels  = [f"{h['順位予想']}位 {h['馬名']}" for h in _chart_horses]
@@ -1219,9 +1288,9 @@ html = f'''<!DOCTYPE html>
   #evHead th {{ cursor:pointer; user-select:none; white-space:nowrap; }}
   #evHead th:hover {{ background:#3d5166; }}
   .ev-table-wrap {{ overflow-x: auto; }}
-  .ev-table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
+  .ev-table {{ width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }}
   .ev-table th, .ev-table td {{
-    padding: 8px 12px; text-align: center;
+    padding: 5px 8px; text-align: center;
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }}
   .ev-table th {{ background: rgba(255,255,255,0.05); color: #f1c40f; }}
@@ -1447,6 +1516,7 @@ html = f'''<!DOCTYPE html>
   </header>
 
   {shutuba_banner}
+  {baba_banner}
 
   <div class="section">
     <h2>🏆 上位3頭 予想</h2>
@@ -1637,6 +1707,10 @@ html = f'''<!DOCTYPE html>
         <div class="adj-dot" style="background:#f39c12"></div>
         <span><b>SmartRC評価補正</b>（−4.5〜+4.5pt）: 過去5走の馬場・展開有利不利評価（h1〜h5_fr_baba）を加重平均（前走×1.0/前々走×0.6/以降逓減）。A=+4.5/B=+2.5pt 上方修正、D=−2.5/E=−4.5pt 下方修正、C=0pt</span>
       </div>
+      <div class="adj-legend-item">
+        <div class="adj-dot" style="background:#16a085"></div>
+        <span><b>馬場適性</b>（−2〜+3pt）: 過去走の同馬場条件（良/稍重/重/不良）における勝率・複勝率・平均着順率を算出。同馬場2走未満の場合は隣接馬場の成績を0.5倍で補完</span>
+      </div>
     </div>
   </div>
 
@@ -1800,7 +1874,7 @@ function renderRows(rows) {{
       : '<span style="color:#555">-</span>';
     return `<tr>
       <td>${{waku_b}}</td>
-      <td><b>${{h['馬名']}}</b>${{h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}}</td>
+      <td style="white-space:nowrap"><b style="font-size:13px">${{h['馬名']}}</b>${{h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}}${{h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}}${{h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}}</td>
       <td>${{h['脚質']}}</td>
       <td>${{h['スコア'].toFixed(1)}}</td>
       <td>${{h['順位予想']}}</td>
@@ -1820,7 +1894,7 @@ function renderRows(rows) {{
         <div>${{probPct}}</div>
         <div class="ev-bar" style="background:${{barColor}};width:${{barWidth}}%"></div>
       </td>
-      <td style="text-align:center">${{beCell}}</td>
+      <td style="text-align:center;display:${{isFuku ? 'none' : ''}}">${{beCell}}</td>
       <td>${{oddsCell}}</td>
       <td class="${{evCls}}">${{evStr}}</td>
       <td class="${{evCls}}">${{judgement}}</td>
@@ -1940,6 +2014,7 @@ if __name__ == '__main__':
     _parser = _ap.ArgumentParser()
     _parser.add_argument('--json',   required=True)
     _parser.add_argument('--outdir', default=None)
+    _parser.add_argument('--baba-json', default=None, dest='baba_json')
     _args = _parser.parse_args()
     _outdir2 = _args.outdir or _os2.path.dirname(_os2.path.abspath(_args.json))
     _stem = _os2.path.splitext(_os2.path.basename(_args.json))[0]

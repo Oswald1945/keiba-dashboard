@@ -22,7 +22,7 @@ run_new.py -- 新規レース自動検出・ダッシュボード生成スクリ
   input/done/  <-- pred/review ともに完了後に移動
 """
 
-import sys, re, shutil, subprocess, pathlib, webbrowser
+import sys, re, shutil, subprocess, pathlib, webbrowser, json, datetime
 
 SCRIPT_DIR = pathlib.Path(__file__).parent
 INPUT_DIR  = SCRIPT_DIR / 'input'
@@ -49,37 +49,134 @@ FORCE_PRED  = '--force' in sys.argv  # pred生成済でも強制再生成
 SHARE_URL_LOG = SCRIPT_DIR / 'shared_urls.txt'
 GITHUB_PAGES_BASE = 'https://oswald1945.github.io/keiba-dashboard'
 
+FETCH_BABA_PY = SCRIPT_DIR / 'fetch_baba.py'
 
-def publish_to_github(html_path: pathlib.Path) -> str | None:
-    """git add / commit / push して GitHub Pages URL を返す"""
+# 会場コード → 場所名マッピング（大文字化してから参照）
+_VENUE_CODE_MAP = {
+    'TK': '東京', 'CB': '中山', 'HN': '阪神', 'KT': '京都', 'KY': '京都',
+    'CK': '中京', 'NK': '新潟', 'NG': '新潟', 'HK': '函館', 'SM': '札幌',
+    'FK': '福島', 'KO': '小倉', 'KK': '小倉',
+}
+
+def extract_venue_from_race_id(race_id: str) -> str | None:
+    """race_id (例: 20260524_TK8, 20260601_ng8) から会場名を取得する"""
+    m = re.match(r'^\d{8}_([A-Za-z]+)\d+', race_id)
+    if not m:
+        return None
+    code = m.group(1).upper()
+    return _VENUE_CODE_MAP.get(code)
+
+
+def update_memo_from_review(html_path: pathlib.Path) -> int:
+    """回顧HTMLから次走注目馬を抽出して memo_horses.json に追記する。戻り値は追加頭数。"""
+    MEMO_JSON = SCRIPT_DIR / 'memo_horses.json'
+    PLACE_MAP = {
+        'CK': '中京', 'TK': '東京', 'HN': '阪神', 'NK': '新潟',
+        'KT': '京都', 'KY': '京都', 'CB': '中山', 'HK': '函館',
+        'SM': '札幌', 'FK': '福島', 'OI': '大井', 'KW': '川崎',
+        'HS': '浦和', 'SK': '船橋',
+    }
     try:
-        # stale な index.lock を事前に除去
+        html = html_path.read_text(encoding='utf-8', errors='ignore')
+        names = re.findall(r'<div class="pickup-name"><b>([^<]+)</b></div>', html)
+        if not names:
+            return 0
+        # レース情報をtitleタグから抽出
+        m_title = re.search(
+            r'<title>レース回顧\s+(.+?)(\d+)R\s+([^<]*?)\s+(\d{4}/\d{2}/\d{2})</title>', html
+        )
+        if m_title:
+            place    = m_title.group(1).strip()
+            rnum     = int(m_title.group(2))
+            rname    = m_title.group(3).strip()
+            date_str = m_title.group(4)
+        else:
+            stem = html_path.stem
+            m_fn = re.match(r'(\d{4})(\d{2})(\d{2})_([A-Z]+)(\d+)R_(.+?)(?:_review)?$', stem)
+            if not m_fn:
+                return 0
+            y, mo, d = m_fn.group(1), m_fn.group(2), m_fn.group(3)
+            place    = PLACE_MAP.get(m_fn.group(4), m_fn.group(4))
+            rnum     = int(m_fn.group(5))
+            rname    = m_fn.group(6)
+            date_str = f'{y}/{mo}/{d}'
+        # 既存データ読み込み
+        existing = []
+        if MEMO_JSON.exists():
+            try:
+                existing = json.loads(MEMO_JSON.read_text(encoding='utf-8'))
+            except Exception:
+                pass
+        existing_keys = {
+            f"{e.get('馬名','')}|{e.get('元レース',{}).get('日付','')}|{e.get('元レース',{}).get('R','')}"
+            for e in existing
+        }
+        today = datetime.date.today().isoformat()
+        added = 0
+        for name in names:
+            key = f'{name}|{date_str}|{rnum}'
+            if key not in existing_keys:
+                existing.append({
+                    '馬名': name,
+                    '登録日': today,
+                    '追加者': '',
+                    '元レース': {'日付': date_str, '場所': place, 'R': rnum, 'レース名': rname, 'クラス': ''},
+                    'メモ': '',
+                })
+                existing_keys.add(key)
+                added += 1
+        if added > 0:
+            MEMO_JSON.write_text(
+                json.dumps(existing, ensure_ascii=False, indent=2), encoding='utf-8'
+            )
+            print(f'  [memo] {added}頭を memo_horses.json に追加しました')
+        return added
+    except Exception as e:
+        print(f'  [memo] 更新エラー: {e}')
+        return 0
+
+
+def publish_batch_to_github(html_paths: list) -> list:
+    """複数HTMLを一括 git add / commit / push して GitHub Pages URL リストを返す"""
+    if not html_paths:
+        return []
+    try:
         lock_file = SCRIPT_DIR / '.git' / 'index.lock'
         if lock_file.exists():
             lock_file.unlink()
-            print('  [share] index.lock を削除しました')
+            print('[share] index.lock を削除しました')
         git = ['git', '-C', str(SCRIPT_DIR)]
-        subprocess.run(git + ['add', str(html_path)], check=True)
-        msg = f'pred: {html_path.stem}'
+        memo_json = SCRIPT_DIR / 'memo_horses.json'
+        files_to_add = [str(p) for p in html_paths]
+        if memo_json.exists():
+            files_to_add.append(str(memo_json))
+        subprocess.run(git + ['add'] + files_to_add, check=True)
+        date_tag = html_paths[0].stem.split('_')[1] if '_' in html_paths[0].stem else 'batch'
+        msg = f'pred: {date_tag} {len(html_paths)}レース'
         result = subprocess.run(
             git + ['commit', '-m', msg],
             capture_output=True, text=True
         )
         if result.returncode not in (0, 1):
-            print(f'  [share] git commit 失敗: {result.stderr.strip()}')
-            return None
+            print(f'[share] git commit 失敗: {result.stderr.strip()}')
+            return []
         push = subprocess.run(
             git + ['push', 'origin', 'main'],
             capture_output=True, text=True
         )
         if push.returncode != 0:
-            print(f'  [share] git push 失敗: {push.stderr.strip()}')
-            return None
-        url = f'{GITHUB_PAGES_BASE}/{html_path.name}'
-        return url
+            print(f'[share] git push 失敗: {push.stderr.strip()}')
+            return []
+        return [f'{GITHUB_PAGES_BASE}/{p.name}' for p in html_paths]
     except Exception as e:
-        print(f'  [share] GitHub Pages 公開エラー: {e}')
-        return None
+        print(f'[share] GitHub Pages 公開エラー: {e}')
+        return []
+
+
+def publish_to_github(html_path: pathlib.Path) -> str | None:
+    """後方互換用: 単一HTML を publish_batch_to_github に委譲"""
+    urls = publish_batch_to_github([html_path])
+    return urls[0] if urls else None
 
 
 
@@ -138,7 +235,8 @@ def run_cmd(cmd, label):
         raise RuntimeError(f'{label} が失敗 (code={r.returncode})')
 
 
-def process_race(race_id, files):
+def process_race(race_id, files) -> pathlib.Path | None:
+    """レースを処理し、新規生成した pred HTML のパスを返す（なければ None）"""
     print(f'\n[Race] {race_id}')
     detected = ', '.join(k for k in ALL_KINDS if k in files)
     print(f'  検出: {detected}')
@@ -157,6 +255,7 @@ def process_race(race_id, files):
     already_review = review_done(race_id)
     generated_pred   = False
     generated_review = False
+    new_pred_html    = None
 
     # SmartRC JSON 自動検出 & 自動取得
     smartrc_json = OUT_DIR / f'smartrc_{race_id}.json'
@@ -192,26 +291,60 @@ def process_race(race_id, files):
 
     if already_pred and not FORCE_PRED:
         print(f'  [pred] 生成済 -> スキップ (--force で強制再生成可能)')
-        # --share 指定時は生成済の HTML も強制公開
+        # --share 指定時は生成済の HTML も一括push対象に追加
         if FORCE_SHARE and not DRY_RUN:
             html_p = OUT_DIR / f'pred_{race_id}.html'
             if html_p.exists():
-                print(f'  [share] {html_p.name} を GitHub に公開中...')
-                share_url = publish_to_github(html_p)
-                if share_url:
-                    print(f'  ╔══════════════════════════════════════════╗')
-                    print(f'  ║  共有URL: {share_url}')
-                    print(f'  ╚══════════════════════════════════════════╝')
-                    with open(SHARE_URL_LOG, 'a', encoding='utf-8') as _lg:
-                        _lg.write(f'{race_id}\t{share_url}\n')
-                    webbrowser.open(share_url)
+                new_pred_html = html_p
     elif kako is None or shutuba is None:
         print(f'  [pred] 過去走 or 出馬表がない -> スキップ')
         if FORCE_PRED:
             print(f'  [force] --force 指定でも過去走/出馬表が不足しているためスキップ')
     else:
+        # ── 馬場情報取得 (fetch_baba.py) ────────────────────────────
+        baba_json = None
+        estimated_baba = '良'
+        if FETCH_BABA_PY.exists() and not DRY_RUN:
+            _venue = extract_venue_from_race_id(race_id)
+            _date  = race_id[:8]  # YYYYMMDD 部分
+            if _venue:
+                baba_json = OUT_DIR / f'baba_{race_id}.json'
+                print(f'  [baba] {_venue} の馬場情報を取得中...')
+                try:
+                    _env = {**__import__('os').environ, 'PYTHONIOENCODING': 'utf-8'}
+                    _proc = subprocess.run(
+                        [sys.executable, str(FETCH_BABA_PY),
+                         '--venue', _venue, '--date', _date, '--out', str(baba_json)],
+                        capture_output=True, timeout=30, env=_env
+                    )
+                    if baba_json.exists():
+                        import json as _j
+                        _bi = _j.loads(baba_json.read_text(encoding='utf-8'))
+                        # 芝/ダートを判定して適切な推定馬場を選択
+                        # shutuba から芝ダの情報を取得（簡易判定: race_id に 'ダ' がなければ芝）
+                        _surface = 'dart' if 'ダ' in race_id else 'turf'
+                        if _surface == 'dart':
+                            estimated_baba = _bi.get('推定馬場_ダート') or '良'
+                        else:
+                            estimated_baba = _bi.get('推定馬場_芝') or '良'
+                        print(f'  [baba] 推定馬場: {estimated_baba}（{_bi.get("推定根拠","")}）')
+                    else:
+                        _out = (_proc.stdout or b'').decode('utf-8', errors='replace')
+                        _err = (_proc.stderr or b'').decode('utf-8', errors='replace')
+                        print(f'  [baba] 取得失敗: {(_out + _err).strip()[:80]}')
+                        baba_json = None
+                except subprocess.TimeoutExpired:
+                    print(f'  [baba] タイムアウト → デフォルト(良)で継続')
+                    baba_json = None
+                except Exception as _e:
+                    print(f'  [baba] スキップ: {_e}')
+                    baba_json = None
+            else:
+                print(f'  [baba] race_id から会場を特定できず → デフォルト(良)で継続')
+
         cmd = [sys.executable, SCORE_PY,
-               '--excel', kako, '--shutuba', shutuba, '--outdir', OUT_DIR]
+               '--excel', kako, '--shutuba', shutuba, '--outdir', OUT_DIR,
+               '--baba', estimated_baba]
         if sakuro:      cmd += ['--sakuro',  sakuro]
         if wood:        cmd += ['--wood',    wood]
         if smartrc_json:
@@ -225,27 +358,16 @@ def process_race(race_id, files):
                 shutil.copy2(src_json,   json_p);   src_json.unlink()
             if src_scores.exists():
                 shutil.copy2(src_scores, scores_p); src_scores.unlink()
-        run_cmd([sys.executable, DASH_PY,
-                 '--json', json_p, '--outdir', OUT_DIR], 'pred')
+        dash_cmd = [sys.executable, DASH_PY,
+                    '--json', json_p, '--outdir', OUT_DIR]
+        if baba_json and baba_json.exists():
+            dash_cmd += ['--baba-json', str(baba_json)]
+        run_cmd(dash_cmd, 'pred')
         generated_pred = True
-        # 生成した HTML を共有URLに変換してブラウザで自動表示
         if not DRY_RUN:
             html_p = OUT_DIR / f'pred_{race_id}.html'
             if html_p.exists():
-                print(f'  [share] {html_p.name} を GitHub に公開中...')
-                share_url = publish_to_github(html_p)
-                if share_url:
-                    print(f'  ╔════════════════════════════════════════════╗')
-                    print(f'  ║  共有URL: {share_url:<38}║')
-                    print(f'  ╚════════════════════════════════════════════╝')
-                    # URLをログファイルに記録
-                    with open(SHARE_URL_LOG, 'a', encoding='utf-8') as _lg:
-                        _lg.write(f'{race_id}\t{share_url}\n')
-                    webbrowser.open(share_url)
-                else:
-                    # upload失敗時はローカルをブラウザで開く
-                    webbrowser.open(html_p.as_uri())
-                    print(f'  [browser] {html_p.name} をローカルで開きました')
+                new_pred_html = html_p  # 一括push用に記録（main側で処理）
 
     if already_review:
         print(f'  [review] 生成済 -> スキップ')
@@ -259,12 +381,10 @@ def process_race(race_id, files):
                '--scores', scores_p, '--outdir', OUT_DIR]
         if racedata:
             cmd += ['--racedata', racedata]
-        # 実行前の review HTML 一覧を記録
         _before = set(OUT_DIR.glob('*_review.html'))
         run_cmd(cmd, 'review')
         mark_review_done(race_id)
         generated_review = True
-        # 新しく生成された review HTML を GitHub に公開
         if not DRY_RUN:
             _new = set(OUT_DIR.glob('*_review.html')) - _before
             if _new:
@@ -293,6 +413,8 @@ def process_race(race_id, files):
     else:
         print(f'  [NG] {race_id} 未完了')
 
+    return new_pred_html if generated_pred and not DRY_RUN else None
+
 
 def main():
     print('=== run_new.py ===')
@@ -310,12 +432,31 @@ def main():
 
     print(f'検出: {len(races)} レース')
     errors = []
+    new_htmls = []
     for race_id, files in sorted(races.items()):
         try:
-            process_race(race_id, files)
+            html = process_race(race_id, files)
+            if html:
+                new_htmls.append(html)
         except Exception as e:
             errors.append((race_id, str(e)))
             print(f'  [ERROR] {race_id}: {e}')
+
+    # 新規生成HTMLを一括push
+    if new_htmls and not DRY_RUN:
+        print(f'\n[share] {len(new_htmls)}件のHTMLを GitHub に一括公開中...')
+        urls = publish_batch_to_github(new_htmls)
+        if urls:
+            with open(SHARE_URL_LOG, 'a', encoding='utf-8') as lg:
+                for html, url in zip(new_htmls, urls):
+                    race_id = html.stem.replace('pred_', '')
+                    lg.write(f'{race_id}\t{url}\n')
+            print(f'[share] 公開完了: {len(urls)}件')
+            print(f'[share] 共有URL一覧 ({SHARE_URL_LOG.name}):')
+            for url in urls:
+                print(f'  {url}')
+        else:
+            print('[share] push 失敗 → ローカルHTMLで確認してください')
 
     print('\n=== 完了 ===')
     if errors:

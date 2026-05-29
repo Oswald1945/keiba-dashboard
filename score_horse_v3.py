@@ -636,6 +636,92 @@ def going_adj_sec(going, surface, dist_m: float) -> float:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# A-1b  馬場適性スコア（過去走の馬場別成績から算出）
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _norm_going_full(g: str) -> str:
+    """馬場状態文字を正規化 (稍→稍重, 不→不良)"""
+    s = str(g).strip()
+    if s in ('稍', 'やや重'):
+        return '稍重'
+    if s == '不':
+        return '不良'
+    return s  # '良', '稍重', '重', '不良'
+
+
+def _baba_apt_from_races(race_list: list) -> float:
+    """
+    レースリストから馬場適性pt を計算 (-2.0 〜 +3.0)。
+    勝率・連対率・着順率に基づくシンプルなスコア。
+    """
+    ranks, heads = [], []
+    for r in race_list:
+        rank  = r.get('着順')
+        total = r.get('頭数')
+        if rank is not None and total:
+            try:
+                ranks.append(int(rank))
+                heads.append(int(total))
+            except (ValueError, TypeError):
+                pass
+    if not ranks:
+        return 0.0
+
+    n         = len(ranks)
+    win_rate  = sum(1 for r in ranks if r == 1) / n
+    top3_rate = sum(1 for r in ranks if r <= 3) / n
+    avg_rate  = sum(r / t for r, t in zip(ranks, heads)) / n  # 小さいほど良い
+
+    score = 0.0
+    # 勝率ボーナス
+    if win_rate >= 0.50:   score += 2.0
+    elif win_rate >= 0.30: score += 1.0
+    elif win_rate >= 0.15: score += 0.5
+    # 3着内率ボーナス
+    if top3_rate >= 0.60:  score += 1.0
+    elif top3_rate >= 0.40: score += 0.5
+    # 平均着順ペナルティ (後方に集中している場合)
+    if avg_rate > 0.65:    score -= 1.5
+    elif avg_rate > 0.50:  score -= 0.5
+
+    return round(max(-2.0, min(3.0, score)), 2)
+
+
+def calc_baba_apt_pts(past_race_list: list, target_baba: str, min_races: int = 2) -> float:
+    """
+    過去走の馬場状態別成績から馬場適性スコアを算出 (-2.0 〜 +3.0)。
+    対象馬場でのレース数が min_races 未満の場合は隣接馬場を0.5倍で参照する。
+
+    target_baba: '良' / '稍重' / '重' / '不良'
+    """
+    if not past_race_list:
+        return 0.0
+
+    # 対象馬場のレースを抽出
+    same = [r for r in past_race_list
+            if _norm_going_full(r.get('馬場', '')) == target_baba]
+
+    if len(same) >= min_races:
+        return _baba_apt_from_races(same)
+
+    # データ不足: 隣接馬場を参照
+    ADJACENT = {
+        '良':   ['稍重'],
+        '稍重': ['良', '重'],
+        '重':   ['稍重', '不良'],
+        '不良': ['重'],
+    }
+    adj_conds = ADJACENT.get(target_baba, [])
+    adj = [r for r in past_race_list
+           if _norm_going_full(r.get('馬場', '')) in adj_conds]
+
+    if not adj:
+        return 0.0
+
+    return round(_baba_apt_from_races(adj) * 0.5, 2)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # ④  馬体重増減補正
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -1480,6 +1566,13 @@ def compute_scores(
 
         past_races_map[h] = past_race_list
 
+        # ── 馬場適性スコア (A-1b) ───────────────────────────
+        _baba_apt_pts = calc_baba_apt_pts(past_race_list, baba)
+        if _baba_apt_pts != 0.0:
+            _same_n = sum(1 for r in past_race_list
+                          if _norm_going_full(r.get('馬場', '')) == baba)
+            print(f"    [馬場適性] {h}: {baba}馬場 {_same_n}走 → {_baba_apt_pts:+.2f}pt")
+
         time_dev   = float(np.average(dev_vals, weights=dev_ws)) if dev_ws else 0.0
         n_dev_used = len(dev_vals)
 
@@ -1681,6 +1774,7 @@ def compute_scores(
             '_smartrc_pop_tan':     _smartrc_pop_tan,
             '_smartrc_ten_rank':    _smartrc_ten_rank,
             '_smartrc_agari_rank':  _smartrc_agari_rank,
+            '_baba_apt_pts':    _baba_apt_pts,
             '坂路Lap1':         t_info.get('坂路Lap1'),
             'ウッドLap1':        t_info.get('ウッドLap1'),
             '枠番':    None,
@@ -1729,7 +1823,9 @@ def compute_scores(
     avg_agari_all = res['平均上がり3F'].mean()
 
     # SmartRCテン速度競合情報（表示用）
-    _ten_ranks_final = res['SmartRCテン速度順位'].dropna().tolist()
+    if '_smartrc_ten_rank' not in res.columns:
+        raise ValueError('[score_horse] SmartRCテン速度順位 列が見つかりません。SmartRCデータを再取得してください。')
+    _ten_ranks_final = res['_smartrc_ten_rank'].dropna().tolist()
     _ten_top3_final  = [r for r in _ten_ranks_final if r <= 3]
     _ten_fast_final  = [r for r in _ten_ranks_final if r <= 5]
 
@@ -1763,6 +1859,7 @@ def compute_scores(
     res['継続pts']      = res['_keizoku_pts']
     res['着差pts']      = res['_chakusa_pts']
     res['昇級pts']      = res['_shokyu_pts']
+    res['馬場適性pts']         = res['_baba_apt_pts']
     res['SmartRC評価pts']      = res['_smartrc_pts']
     res['SmartRC評価']         = res['_smartrc_hyoka']
     res['SmartRCテンパターン']   = res['_smartrc_ten_pat']
@@ -1824,6 +1921,7 @@ def compute_scores(
         + res['馬体重pts'] + res['継続pts'] + res['着差pts']
         + res['枠順pts'] + res['昇級pts']
         + res['SmartRC評価pts']   # SmartRC 前走有利不利補正
+        + res['馬場適性pts']      # 馬場別成績による適性補正
     )
     # スコア下限補正: 最低スコアを1.0にシフト（マイナス表示を防ぐ）
     _min_score = res['総合スコア'].min()
@@ -1928,6 +2026,7 @@ def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None
             '着差pts':          round(float(r['着差pts']), 1),
             '枠順pts':          round(float(r.get('枠順pts', 0)), 1),
             '昇級pts':          round(float(r.get('昇級pts', 0)), 1),
+            '馬場適性pts':      round(float(r.get('馬場適性pts', 0)), 1),
             'SmartRC評価pts':   round(float(r.get('SmartRC評価pts', 0)), 1),
             'SmartRC評価':      r.get('SmartRC評価'),          # A/B/C/D/E or None
             'SmartRCテンパターン':   r.get('SmartRCテンパターン'),
@@ -2096,18 +2195,15 @@ if __name__ == '__main__':
             _io_suffix = _get_inner_outer(_venue, _surface, _target_dist,
                                           _num_corners, _target_class_tmp)
             _candidate = f"{_venue}{_surface}{_target_dist}m{_io_suffix}"
-            # COURSE_FEATURESにキーがあればサフィックス付き、なければベースキーを使用
             _base_key     = f"{_venue}{_surface}{_target_dist}m"
             _target_course = _candidate if _candidate in COURSE_FEATURES else _base_key
         else:
             _target_course = f"東京芝{_target_dist}m"
 
-        # 回りをCOURSE_FEATURESから取得してrace_infoに付加
         _mawari = COURSE_FEATURES.get(_target_course, {}).get('回り', '左')
         _race_info['回り'] = _mawari
 
     else:
-        # 出馬表なし: デフォルト値を使用
         _rd            = RACE_DATE
         _target_dist   = TARGET_DIST
         _target_course = TARGET_COURSE
@@ -2116,12 +2212,10 @@ if __name__ == '__main__':
 
     _target_class = _race_info.get('クラス名', '') if args.shutuba else ''
 
-    # SmartRC データ読み込み
     smartrc_data = None
     if args.smartrc:
         smartrc_data = load_smartrc_data(args.smartrc)
 
-    # ── スコア計算 ─────────────────────────────────────────────────────
     res, meta, past_races_map = compute_scores(
         df, course_times,
         shutuba_df=shutuba_df,
@@ -2135,10 +2229,8 @@ if __name__ == '__main__':
         smartrc_data=smartrc_data,
     )
 
-    # race_info を meta に付加（build_dashboard_v3.py が参照）
     meta['race_info'] = _race_info
 
-    # ── JSON 出力 ───────────────────────────────────────────────────────
     import os as _os2
     out_data = build_horses_json(res, meta, past_races_map)
     out_json = _os2.path.join(_outdir, 'horses_data.json')
@@ -2146,13 +2238,12 @@ if __name__ == '__main__':
         json.dump(out_data, _f, ensure_ascii=False, indent=2)
     print(f'\n[完了] {out_json} に保存しました')
 
-    # ── スコア CSV 出力 ─────────────────────────────────────────────────
     _score_cols = [
         '馬名', '脚質', '順位予想', '総合スコア',
         '最高出力pts', 'クラスpts', '時計pts', '展開pts',
         '斤量pts', '距離pts', 'コース適性pts', '臨戦pts',
         '人気補正pts', '騎手pts', '馬体重pts', '継続pts', '着差pts',
-        '枠順pts', '昇級pts', 'SmartRC評価pts',
+        '枠順pts', '昇級pts', '馬場適性pts', 'SmartRC評価pts',
     ]
     out_csv = _os2.path.join(_outdir, 'scores.csv')
     res[[c for c in _score_cols if c in res.columns]].to_csv(
@@ -2160,7 +2251,6 @@ if __name__ == '__main__':
     )
     print(f'[完了] {out_csv} にスコアCSVを保存しました')
 
-    # ── 上位表示 ────────────────────────────────────────────────────────
     print('\n=== スコア上位 ===')
     _disp_cols = ['馬名', '脚質', '順位予想', '総合スコア']
     print(res[[c for c in _disp_cols if c in res.columns]].head(10).to_string(index=False))

@@ -679,8 +679,9 @@ _n_horses = len(horses)
 _fav1_score_rank = next(
     (h.get('順位予想', 99) for h in horses if h.get('人気') == 1), 99
 )
-_fav_thr = _n_horses // 2 if _n_horses <= 12 else 7
-_fav1_is_low = _fav1_score_rank > _fav_thr
+_fav_thr = _n_horses // 2   # 中央値より下位なら低評価
+# 99はデータなし（過去走なし等）のデフォルト値なので判定除外
+_fav1_is_low = (_fav1_score_rank != 99) and (_fav1_score_rank > _fav_thr)
 
 # ── 自信あり判定（偏差値≥65 OR スコアリード≥15pt） ─────────────
 _sorted_valid = sorted(
@@ -703,24 +704,24 @@ if _max_kairido >= 4:
     _rec_badge  = '🟢 妙味有'
     _rec_color  = '#27ae60'
     _rec_bg     = '#1a3a28'
-    _rec_reason = f'SmartRC推定より{_max_kairido}順位上の穴馬候補あり（大きな市場乖離）'
+    _rec_reason = f'スコア上位馬がSmartRC推定より{_max_kairido}順位上 ― 大きな市場乖離あり'
 elif _max_kairido >= 2:
     if _fav1_is_low:
         _rec_badge  = '🟢 妙味有'
         _rec_color  = '#27ae60'
         _rec_bg     = '#1a3a28'
-        _rec_reason = (f'SmartRC推定より{_max_kairido}順位の乖離 '
-                       f'+ 1番人気スコア{_fav1_score_rank}位（閾値{_fav_thr}超）')
+        _rec_reason = (f'SmartRC推定から{_max_kairido}順位上の乖離あり'
+                       f'＋1番人気スコア低評価（{_fav1_score_rank}位/{_n_horses}頭中）')
     else:
         _rec_badge  = '🟡 要検討'
         _rec_color  = '#f39c12'
         _rec_bg     = '#3a2e10'
-        _rec_reason = f'SmartRC推定より{_max_kairido}順位上の乖離（中穴の可能性）'
+        _rec_reason = f'SmartRC推定から{_max_kairido}順位上の乖離あり（中穴の可能性）'
 else:
     _rec_badge  = '🔴 妙味薄'
     _rec_color  = '#e74c3c'
     _rec_bg     = '#3a1a1a'
-    _rec_reason = 'スコア上位3頭とSmartRC推定が概ね一致（妙味薄め）'
+    _rec_reason = 'スコア上位3頭とSmartRC推定が概ね一致（妙味薄）'
 
 # ── 自信ありバッジ（妙味有 かつ 偏差値≥65 or リード≥15pt） ────
 _jishin_html = ''
@@ -860,8 +861,8 @@ _pace_headers = ''.join(
 _matrix_html = f'''<div class="section" id="section-matrix">
   <h2>🗂 展開マトリクス（脚質 × ペース）</h2>
   <div style="font-size:12px;color:#bdc3c7;margin-bottom:10px">
-    本日の想定ペース: <b style="color:#f1c40f">{"★ " + dict(_paces)[_today_pace]}</b> —
-    強調列が今回の展開に適した脚質グループです。
+    当レースの想定ペース: <b style="color:#f1c40f">{"★ " + dict(_paces)[_today_pace]}</b> —
+    ★印の列が今回の展開で有利な脚質グループです。
   </div>
   <div style="overflow-x:auto">
   <table style="border-collapse:collapse;width:100%;font-size:12px">

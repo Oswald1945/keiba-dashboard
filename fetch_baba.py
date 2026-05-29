@@ -278,10 +278,11 @@ def estimate_race_baba(current_baba: str | None, rain_mm: float | None) -> tuple
     return estimated, f'現在馬場:{current_baba} + {reason}'
 
 
-def fetch_baba_info(venue_name: str, date_str: str) -> dict:
+def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict:
     """
     指定会場のページを順番に検索してパース。
     どのページでも取得できない場合はデフォルト値を返す。
+    debug=True のとき parse_html を baba_debug_<venue>.html に保存。
     """
     for suffix in PAGE_SUFFIXES:
         url = BASE_URL + suffix
@@ -297,12 +298,45 @@ def fetch_baba_info(venue_name: str, date_str: str) -> dict:
             continue
 
         # 対象会場のセクションだけ切り出してパース（複数会場混在対策）
-        other_venues = '|'.join(re.escape(v) for v in KNOWN_VENUES if v != venue_name)
-        m_sec = re.search(
-            venue_name + r'競馬場(.+?)(?:(?:' + other_venues + r')競馬場|$)',
-            html, re.DOTALL
+        # ナビゲーションリンクと本文の両方に venue_name+'競馬場' が現れるため、
+        # 全マッチを走査して馬場状態キーワードを含む最初のセクションを採用する。
+        other_venues_pat = '|'.join(re.escape(v) + r'競馬場' for v in KNOWN_VENUES if v != venue_name)
+        section_pat = re.compile(
+            re.escape(venue_name) + r'競馬場(.+?)(?=' + other_venues_pat + r'|$)',
+            re.DOTALL
         )
-        parse_html = (venue_name + '競馬場' + m_sec.group(1)) if m_sec else html
+        BABA_KW = ['芝', 'ダート', '稍重', 'クッション', '馬場状態']
+        parse_html = None
+        longest = ''
+        for m_sec in section_pat.finditer(html):
+            candidate = venue_name + '競馬場' + m_sec.group(1)
+            if any(kw in candidate for kw in BABA_KW):
+                parse_html = candidate
+                break
+            if len(candidate) > len(longest):
+                longest = candidate
+        if parse_html is None:
+            # キーワードが見つからない場合は最長セクションを使用（フォールバック）
+            parse_html = longest if longest else html
+
+        # デバッグ: parse_html をファイルに保存（--debug 時のみ）
+        if debug:
+            debug_path = pathlib.Path(f'baba_debug_{venue_name}.html')
+            debug_path.write_text(parse_html, encoding='utf-8')
+            print(f'  [debug] parse_html を {debug_path} に保存しました（{len(parse_html)} chars）')
+            # 全マッチ件数と各セクション長を表示
+            all_matches = list(section_pat.finditer(html))
+            print(f'  [debug]   "{venue_name}競馬場" マッチ数: {len(all_matches)}')
+            for i, m in enumerate(all_matches):
+                cand = venue_name + '競馬場' + m.group(1)
+                has_kw = any(kw in cand for kw in BABA_KW)
+                print(f'  [debug]   [{i}] len={len(cand)}  キーワード={has_kw}  先頭50: {cand[:50].replace(chr(10)," ")}')
+            # 馬場状態テキストが含まれているか簡易確認
+            for kw in ['芝', 'ダート', '良', '稍重', '重', '不良', 'クッション']:
+                if kw in parse_html:
+                    print(f'  [debug]   キーワード確認: "{kw}" → あり')
+                else:
+                    print(f'  [debug]   キーワード確認: "{kw}" → なし')
 
         print(f'  [parse] {suffix}: {venue_name} を確認 → パース中...')
 
@@ -350,12 +384,14 @@ def main():
                     help='レース日 YYYYMMDD (例: 20260601)')
     ap.add_argument('--out',   default=None,
                     help='出力 JSON ファイルパス (省略時は stdout のみ)')
+    ap.add_argument('--debug', action='store_true',
+                    help='パース対象 HTML を baba_debug_<venue>.html に保存してデバッグ')
     args = ap.parse_args()
 
     venue = normalize_venue(args.venue)
     print(f'[fetch_baba] 会場={venue}  日付={args.date}')
 
-    result = fetch_baba_info(venue, args.date)
+    result = fetch_baba_info(venue, args.date, debug=args.debug)
 
     json_str = json.dumps(result, ensure_ascii=False, indent=2)
     print(json_str)

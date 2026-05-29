@@ -395,8 +395,17 @@ def process_race(race_id, files) -> pathlib.Path | None:
                     print(f'  ╔════════════════════════════════════════════╗')
                     print(f'  ║  共有URL: {share_url:<38}║')
                     print(f'  ╚════════════════════════════════════════════╝')
-                    with open(SHARE_URL_LOG, 'a', encoding='utf-8') as _lg:
-                        _lg.write(f'{race_id}_review\t{share_url}\n')
+                    # 重複排除してURL記録
+                    _ex: dict[str, str] = {}
+                    if SHARE_URL_LOG.exists():
+                        for _l in SHARE_URL_LOG.read_text(encoding='utf-8').splitlines():
+                            _p = _l.split('\t')
+                            if len(_p) == 2:
+                                _ex[_p[0]] = _p[1]
+                    _ex[f'{race_id}_review'] = share_url
+                    with open(SHARE_URL_LOG, 'w', encoding='utf-8') as _lg:
+                        for _k, _v in sorted(_ex.items()):
+                            _lg.write(f'{_k}\t{_v}\n')
                     webbrowser.open(share_url)
                 else:
                     webbrowser.open(review_html_p.as_uri())
@@ -447,10 +456,19 @@ def main():
         print(f'\n[share] {len(new_htmls)}件のHTMLを GitHub に一括公開中...')
         urls = publish_batch_to_github(new_htmls)
         if urls:
-            with open(SHARE_URL_LOG, 'a', encoding='utf-8') as lg:
-                for html, url in zip(new_htmls, urls):
-                    race_id = html.stem.replace('pred_', '')
-                    lg.write(f'{race_id}\t{url}\n')
+            # 既存ログを読み込み、重複排除してから上書き保存
+            existing_entries: dict[str, str] = {}
+            if SHARE_URL_LOG.exists():
+                for line in SHARE_URL_LOG.read_text(encoding='utf-8').splitlines():
+                    parts = line.split('\t')
+                    if len(parts) == 2:
+                        existing_entries[parts[0]] = parts[1]
+            for html, url in zip(new_htmls, urls):
+                race_id = html.stem.replace('pred_', '')
+                existing_entries[race_id] = url
+            with open(SHARE_URL_LOG, 'w', encoding='utf-8') as lg:
+                for rid, url in sorted(existing_entries.items()):
+                    lg.write(f'{rid}\t{url}\n')
             print(f'[share] 公開完了: {len(urls)}件')
             print(f'[share] 共有URL一覧 ({SHARE_URL_LOG.name}):')
             for url in urls:

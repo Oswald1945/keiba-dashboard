@@ -66,10 +66,23 @@ def fetch_page(url: str) -> str | None:
 
 
 def detect_venue(html: str) -> str | None:
-    """HTML から開催会場名を検出する。"""
-    for vname in KNOWN_VENUES:
-        if vname + '競馬場' in html:
-            return vname
+    """
+    HTML の本文コンテンツから開催会場名を検出する。
+    navリンクには全会場が含まれるため、h2 見出し（例:「第2回東京競馬第11日前日」）
+    や contents_header クラスのテキストから判定する。
+    """
+    # メイン h2 見出し内の会場名（例: 「第2回東京競馬...」→ 東京）
+    for m in re.finditer(r'<h2[^>]*>([^<]{2,50})', html):
+        text = m.group(1)
+        for vname in KNOWN_VENUES:
+            if vname in text:
+                return vname
+    # 次善策: contents_header クラス内テキスト
+    m_hdr = re.search(r'class="[^"]*contents_header[^"]*"(.{0,400})', html, re.DOTALL)
+    if m_hdr:
+        for vname in KNOWN_VENUES:
+            if vname in m_hdr.group(1):
+                return vname
     return None
 
 
@@ -290,53 +303,26 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
         if html is None:
             continue
 
-        # 対象会場がこのページに含まれているか確認
-        if venue_name + '競馬場' not in html:
-            detected = detect_venue(html)
-            label = detected if detected else '不明'
-            print(f'  [parse] {suffix}: {label}（対象: {venue_name} なし）→ スキップ')
+        # JRA馬場ページは 1ページ = 1会場。
+        # ただし全ページのnavに全会場リンクが含まれるため、
+        # 本文の h2 見出しや contents_header から会場を判定する。
+        content_venue = detect_venue(html)
+        if content_venue != venue_name:
+            label = content_venue if content_venue else '不明'
+            print(f'  [parse] {suffix}: コンテンツ会場={label}（対象: {venue_name}）→ スキップ')
             continue
 
-        # 対象会場のセクションだけ切り出してパース（複数会場混在対策）
-        # ナビゲーションリンクと本文の両方に venue_name+'競馬場' が現れるため、
-        # 全マッチを走査して馬場状態キーワードを含む最初のセクションを採用する。
-        other_venues_pat = '|'.join(re.escape(v) + r'競馬場' for v in KNOWN_VENUES if v != venue_name)
-        section_pat = re.compile(
-            re.escape(venue_name) + r'競馬場(.+?)(?=' + other_venues_pat + r'|$)',
-            re.DOTALL
-        )
-        BABA_KW = ['芝', 'ダート', '稍重', 'クッション', '馬場状態']
-        parse_html = None
-        longest = ''
-        for m_sec in section_pat.finditer(html):
-            candidate = venue_name + '競馬場' + m_sec.group(1)
-            if any(kw in candidate for kw in BABA_KW):
-                parse_html = candidate
-                break
-            if len(candidate) > len(longest):
-                longest = candidate
-        if parse_html is None:
-            # キーワードが見つからない場合は最長セクションを使用（フォールバック）
-            parse_html = longest if longest else html
+        # 正しいページなので全体をパース（会場セクション分割不要）
+        parse_html = html
 
         # デバッグ: parse_html をファイルに保存（--debug 時のみ）
         if debug:
             debug_path = pathlib.Path(f'baba_debug_{venue_name}.html')
             debug_path.write_text(parse_html, encoding='utf-8')
             print(f'  [debug] parse_html を {debug_path} に保存しました（{len(parse_html)} chars）')
-            # 全マッチ件数と各セクション長を表示
-            all_matches = list(section_pat.finditer(html))
-            print(f'  [debug]   "{venue_name}競馬場" マッチ数: {len(all_matches)}')
-            for i, m in enumerate(all_matches):
-                cand = venue_name + '競馬場' + m.group(1)
-                has_kw = any(kw in cand for kw in BABA_KW)
-                print(f'  [debug]   [{i}] len={len(cand)}  キーワード={has_kw}  先頭50: {cand[:50].replace(chr(10)," ")}')
-            # 馬場状態テキストが含まれているか簡易確認
             for kw in ['芝', 'ダート', '良', '稍重', '重', '不良', 'クッション']:
-                if kw in parse_html:
-                    print(f'  [debug]   キーワード確認: "{kw}" → あり')
-                else:
-                    print(f'  [debug]   キーワード確認: "{kw}" → なし')
+                status = 'あり' if kw in parse_html else 'なし'
+                print(f'  [debug]   キーワード確認: "{kw}" → {status}')
 
         print(f'  [parse] {suffix}: {venue_name} を確認 → パース中...')
 

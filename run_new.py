@@ -389,6 +389,8 @@ def process_race(race_id, files) -> pathlib.Path | None:
             _new = set(OUT_DIR.glob('*_review.html')) - _before
             if _new:
                 review_html_p = next(iter(_new))
+                # 次走注目馬を memo_horses.json に自動登録
+                update_memo_from_review(review_html_p)
                 print(f'  [share] {review_html_p.name} を GitHub に公開中...')
                 share_url = publish_to_github(review_html_p)
                 if share_url:

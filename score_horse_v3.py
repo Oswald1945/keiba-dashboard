@@ -1269,11 +1269,13 @@ def calc_tenkai_pts_all(
         # ハイペース: 逃げは消耗、番手(3〜5番手)が最有利、先行はやや割引
         pace_zone_bonus = {0: -1.5, 1: +2.5, 2: +0.5, 3: +0.5, 4: -0.5}
     elif today_pace == 'low':
-        # スローペース: 逃げ〜先行が有利、後方は展開負け ← 先行 +0.5→+1.5
-        pace_zone_bonus = {0: +2.0, 1: +2.5, 2: +1.5, 3: -0.5, 4: -2.0}
+        # スローペース: 逃げ〜先行が有利、後方は展開負け
+        # [②] 後方(zone=4): -2.0→-2.5 に強化
+        pace_zone_bonus = {0: +2.0, 1: +2.5, 2: +1.5, 3: -0.5, 4: -2.5}
     else:  # mid
-        # ミドル: 番手が最有利、先行も加点 ← 先行 +1.0→+2.0
-        pace_zone_bonus = {0: +0.5, 1: +2.0, 2: +2.0, 3: -0.5, 4: -1.0}
+        # ミドル: 番手が最有利、先行も加点
+        # [②] 後方(zone=4): -1.0→-1.5 に強化
+        pace_zone_bonus = {0: +0.5, 1: +2.0, 2: +2.0, 3: -0.5, 4: -1.5}
 
     # [C案] 1200m以下スプリント: 先行ゾーン(zone=2)にさらに+0.5追加
     if target_dist > 0 and target_dist <= 1200:
@@ -1306,6 +1308,21 @@ def calc_tenkai_pts_all(
                 inner_bonus = (n + 1 - int(uma)) / n * inner_scale
                 pt += inner_bonus
             except (ValueError, TypeError):
+                pass
+
+        # [③] SmartRC上がり速度ボーナス（差し・追込馬の見落とし対策）
+        # 上がり速度順位が上位の差し・追込馬はスコアに反映されにくいため展開ptsで補正
+        # zone=3(中団)・4(後方)かつSmartRC上がり順位1-3位: +1.0pt
+        # zone=3(中団)・4(後方)かつSmartRC上がり順位4-6位: +0.5pt
+        _agari_r = r.get('SmartRC上がり速度順位')
+        if _agari_r is not None and zone >= 3:
+            try:
+                _ar = int(_agari_r)
+                if _ar <= 3:
+                    pt += 1.0
+                elif _ar <= 6:
+                    pt += 0.5
+            except (TypeError, ValueError):
                 pass
 
         results.append(pt)
@@ -1663,6 +1680,46 @@ def compute_scores(
             except Exception:
                 pass
 
+        # ── クラス適応補正 ───────────────────────────
+        # 今走クラス以上での直近5走(1年以内)の「1位との着差(秒)」加重平均で
+        # クラス適応度を評価する。着順でなく着差を使うことで僅差好走を正確に評価。
+        # 重み: 直近1走×3 / 2走目×2 / 3走目×1 / 4〜5走目×0.5 / 1年超は×0.3
+        # 適用条件: 有効データ2走以上。未勝利クラスは加点上限+0.5pt。
+        class_adapt_pts = 0.0
+        if today_class_rank > 0 and not sub.empty:
+            try:
+                _same_up = sub[sub['class_norm'].apply(
+                    lambda c: CLASS_RANK.get(c, 0) >= today_class_rank
+                )].head(5)
+                _base_w = [3.0, 2.0, 1.0, 0.5, 0.5]
+                _margins, _weights = [], []
+                for _i, (_, _row) in enumerate(_same_up.iterrows()):
+                    _m = pd.to_numeric(_row.get('着差タイム'), errors='coerce')
+                    if pd.isna(_m):
+                        continue
+                    try:
+                        _di = int(_row['date_int'])
+                        _pd = date(_di // 10000, (_di % 10000) // 100, _di % 100)
+                        _days = (race_date - _pd).days
+                    except Exception:
+                        _days = 0
+                    _tw = (_base_w[_i] if _i < 5 else 0.5) * (0.3 if _days > 365 else 1.0)
+                    _margins.append(float(_m))
+                    _weights.append(_tw)
+                if len(_margins) >= 2:
+                    _wm = sum(m * w for m, w in zip(_margins, _weights)) / sum(_weights)
+                    if   _wm <= 0.2: _rp = +1.5
+                    elif _wm <= 0.5: _rp = +0.8
+                    elif _wm <= 0.8: _rp =  0.0   # 0.8秒以内は中立（旧:1.0秒）
+                    elif _wm <= 1.3: _rp = -1.0   # 1.3秒以内は-1.0pt（旧:1.8秒）
+                    else:            _rp = -2.0   # 1.3秒超は-2.0pt（旧:1.8秒超）
+                    # 未勝利クラスは加点上限を+0.5に制限
+                    if target_class_norm == '未勝利':
+                        _rp = min(_rp, 0.5)
+                    class_adapt_pts = _rp
+            except Exception:
+                class_adapt_pts = 0.0
+
         # ── SmartRC 評価補正 ─────────────────────────
         # h1_fr_baba: 前走の馬場有利不利評価（h2〜h5 で前々走以前）
         #   A/B = 不利を受けた → 実力は結果より高い → 上方修正
@@ -1783,6 +1840,7 @@ def compute_scores(
             '_keizoku_pts':    keizoku_pts,
             '_chakusa_pts':    chakusa_pts,
             '_shokyu_pts':     shokyu_pts,
+            '_class_adapt_pts': class_adapt_pts,
             '_smartrc_pts':         _smartrc_pts,
             '_smartrc_hyoka':       _smartrc_hyoka,
             '_smartrc_ten_pat':     _smartrc_ten_pat,
@@ -1876,6 +1934,7 @@ def compute_scores(
     res['継続pts']      = res['_keizoku_pts']
     res['着差pts']      = res['_chakusa_pts']
     res['昇級pts']      = res['_shokyu_pts']
+    res['クラス適応pts']        = res['_class_adapt_pts']
     res['馬場適性pts']         = res['_baba_apt_pts']
     res['SmartRC評価pts']      = res['_smartrc_pts']
     res['SmartRC評価']         = res['_smartrc_hyoka']
@@ -1938,6 +1997,7 @@ def compute_scores(
         + res['臨戦pts'] + res['騎手pts']
         + res['馬体重pts'] + res['継続pts'] + res['着差pts']
         + res['枠順pts'] + res['昇級pts']
+        + res['クラス適応pts']    # 同クラス以上での直近着差加重平均によるクラス適応度
         + res['SmartRC評価pts']   # SmartRC 前走有利不利補正
         + res['馬場適性pts']      # 馬場別成績による適性補正
     )
@@ -2044,6 +2104,7 @@ def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None
             '着差pts':          round(float(r['着差pts']), 1),
             '枠順pts':          round(float(r.get('枠順pts', 0)), 1),
             '昇級pts':          round(float(r.get('昇級pts', 0)), 1),
+            'クラス適応pts':    round(float(r.get('クラス適応pts', 0)), 1),
             '馬場適性pts':      round(float(r.get('馬場適性pts', 0)), 1),
             'SmartRC評価pts':   round(float(r.get('SmartRC評価pts', 0)), 1),
             'SmartRC評価':      r.get('SmartRC評価'),          # A/B/C/D/E or None
@@ -2188,7 +2249,6 @@ if __name__ == '__main__':
             shutuba_df = shutuba_df.rename(columns={'馬名S': '馬名'})
         if '番' in shutuba_df.columns and '馬番' not in shutuba_df.columns:
             shutuba_df = shutuba_df.rename(columns={'番': '馬番'})
-        # 列名の揺れを吸収（単勝・増減など）
         col_map = {'単勝': '単勝オッズ', '増減': '馬体重増減_raw'}
         shutuba_df = shutuba_df.rename(columns={k: v for k, v in col_map.items() if k in shutuba_df.columns})
         shutuba_df = shutuba_df[shutuba_df['馬名'].notna()].copy()
@@ -2200,7 +2260,6 @@ if __name__ == '__main__':
     if args.wood:
         wood_df = _read_df(args.wood, sheet_name=0)
 
-    # 出馬表から実際のレース日・コース・距離を取得
     if args.shutuba:
         _rd          = date(int(float(_race_info['年'])), int(float(_race_info['月'])), int(float(_race_info['日'])))
         _target_dist = int(float(_race_info.get('距離', TARGET_DIST)))
@@ -2217,10 +2276,8 @@ if __name__ == '__main__':
             _target_course = _candidate if _candidate in COURSE_FEATURES else _base_key
         else:
             _target_course = f"東京芝{_target_dist}m"
-
         _mawari = COURSE_FEATURES.get(_target_course, {}).get('回り', '左')
         _race_info['回り'] = _mawari
-
     else:
         _rd            = RACE_DATE
         _target_dist   = TARGET_DIST
@@ -2250,3 +2307,8 @@ if __name__ == '__main__':
     meta['race_info'] = _race_info
 
     import os as _os2
+    out_data = build_horses_json(res, meta, past_races_map)
+    out_json = _os2.path.join(_outdir, 'horses_data.json')
+    with open(out_json, 'w', encoding='utf-8') as _f:
+        json.dump(out_data, _f, ensure_ascii=False, indent=2)
+    print(f'[完了] {out_json} に保存しました')

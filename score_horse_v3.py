@@ -552,12 +552,14 @@ def calc_wakuban_pts(umaban, kyakushitsu: str, target_course: str, num_horses: i
 
 def classify_脚質(avg_4kaku, 頭数_avg) -> str:
     if pd.isna(avg_4kaku) or avg_4kaku == 0: return '不明'
-    # 頭数相対化閾値（差し過少分類→先行の正解率改善）
-    # 逃げ: 絶対的な1〜2番手。先行: 頭数の37%以内。差し: 70%以内。
+    # 頭数相対化閾値
+    # [A案] 先行閾値を n*0.37→n*0.30 に絞り、中団ポジションの馬が
+    #       先行に誤分類されて展開pts加点される過大評価を抑制。
+    # 逃げ: 絶対的な1〜2番手。先行: 頭数の30%以内。差し: 60%以内。
     n = float(頭数_avg) if (頭数_avg is not None and not pd.isna(頭数_avg) and float(頭数_avg) > 1) else 16.0
     nige_thr   = 2.0                        # 逃げ: 1〜2番手（絶対的先頭グループ）
-    senkou_thr = max(5.5, n * 0.37)         # 先行: 16頭→5.9, 18頭→6.7
-    sashi_thr  = max(9.5, n * 0.70)         # 差し: 16頭→11.2, 18頭→12.6
+    senkou_thr = max(4.5, n * 0.30)         # 先行: 16頭→4.8, 18頭→5.4  ← 絞り込み
+    sashi_thr  = max(8.5, n * 0.60)         # 差し: 16頭→9.6, 18頭→10.8 ← 少し絞り
     if avg_4kaku <= nige_thr:   return '逃げ'
     if avg_4kaku <= senkou_thr: return '先行'
     if avg_4kaku <= sashi_thr:  return '差し'
@@ -1197,9 +1199,10 @@ def calc_tenkai_pts_all(
     today_pace: str,
     num_horses: int,
     smartrc_ten_ranks: dict = None,
+    target_dist: int = 0,
 ) -> 'pd.Series':
     """
-    展開有利不利スコア（全馬一括計算、±4pt）
+    展開有利不利スコア（全馬一括計算、±5pt）
 
     旧 calc_position_pts（±2pt, 枠番+通過順のみ）を全面刷新。
 
@@ -1209,8 +1212,10 @@ def calc_tenkai_pts_all(
     3. ペース×ゾーン有利不利（today_pace: high/mid/low）
        - ハイ: 番手(3〜5番手)が最有利、逃げは消耗、後方もチャンスあり
        - スロー: 逃げ〜番手が有利、差し・追込は届きにくい
+       [B案] 先行ゾーン(zone=2)のスロー/ミドル加点を強化（見落とし先行13頭対策）
     4. 同ゾーン競合（混雑）ペナルティ: 許容頭数超過分 × -0.7pt
     5. コース特性×内枠優先: 小回りほど内枠ボーナス大
+    6. [C案] 1200m以下スプリント補正: 先行ゾーンに+0.5追加
     """
     import numpy as np
 
@@ -1259,16 +1264,21 @@ def calc_tenkai_pts_all(
     res['_zone'] = res['_pos_ratio'].apply(lambda r: ratio_to_zone(r, n))
 
     # ── 3. ペース×ゾーン有利不利 ─────────────────────────────────────
+    # [B案] 先行(zone=2)をスロー/ミドルで強化し見落とし先行の過小評価を改善
     if today_pace == 'high':
-        # ハイペース: 逃げは消耗、番手(3〜5番手)が最有利
-        # 中団まで展開の恩恵あり（差し馬が届きやすい）
-        pace_zone_bonus = {0: -1.5, 1: +2.5, 2: +1.0, 3: +0.5, 4: -0.5}
+        # ハイペース: 逃げは消耗、番手(3〜5番手)が最有利、先行はやや割引
+        pace_zone_bonus = {0: -1.5, 1: +2.5, 2: +0.5, 3: +0.5, 4: -0.5}
     elif today_pace == 'low':
-        # スローペース: 逃げ〜番手が有利、後方は展開負け
-        pace_zone_bonus = {0: +2.0, 1: +2.5, 2: +0.5, 3: -0.5, 4: -2.0}
+        # スローペース: 逃げ〜先行が有利、後方は展開負け ← 先行 +0.5→+1.5
+        pace_zone_bonus = {0: +2.0, 1: +2.5, 2: +1.5, 3: -0.5, 4: -2.0}
     else:  # mid
-        # ミドル: 番手が最有利、比較的フラット
-        pace_zone_bonus = {0: +0.5, 1: +2.0, 2: +1.0, 3: -0.0, 4: -1.0}
+        # ミドル: 番手が最有利、先行も加点 ← 先行 +1.0→+2.0
+        pace_zone_bonus = {0: +0.5, 1: +2.0, 2: +2.0, 3: -0.5, 4: -1.0}
+
+    # [C案] 1200m以下スプリント: 先行ゾーン(zone=2)にさらに+0.5追加
+    if target_dist > 0 and target_dist <= 1200:
+        pace_zone_bonus = {z: v + (0.5 if z in (0, 1, 2) else 0)
+                           for z, v in pace_zone_bonus.items()}
 
     # ── 4. 同ゾーン混雑ペナルティ ────────────────────────────────────
     zone_counts = res['_zone'].value_counts().to_dict()
@@ -1301,7 +1311,7 @@ def calc_tenkai_pts_all(
         results.append(pt)
 
     pts = pd.Series(results, index=res.index)
-    return pts.clip(-4.0, 4.0)
+    return pts.clip(-5.0, 5.0)  # [B案] ±4→±5 に拡大
 
 # ─────────────────────────────────────────────────────────────────────────────
 # メイン処理
@@ -1394,8 +1404,15 @@ def compute_scores(
     # ── コース特性バイアス + 前走頭数ベースの圧力 ────────────────
     bias_pre = pace_bias_from_course(target_course, target_dist)
 
+    # [C案] 1200m以下スプリント: テン速度競合圧力を1.5倍に増幅
+    if target_dist <= 1200 and smartrc_pace_pressure > 0:
+        smartrc_pace_pressure *= 1.5
+
     # 距離帯別・先行頭数による基礎圧力
-    if target_dist <= 1400 and front_pre >= 5:
+    # [C案] 1200m以下はdist_band_bonusを強化（前半速度支配度が高い）
+    if target_dist <= 1200 and front_pre >= 4:
+        dist_band_bonus = 4.5
+    elif target_dist <= 1400 and front_pre >= 5:
         dist_band_bonus = 3.0
     elif 1401 <= target_dist <= 2000 and front_pre >= 6:
         dist_band_bonus = 2.0
@@ -1899,12 +1916,13 @@ def compute_scores(
     # ⑤ 枠番確定後の計算（展開pts・枠順pts）
     num_horses = len(res)
 
-    # 展開pts: ゾーン×ペース×混雑×内枠を総合評価（±4pt）
+    # 展開pts: ゾーン×ペース×混雑×内枠を総合評価（±5pt）
     res['展開pts'] = calc_tenkai_pts_all(
         res,
         target_course=target_course,
         today_pace=today_pace,
         num_horses=num_horses,
+        target_dist=target_dist,
     )
 
     res['枠順pts'] = res.apply(
@@ -2232,25 +2250,3 @@ if __name__ == '__main__':
     meta['race_info'] = _race_info
 
     import os as _os2
-    out_data = build_horses_json(res, meta, past_races_map)
-    out_json = _os2.path.join(_outdir, 'horses_data.json')
-    with open(out_json, 'w', encoding='utf-8') as _f:
-        json.dump(out_data, _f, ensure_ascii=False, indent=2)
-    print(f'\n[完了] {out_json} に保存しました')
-
-    _score_cols = [
-        '馬名', '脚質', '順位予想', '総合スコア',
-        '最高出力pts', 'クラスpts', '時計pts', '展開pts',
-        '斤量pts', '距離pts', 'コース適性pts', '臨戦pts',
-        '人気補正pts', '騎手pts', '馬体重pts', '継続pts', '着差pts',
-        '枠順pts', '昇級pts', '馬場適性pts', 'SmartRC評価pts',
-    ]
-    out_csv = _os2.path.join(_outdir, 'scores.csv')
-    res[[c for c in _score_cols if c in res.columns]].to_csv(
-        out_csv, index=False, encoding='utf-8-sig'
-    )
-    print(f'[完了] {out_csv} にスコアCSVを保存しました')
-
-    print('\n=== スコア上位 ===')
-    _disp_cols = ['馬名', '脚質', '順位予想', '総合スコア']
-    print(res[[c for c in _disp_cols if c in res.columns]].head(10).to_string(index=False))

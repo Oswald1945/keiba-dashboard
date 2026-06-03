@@ -761,7 +761,7 @@ if _best_val and _best_val['乖離'] >= 2:
         f'<span style="margin-left:14px;padding:3px 10px;'
         f'background:#2c3e50;border-radius:4px;font-size:12px;">'
         f'💎 注目馬: <b style="color:#f1c40f">{_best_val["馬名"]}</b>'
-        f'（予想{_best_val["予想順位"]}位 / SmartRC{_best_val["SmartRC推定"]}番人気'
+        f'（予想{_best_val["予想順位"]}位 / 想定{_best_val["SmartRC推定"]}番人気'
         f' / 乖離+{_best_val["乖離"]} / 単勝{_odds_str}）'
         f'</span>'
     )
@@ -1761,9 +1761,9 @@ let currentTab = 'tansho';
 let sortCol    = 'score';
 let sortAsc    = false;   // default: スコア降順
 let _userOdds  = {{}};     // 馬番 → ユーザー手入力オッズ（案B）
-// オッズ未設定の馬は採算オッズ（1/確率）をデフォルト値として設定
+// 初期値は常に採算オッズ（1/勝率推定）で設定。実際のオッズは変動するため使用しない。
 EV_DATA.forEach(function(h) {{
-  if (!h['オッズ'] && h._prob > 0) {{
+  if (h._prob > 0) {{
     _userOdds[h['馬番']] = Math.round((1 / h._prob) * 10) / 10;
   }}
 }});
@@ -1851,7 +1851,13 @@ function renderRows(rows) {{
 
   const isFuku = (currentTab === 'fukusho');
   document.getElementById('evBody').innerHTML = sorted.map(h => {{
-    const waku_b  = h['枠番'] ? h['枠番'] + '枠-' + (h['馬番'] || '?') + '番' : '未定';
+    const waku_fg = ['','#222','#fff','#fff','#fff','#222','#fff','#fff','#222'];
+    const waku_num = h['枠番'] || 0;
+    const waku_bg_c = WAKU_BG[waku_num] || '#888';
+    const waku_fg_c = waku_fg[waku_num] || '#fff';
+    const waku_b  = h['枠番']
+      ? `<span style="display:inline-block;background:${{waku_bg_c}};color:${{waku_fg_c}};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:3px;">${{h['枠番']}}枠</span><span style="font-size:12px;color:#bdc3c7;">${{h['馬番'] || '?'}}番</span>`
+      : '<span style="color:#555">未定</span>';
     const probPct = ((h._prob || 0) * 100).toFixed(1) + '%';
     const ev      = h._ev;
     let evStr = '-', evCls = 'ev-neutral', judgement = '-';
@@ -1881,8 +1887,8 @@ function renderRows(rows) {{
     const oddsCell = isFuku
       ? (h['複勝下限'] ? h['複勝下限'].toFixed(1) + '〜' + (h['複勝上限'] || '?').toFixed(1) + '倍' : '-')
       : `<input type="number" min="0" max="999" step="0.1"
-           value="${{curOdds != null ? curOdds.toFixed(1) : (h['オッズ'] ? '' : (h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0'))}}"
-           placeholder="${{h['オッズ'] ? h['オッズ'].toFixed(1) : '0.0'}}"
+           value="${{curOdds != null ? curOdds.toFixed(1) : (h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0')}}"
+           placeholder="${{h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0'}}"
            style="width:68px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;
                   border-radius:4px;padding:2px 5px;font-size:12px;text-align:right"
            oninput="const v=parseFloat(this.value); _userOdds[${{h['馬番']}}]=(v>0?v:null);

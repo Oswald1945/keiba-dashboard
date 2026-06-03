@@ -393,6 +393,13 @@ def process_race(race_id, files) -> pathlib.Path | None:
         generated_review = True
         if not DRY_RUN:
             _new = set(OUT_DIR.glob('*_review.html')) - _before
+            # --force 再生成時は既存HTMLも対象（差分が空になるため）
+            if not _new and FORCE_REVIEW:
+                # race_id例: 20260530_kt12 → 日付+レース番号でマッチ
+                _date_part = race_id.split('_')[0]          # 20260530
+                _rnum_part = re.sub(r'\D', '', race_id.split('_')[-1])  # 12
+                _new = {p for p in OUT_DIR.glob('*_review.html')
+                        if _date_part in p.stem and f'{_rnum_part}R' in p.stem}
             if _new:
                 review_html_p = next(iter(_new))
                 # 次走注目馬を memo_horses.json に自動登録

@@ -572,9 +572,11 @@ for h in horses:
         _wfg = WAKU_FG.get(int(waku_b), '#fff')
         num_str = (
             f'<span style="display:inline-block;background:{_wbg};color:{_wfg};'
-            f'font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:3px;">'
+            f'font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">'
             f'{waku_b}枠</span>'
-            f'<span style="font-size:12px;color:#bdc3c7;">{fmt_int(bango_b)}番</span>'
+            f'<span style="display:inline-block;background:{_wbg};color:{_wfg};'
+            f'font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">'
+            f'{fmt_int(bango_b)}番</span>'
         )
     else:
         num_str = '<span style="color:#555">未定</span>'
@@ -805,6 +807,7 @@ _comp_fields = [
     ('着差pts',       '着差',     '#dbdb8d'),  # ライトイエロー
     ('枠順pts',       '枠順',     '#9edae5'),  # ライトシアン
     ('昇級pts',       '昇級',     '#c5b0d5'),  # ラベンダー
+    ('クラス適応pts',  'クラス適応', '#1abc9c'),  # ターコイズ
     ('SmartRC評価pts',  'SmartRC評価', '#f39c12'),  # アンバー
     ('馬場適性pts',       '馬場適性',   '#16a085'),  # エメラルド
 ]
@@ -2042,7 +2045,8 @@ if (stackCtx) {{
       const valStr = val > 0 ? '+' + val.toFixed(1) : val.toFixed(1);
       const valCol = val > 1 ? '#2ecc71' : val < -0.5 ? '#e74c3c' : '#7f8c8d';
       const rank   = i < 3 ? RANK_ICONS[i] : (i + 1) + '位';
-      
+      inner += '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:12px">' +
+               '<span>' + rank + ' ' + r.name + '</span>' +
                '<span style="font-weight:700;color:' + valCol + '">' + valStr + '</span>' +
                '</div>';
     }});

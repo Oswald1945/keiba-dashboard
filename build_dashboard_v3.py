@@ -1218,7 +1218,12 @@ html = f'''<!DOCTYPE html>
     background: rgba(255,255,255,0.05);
     padding: 16px; border-radius: 10px; text-align: center;
   }}
-  .summary-value {{ font-size: 26px; font-weight: bold; color: #f39c12; }}
+  .summary-value {{
+    font-size: 26px; font-weight: bold; color: #f39c12;
+    word-break: break-all; line-height: 1.2;
+  }}
+  .summary-value.small {{ font-size: 16px; }}
+  .summary-value.xsmall {{ font-size: 13px; }}
   .summary-label {{ font-size: 12px; color: #bdc3c7; margin-top: 4px; }}
 
   .shutuba-banner {{
@@ -1502,11 +1507,11 @@ html = f'''<!DOCTYPE html>
         <div class="summary-label">出走頭数</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">{meta["pace"].replace("想定","")}</div>
+        {(lambda t: f'<div class="summary-value{" xsmall" if len(t)>10 else " small" if len(t)>7 else ""}">{t}</div>')(meta["pace"].replace("想定",""))}
         <div class="summary-label">ペース予想</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">{horses[0]["馬名"][:6]}</div>
+        {(lambda t: f'<div class="summary-value{" small" if len(t)>5 else ""}">{t}</div>')(horses[0]["馬名"])}
         <div class="summary-label">最高スコア馬</div>
       </div>
       <div class="summary-item">

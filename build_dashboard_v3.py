@@ -565,16 +565,37 @@ for h in horses:
     _dev_t  = _dev_map.get(h['馬名'], 50)
     waku_b  = h.get('枠番')
     bango_b = h.get('馬番')
-    num_str = f'{fmt_int(waku_b)}枠-{fmt_int(bango_b)}番' if waku_b else '未定'
 
+    # ① 枠番バッジ（枠色付き）
+    if waku_b:
+        _wbg = WAKU_BG.get(int(waku_b), '#888')
+        _wfg = WAKU_FG.get(int(waku_b), '#fff')
+        num_str = (
+            f'<span style="display:inline-block;background:{_wbg};color:{_wfg};'
+            f'font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:3px;">'
+            f'{waku_b}枠</span>'
+            f'<span style="font-size:12px;color:#bdc3c7;">{fmt_int(bango_b)}番</span>'
+        )
+    else:
+        num_str = '<span style="color:#555">未定</span>'
+
+    # ② バッジ: 補正スコア系を削除し、メモ馬・注目穴馬バッジのみ表示
     badges = ''
-    if h.get('距離pts', 0)     != 0: badges += f'<span class="mini-badge red">距離{h["距離pts"]:+.0f}</span>'
-    if h.get('臨戦pts', 0)     != 0: badges += f'<span class="mini-badge purple">休養{h["臨戦pts"]:+.0f}</span>'
-    if h.get('コース適性pts', 0) != 0:
-        c = 'blue' if h['コース適性pts'] > 0 else 'red'
-        badges += f'<span class="mini-badge {c}">コース{h["コース適性pts"]:+.1f}</span>'
-    if h.get('人気補正pts', 0)  != 0:
-        badges += f'<span class="mini-badge orange">人気補正{h["人気補正pts"]:+.1f}</span>'
+    if h['馬名'] in _memo_map:
+        badges += '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>'
+    _sr_int_am = None
+    try:
+        _sr_int_am = int(h.get('SmartRC推定人気順') or 99)
+    except (TypeError, ValueError):
+        pass
+    _apt_sum_am = (h.get('コース適性pts', 0) + h.get('馬場適性pts', 0)
+                 + h.get('距離pts', 0) + h.get('展開pts', 0) + h.get('枠順pts', 0))
+    _is_ana_am = (_sr_int_am is not None
+                  and _sr_int_am > len(horses) // 2
+                  and h.get('順位予想', 99) <= 3
+                  and _apt_sum_am >= 0)
+    if _is_ana_am:
+        badges += '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>'
 
     # SmartRC推定人気列: 数字のみ表示
     src_rank  = h.get('SmartRC推定人気順')
@@ -586,7 +607,7 @@ for h in horses:
     all_marks += (
         f'<tr>'
         f'<td>{r}</td>'
-        f'<td>{num_str}</td>'
+        f'<td style="white-space:nowrap">{num_str}</td>'
         f'<td><b>{h["馬名"]}</b>{badges}</td>'
         f'<td>{h["脚質"]}</td>'
         f'<td style="white-space:nowrap"><b>{h["総合スコア"]:.1f}</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差{_dev_t}</span></td>'
@@ -2021,8 +2042,7 @@ if (stackCtx) {{
       const valStr = val > 0 ? '+' + val.toFixed(1) : val.toFixed(1);
       const valCol = val > 1 ? '#2ecc71' : val < -0.5 ? '#e74c3c' : '#7f8c8d';
       const rank   = i < 3 ? RANK_ICONS[i] : (i + 1) + '位';
-      inner += '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:12px">' +
-               '<span>' + rank + ' ' + r.name + '</span>' +
+      
                '<span style="font-weight:700;color:' + valCol + '">' + valStr + '</span>' +
                '</div>';
     }});

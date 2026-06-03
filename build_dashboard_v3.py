@@ -183,10 +183,13 @@ WAKU_FG = {1:'#111', 2:'#fff', 3:'#fff', 4:'#fff', 5:'#111', 6:'#fff', 7:'#fff',
 
 def waku_html_fn(waku, bango):
     if waku and isinstance(waku, int):
+        _bg = WAKU_BG.get(waku, '#999')
+        _fg = WAKU_FG.get(waku, '#fff')
         wh = (f'<span class="waku-badge" '
-              f'style="background:{WAKU_BG.get(waku,"#999")};'
-              f'color:{WAKU_FG.get(waku,"#fff")};">{waku}枠</span>')
-        bh = f'<span class="bango-badge">{fmt_int(bango)}番</span>' if bango else ''
+              f'style="background:{_bg};color:{_fg};">{waku}枠</span>')
+        bh = (f'<span class="bango-badge" '
+              f'style="background:{_bg};color:{_fg};">{fmt_int(bango)}番</span>'
+              if bango else '')
     else:
         wh = '<span class="waku-badge" style="background:#666;color:#fff;">未定</span>'
         bh = ''
@@ -1380,9 +1383,10 @@ html = f'''<!DOCTYPE html>
     border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;
   }}
   .bango-badge {{
-    font-size: 14px; font-weight: bold; color: #f1c40f;
-    background: rgba(241,196,15,0.15);
-    padding: 2px 8px; border-radius: 5px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 26px;
+    border-radius: 5px; font-size: 12px; font-weight: bold;
+    border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;
   }}
   .leg-badge {{
     padding: 3px 10px; border-radius: 12px;

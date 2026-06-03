@@ -1781,6 +1781,9 @@ function toggleDrill(id, btn) {{
 
 // ── 期待値シミュレーター ─────────────────────────────────
 const EV_DATA = {ev_data_json};
+// WAKU_BG をメインJSスコープで定義（renderRows内のwakuバッジで参照）
+const WAKU_BG = {{1:'#ffffff',2:'#555555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'#22bb22',7:'#ff8822',8:'#ffaacc'}};
+const WAKU_FG = {{1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111',8:'#111'}};
 let currentTab = 'tansho';
 let sortCol    = 'score';
 let sortAsc    = false;   // default: スコア降順

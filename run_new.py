@@ -370,11 +370,13 @@ def process_race(race_id, files) -> pathlib.Path | None:
             if html_p.exists():
                 new_pred_html = html_p  # 一括push用に記録（main側で処理）
 
-    if already_review and not FORCE_REVIEW:
-        print(f'  [review] 生成済 -> スキップ (--force で強制再生成可能)')
-    elif already_review and FORCE_REVIEW:
-        already_review = False  # --force 時はスキップを解除して再生成
+    # --force 時はdoneマーカーを解除して再生成を許可
+    if already_review and FORCE_REVIEW:
+        already_review = False
         print(f'  [review] --force 指定: 回顧を強制再生成')
+
+    if already_review:
+        print(f'  [review] 生成済 -> スキップ (--force で強制再生成可能)')
     elif result is None:
         print(f'  [review] 結果ファイルなし -> 結果待ち')
     elif not json_p.exists() and not DRY_RUN:

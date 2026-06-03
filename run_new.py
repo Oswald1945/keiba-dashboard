@@ -44,7 +44,8 @@ ALL_KINDS = [KIND_KAKO, KIND_SHUTUBA, KIND_SAKURO, KIND_WOOD, KIND_RESULT, KIND_
 FILENAME_RE = re.compile(r'^(.+?)_(\d{8}_.+?)\.(csv|xlsx)$')
 DRY_RUN     = '--dry' in sys.argv or '--dry-run' in sys.argv
 FORCE_SHARE = '--share' in sys.argv  # pred生成済のHTMLも強制公開
-FORCE_PRED  = '--force' in sys.argv  # pred生成済でも強制再生成
+FORCE_PRED   = '--force' in sys.argv  # pred生成済でも強制再生成
+FORCE_REVIEW = '--force' in sys.argv  # review生成済でも強制再生成
 
 SHARE_URL_LOG = SCRIPT_DIR / 'shared_urls.txt'
 GITHUB_PAGES_BASE = 'https://oswald1945.github.io/keiba-dashboard'
@@ -369,8 +370,11 @@ def process_race(race_id, files) -> pathlib.Path | None:
             if html_p.exists():
                 new_pred_html = html_p  # 一括push用に記録（main側で処理）
 
-    if already_review:
-        print(f'  [review] 生成済 -> スキップ')
+    if already_review and not FORCE_REVIEW:
+        print(f'  [review] 生成済 -> スキップ (--force で強制再生成可能)')
+    elif already_review and FORCE_REVIEW:
+        already_review = False  # --force 時はスキップを解除して再生成
+        print(f'  [review] --force 指定: 回顧を強制再生成')
     elif result is None:
         print(f'  [review] 結果ファイルなし -> 結果待ち')
     elif not json_p.exists() and not DRY_RUN:

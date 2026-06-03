@@ -395,11 +395,21 @@ def process_race(race_id, files) -> pathlib.Path | None:
             _new = set(OUT_DIR.glob('*_review.html')) - _before
             # --force 再生成時は既存HTMLも対象（差分が空になるため）
             if not _new and FORCE_REVIEW:
-                # race_id例: 20260530_kt12 → 日付+レース番号でマッチ
-                _date_part = race_id.split('_')[0]          # 20260530
+                # race_id例: 20260530_kt12 → 日付+会場コード+レース番号でマッチ
+                _date_part = race_id.split('_')[0]                      # 20260530
                 _rnum_part = re.sub(r'\D', '', race_id.split('_')[-1])  # 12
+                _code_part = re.sub(r'\d', '', race_id.split('_')[-1]).upper()  # KT
+                # KT→KY など会場HTMLコードへの変換マップ
+                _HTML_CODE = {
+                    'TK': 'TK', 'CB': 'CB', 'HN': 'HN', 'KT': 'KY', 'KY': 'KY',
+                    'CK': 'CK', 'NK': 'NG', 'NG': 'NG', 'HK': 'HK', 'SM': 'SM',
+                    'FK': 'FK', 'KO': 'KO', 'KK': 'KO',
+                }
+                _venue_part = _HTML_CODE.get(_code_part, _code_part)    # KY
                 _new = {p for p in OUT_DIR.glob('*_review.html')
-                        if _date_part in p.stem and f'{_rnum_part}R' in p.stem}
+                        if _date_part in p.stem
+                        and f'{_rnum_part}R' in p.stem
+                        and f'_{_venue_part}' in p.stem}
             if _new:
                 review_html_p = next(iter(_new))
                 # 次走注目馬を memo_horses.json に自動登録
@@ -475,7 +485,7 @@ def main():
             existing_entries: dict[str, str] = {}
             if SHARE_URL_LOG.exists():
                 for line in SHARE_URL_LOG.read_text(encoding='utf-8').splitlines():
-                    parts = line.split('\t')
+                    parts = line.split('	')
                     if len(parts) == 2:
                         existing_entries[parts[0]] = parts[1]
             for html, url in zip(new_htmls, urls):

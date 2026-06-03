@@ -1887,7 +1887,7 @@ function renderRows(rows) {{
     const waku_bg_c = WAKU_BG[waku_num] || '#888';
     const waku_fg_c = waku_fg[waku_num] || '#fff';
     const waku_b  = h['枠番']
-      ? `<span style="display:inline-block;background:${{waku_bg_c}};color:${{waku_fg_c}};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:3px;">${{h['枠番']}}枠</span><span style="font-size:12px;color:#bdc3c7;">${{h['馬番'] || '?'}}番</span>`
+      ? `<span style="display:inline-block;background:${{waku_bg_c}};color:${{waku_fg_c}};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">${{h['枠番']}}枠</span><span style="display:inline-block;background:${{waku_bg_c}};color:${{waku_fg_c}};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">${{h['馬番'] || '?'}}番</span>`
       : '<span style="color:#555">未定</span>';
     const probPct = ((h._prob || 0) * 100).toFixed(1) + '%';
     const ev      = h._ev;

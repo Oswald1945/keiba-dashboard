@@ -822,12 +822,22 @@ const rngA=maxA-minA||1;
 document.getElementById('agariViz').innerHTML=agS.map((h,i)=>{
   const pct=((1-(h['上り3F']-minA)/rngA)*70+15).toFixed(0);
   const w=h['枠番']||Math.ceil(h['馬番']/2);
+  const barBg=wBg(w);
+  const barFg=wFg(w);
+  // バーが短い(40%未満)場合はテキストをバー外(右側)に白で表示して視認性を確保
+  const shortBar=Number(pct)<40;
+  const timeLabel=`${h['上り3F']}秒${i===0?' ★最速':''}`;
+  const innerSpan=shortBar?''
+    :`<span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:${barFg};font-weight:700;text-shadow:0 0 3px rgba(0,0,0,0.5)">${timeLabel}</span>`;
+  const outerSpan=shortBar
+    ?`<span style="font-size:11px;color:#ecf0f1;font-weight:600;margin-left:4px;white-space:nowrap">${timeLabel}</span>`
+    :'';
   return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-    <div style="width:26px;height:26px;border-radius:50%;background:${wBg(w)};color:${wFg(w)};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid #444">${h['馬番']}</div>
+    <div style="width:26px;height:26px;border-radius:50%;background:${barBg};color:${barFg};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid #444">${h['馬番']}</div>
     <div style="width:110px;font-size:11px;color:#bdc3c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h['馬名']}</div>
-    <div style="flex:1;background:#243447;border-radius:4px;height:22px;position:relative;overflow:hidden">
-      <div style="height:100%;width:${pct}%;background:${wBg(w)};opacity:0.85;border-radius:4px"></div>
-      <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#fff;font-weight:600">${h['上り3F']}秒${i===0?' ★最速':''}</span>
+    <div style="flex:1;background:#243447;border-radius:4px;height:22px;position:relative;overflow:visible;display:flex;align-items:center">
+      <div style="height:100%;width:${pct}%;background:${barBg};opacity:0.9;border-radius:4px;position:relative;flex-shrink:0">${innerSpan}</div>
+      ${outerSpan}
     </div>
     <div style="width:32px;font-size:12px;color:${rColor(h['入線順位'])};font-weight:700;text-align:right">${h['入線順位']}着</div>
   </div>`;

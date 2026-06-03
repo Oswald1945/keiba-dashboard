@@ -729,6 +729,12 @@ tr:hover td{{background:#1f2f42}}
   </div>
   <div style="font-size:12px;color:#7f8c8d">通過ラップ: {race['通過ラップ']} → 上りラップ: {race['上りラップ']}</div>
 </div>
+<div class="section"><h2>&#128202; 全馬成績詳細</h2>
+  <div style="overflow-x:auto"><table>
+    <thead><tr><th>着順</th><th>枠/馬番</th><th>馬名</th><th>人気/単勝</th><th>決め手</th><th>走破タイム</th><th>通過順位</th><th>上り3F</th><th>予想順位</th><th>スコア</th><th>順位差</th><th>予想精度</th></tr></thead>
+    <tbody id="detailBody"></tbody>
+  </table></div>
+</div>
 <div class="section"><h2>&#128205; コーナー通過順の変化</h2>
   <div class="chart-wrap-lg"><canvas id="cornerChart"></canvas></div>
   <div class="corner-legend" id="cornerLegend"></div>
@@ -742,12 +748,6 @@ tr:hover td{{background:#1f2f42}}
   <div class="ev-summary" id="evSummary"></div>
   <div style="overflow-x:auto" id="evTableWrap"></div>
   <div class="note">予測勝率 = スコアをsoftmax変換（温度T=20）した確率。市場確率 = 1÷単勝オッズ。<br>期待値 = 予測勝率 × 単勝オッズ − 1（プラスなら理論上のプラスEV馬）。過去走データなし等の理由で予想対象外となった馬はこのパネルから除外されます。</div>
-</div>
-<div class="section"><h2>&#128202; 全馬成績詳細</h2>
-  <div style="overflow-x:auto"><table>
-    <thead><tr><th>着順</th><th>枠/馬番</th><th>馬名</th><th>人気/単勝</th><th>決め手</th><th>走破タイム</th><th>通過順位</th><th>上り3F</th><th>予想順位</th><th>スコア</th><th>順位差</th><th>予想精度</th></tr></thead>
-    <tbody id="detailBody"></tbody>
-  </table></div>
 </div>
 {improve_html}
 {pickup_html}

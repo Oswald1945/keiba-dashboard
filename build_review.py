@@ -935,8 +935,8 @@ document.getElementById('detailBody').innerHTML=
     const ev2=!isTarget?'<span style="font-size:10px;color:#7f8c8d">対象外</span>'
              :isRef?'<span style="font-size:10px;color:#7f8c8d">参考</span>'
              :d===null?'—'
-             :Math.abs(d)<=2?'<span class="badge" style="background:#27ae60">◎</span>'
-             :Math.abs(d)<=5?'<span class="badge" style="background:#f39c12">△</span>'
+             :Math.abs(d)<=1?'<span class="badge" style="background:#27ae60">◎</span>'
+             :Math.abs(d)<=3?'<span class="badge" style="background:#f39c12">△</span>'
              :'<span class="badge" style="background:#e74c3c">✕</span>';
     const predCell=!isTarget?'<span style="font-size:10px;color:#7f8c8d">対象外</span>'
                   :isRef?'<span style="font-size:10px;color:#7f8c8d">参考'+h['予想順位']+'位</span>'

@@ -542,6 +542,16 @@ honmei = top3[0]
 taikou = top3[1]
 tanana = top3[2]
 
+def podium_smartrc_pop(h):
+    """SmartRC推定人気順を「SmartRC◯番人気」形式で返す。データなしは空文字。"""
+    v = h.get('SmartRC推定人気順')
+    if v is None:
+        return '-人気'
+    try:
+        return f'想定{int(v)}番人気'
+    except (TypeError, ValueError):
+        return '-人気'
+
 def podium_waku_str(h):
     w = h.get('枠番')
     b = h.get('馬番')
@@ -1530,19 +1540,19 @@ html = f'''<!DOCTYPE html>
       <div class="podium-card first">
         <div class="podium-mark">🥇</div>
         <div class="podium-name">{honmei["馬名"]}</div>
-        <div class="podium-info">{podium_waku_str(honmei)}{honmei["脚質"]} ・ {honmei["騎手"]} ・ {fmt(honmei.get("単勝オッズ"),1)}倍 ({fmt_int(honmei.get("人気"))}人気)</div>
+        <div class="podium-info">{podium_waku_str(honmei)}{honmei["脚質"]} ・ {honmei["騎手"]} ・ {podium_smartrc_pop(honmei)}</div>
         <div class="podium-score">{honmei["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(honmei["馬名"],50)}</div></div>
       </div>
       <div class="podium-card second">
         <div class="podium-mark">🥈</div>
         <div class="podium-name">{taikou["馬名"]}</div>
-        <div class="podium-info">{podium_waku_str(taikou)}{taikou["脚質"]} ・ {taikou["騎手"]} ・ {fmt(taikou.get("単勝オッズ"),1)}倍 ({fmt_int(taikou.get("人気"))}人気)</div>
+        <div class="podium-info">{podium_waku_str(taikou)}{taikou["脚質"]} ・ {taikou["騎手"]} ・ {podium_smartrc_pop(taikou)}</div>
         <div class="podium-score">{taikou["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(taikou["馬名"],50)}</div></div>
       </div>
       <div class="podium-card third">
         <div class="podium-mark">🥉</div>
         <div class="podium-name">{tanana["馬名"]}</div>
-        <div class="podium-info">{podium_waku_str(tanana)}{tanana["脚質"]} ・ {tanana["騎手"]} ・ {fmt(tanana.get("単勝オッズ"),1)}倍 ({fmt_int(tanana.get("人気"))}人気)</div>
+        <div class="podium-info">{podium_waku_str(tanana)}{tanana["脚質"]} ・ {tanana["騎手"]} ・ {podium_smartrc_pop(tanana)}</div>
         <div class="podium-score">{tanana["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(tanana["馬名"],50)}</div></div>
       </div>
     </div>

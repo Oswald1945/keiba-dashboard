@@ -3292,15 +3292,10 @@ function renderRows(rows) {
     let evStr = '-', evCls = 'ev-neutral', judgement = '-';
     if (ev !== undefined && ev !== null) {
       evStr = ev.toFixed(3);
-      if (h._isDark) {
-        // 大穴馬（50倍超）: 圧縮後のEVでも信頼性に注意表示
-        evCls = ev > 0.05 ? 'ev-neutral' : 'ev-negative';
-        judgement = ev > 0.05 ? '⚠ 大穴注意' : '✕ 見送り';
-      } else {
-        if (ev > 0.05)       { evCls = 'ev-positive'; judgement = '◎ 買い'; }
-        else if (ev >= -0.1) { evCls = 'ev-neutral';  judgement = '△ 様子見'; }
-        else                 { evCls = 'ev-negative';  judgement = '✕ 見送り'; }
-      }
+      // EV値のみで判定（大穴・通常共通基準）
+      if (ev > 0.05)       { evCls = 'ev-positive'; judgement = h._isDark ? '⚠ 大穴注意' : '◎ 買い'; }
+      else if (ev >= -0.1) { evCls = 'ev-neutral';  judgement = '△ 様子見'; }
+      else                 { evCls = 'ev-negative';  judgement = '✕ 見送り'; }
     }
     const barWidth = Math.min(100, (h._prob || 0) * 100 * (isFuku ? 2 : 5));
     const barColor = evCls === 'ev-positive' ? '#2ecc71' :

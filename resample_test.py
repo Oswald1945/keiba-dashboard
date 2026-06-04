@@ -101,6 +101,8 @@ def main():
                     help='利用可能なレース一覧を表示')
     ap.add_argument('--seed',     type=int, default=None,
                     help='乱数シード（再現性のため）')
+    ap.add_argument('--all',      action='store_true',
+                    help='doneフォルダの全レースを再生成')
     args = ap.parse_args()
 
     if not DONE_DIR.exists():
@@ -137,6 +139,11 @@ def main():
             print(f'[ERROR] {args.date} のレースがdoneフォルダに見つかりません')
             sys.exit(1)
         print(f'[resample] {args.date}: {len(targets)}レース')
+
+    elif args.all:
+        # doneフォルダの全レースを対象（予想データあり）
+        targets = [(rid, f) for rid, f in sorted(all_races.items()) if has_pred_data(f)]
+        print(f'[resample] 全レース: {len(targets)}R を再生成します')
 
     else:
         # 予想データがあるレースからランダム選択

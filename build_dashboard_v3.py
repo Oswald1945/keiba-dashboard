@@ -1791,13 +1791,7 @@ const WAKU_FG = {{1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111'
 let currentTab = 'tansho';
 let sortCol    = 'score';
 let sortAsc    = false;   // default: スコア降順
-let _userOdds  = {{}};     // 馬番 → ユーザー手入力オッズ（案B）
-// 初期値は常に採算オッズ（1/勝率推定）で設定。実際のオッズは変動するため使用しない。
-EV_DATA.forEach(function(h) {{
-  if (h._prob > 0) {{
-    _userOdds[h['馬番']] = Math.round((1 / h._prob) * 10) / 10;
-  }}
-}});
+let _userOdds  = {{}};     // 馬番 → ユーザー手入力オッズ（採算オッズで初期化 → 手入力で上書き）
 
 // Harville式 上位k着以内確率
 function placeProb(probs, idx, k) {{
@@ -1909,7 +1903,11 @@ function renderRows(rows) {{
                      evCls === 'ev-negative' ? '#e74c3c' : '#95a5a6';
     // 採算オッズ（案A）: 1/勝率推定 = EV=0となる損益分岐点
     const beOdds   = (!isFuku && h._prob > 0) ? 1/h._prob : null;
-    const curOdds  = !isFuku ? (_userOdds[h['馬番']] != null ? _userOdds[h['馬番']] : h['オッズ']) : null;
+    // 初期値は採算オッズ。ユーザー手入力で上書きされた場合のみ_userOddsを使用。
+    if (!isFuku && _userOdds[h['馬番']] == null && beOdds) {{
+      _userOdds[h['馬番']] = Math.round(beOdds * 10) / 10;
+    }}
+    const curOdds  = !isFuku ? (_userOdds[h['馬番']] != null ? _userOdds[h['馬番']] : beOdds) : null;
     const beColor  = beOdds && curOdds ? (curOdds >= beOdds ? '#2ecc71' : '#e74c3c') : '#7f8c8d';
     const beCell   = !isFuku
       ? (beOdds ? `<span style="font-weight:700;color:${{beColor}}">${{beOdds.toFixed(1)}}倍</span>` : '-')

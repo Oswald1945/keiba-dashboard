@@ -729,17 +729,17 @@ def calc_baba_apt_pts(past_race_list: list, target_baba: str, min_races: int = 2
 
 def calc_taiju_pts(horse_name: str, shutuba_df) -> float:
     """
-    馬体重増減補正 (-1〜0pt)
-    大幅な増減は太め残り・体調不安の懸念として小さく減点。
-      |増減| ≥ 20kg : -1.0pt
-      |増減| 12-19kg: -0.5pt
-      |増減| ≤ 11kg : 0pt
+    馬体重増減補正（非対称設計）
+    実績分析で「増加+10kg以上は好走傾向」のため増加ペナルティを緩和。
+    減少は体調不安として従来通り減点。
+      減少 ≥ 20kg      : -1.0pt
+      減少 12-19kg     : -0.5pt
+      ±11kg以内 / 増加: 0pt（増加はペナルティなし）
     """
     if shutuba_df is None: return 0.0
     rows = shutuba_df[shutuba_df['馬名'] == horse_name]
     if rows.empty: return 0.0
     try:
-        # '増減'列はshutuba読込時に'馬体重増減_raw'へ改名される場合がある
         delta = None
         for _col in ('馬体重増減_raw', '増減', '馬体重増減'):
             if _col in rows.columns:
@@ -748,8 +748,11 @@ def calc_taiju_pts(horse_name: str, shutuba_df) -> float:
                     delta = float(_v)
                     break
         if delta is None: return 0.0
-        if abs(delta) >= 20: return -1.0
-        if abs(delta) >= 12: return -0.5
+        # 増加は減点なし（実績上+10kg以上でも好走）
+        if delta >= 0: return 0.0
+        # 減少のみペナルティ
+        if delta <= -20: return -1.0
+        if delta <= -12: return -0.5
     except Exception:
         pass
     return 0.0
@@ -1266,20 +1269,23 @@ def calc_tenkai_pts_all(
     # ── 3. ペース×ゾーン有利不利 ─────────────────────────────────────
     # [B案] 先行(zone=2)をスロー/ミドルで強化し見落とし先行の過小評価を改善
     if today_pace == 'high':
-        # ハイペース: 逃げは消耗、番手(3〜5番手)が最有利、先行はやや割引
-        pace_zone_bonus = {0: -1.5, 1: +2.5, 2: +0.5, 3: +0.5, 4: -0.5}
+        # ハイペース: 逃げは消耗、番手が最有利、後方に-1.0（強化）
+        pace_zone_bonus = {0: -1.5, 1: +2.5, 2: +0.5, 3: +0.5, 4: -1.0}
     elif today_pace == 'low':
-        # スローペース: 逃げ〜先行が有利、後方は展開負け
-        # [②] 後方(zone=4): -2.0→-2.5 に強化
-        pace_zone_bonus = {0: +2.0, 1: +2.5, 2: +1.5, 3: -0.5, 4: -2.5}
+        # スローペース: 逃げ〜先行が有利（+2.0）、後方は展開負け（-2.5）
+        pace_zone_bonus = {0: +2.0, 1: +2.5, 2: +2.0, 3: -0.5, 4: -2.5}
     else:  # mid
-        # ミドル: 番手が最有利、先行も加点
-        # [②] 後方(zone=4): -1.0→-1.5 に強化
+        # ミドル: 番手が最有利、先行も加点、後方は-1.5
         pace_zone_bonus = {0: +0.5, 1: +2.0, 2: +2.0, 3: -0.5, 4: -1.5}
 
-    # [C案] 1200m以下スプリント: 先行ゾーン(zone=2)にさらに+0.5追加
+    # [C案] 1200m以下スプリント: 前め有利をさらに強調
     if target_dist > 0 and target_dist <= 1200:
         pace_zone_bonus = {z: v + (0.5 if z in (0, 1, 2) else 0)
+                           for z, v in pace_zone_bonus.items()}
+
+    # [1800-2000m専用] 中団(zone=3)のペナルティを強化（MAE最悪帯の過大評価対策）
+    if target_dist > 0 and 1800 <= target_dist <= 2000:
+        pace_zone_bonus = {z: (v - 0.5 if z == 3 else v)
                            for z, v in pace_zone_bonus.items()}
 
     # ── 4. 同ゾーン混雑ペナルティ ────────────────────────────────────
@@ -1884,12 +1890,25 @@ def compute_scores(
     res['クラス_dev']   = deviation_score(res['クラス補正着順'].tolist())
     res['時計_dev']     = deviation_score(res['タイム偏差秒'].tolist())
 
+    # 上がり3F平均偏差値: 小さい（速い）ほど高スコア → 値を反転してdeviation_score
+    _agari_raw = res['平均上がり3F'].tolist()
+    _agari_neg = [-v if (v is not None and not (isinstance(v, float) and np.isnan(v))) else np.nan
+                  for v in _agari_raw]
+    res['上がり_dev'] = deviation_score(_agari_neg)
+
     def to_points(devs, max_pts):
         return [max(0.0, min(max_pts, (d - 35) / 30 * max_pts)) for d in devs]
+
+    def to_symmetric_points(devs, max_pts):
+        """偏差値50を0ptとし±max_ptsにマッピング（加点・減点両対応）"""
+        return [max(-max_pts, min(max_pts, (d - 50) / 15 * max_pts)) for d in devs]
 
     res['最高出力pts'] = to_points(res['最高出力_dev'].tolist(), 30)
     res['クラスpts']   = to_points(res['クラス_dev'].tolist(),   25)
     res['時計pts']     = to_points(res['時計_dev'].tolist(),     20)
+
+    # 上がり3F補正: ±3pt（上がり速い馬を加点、遅い馬を減点）
+    res['上がりpts'] = to_symmetric_points(res['上がり_dev'].tolist(), 3)
 
     # ── 展開予想（ペース判定・メタ情報用）─────────────────
     leg_count = res['脚質'].value_counts().to_dict()
@@ -1998,6 +2017,7 @@ def compute_scores(
         + res['馬体重pts'] + res['継続pts'] + res['着差pts']
         + res['枠順pts'] + res['昇級pts']
         + res['クラス適応pts']    # 同クラス以上での直近着差加重平均によるクラス適応度
+        + res['上がりpts']        # 過去走の上がり3F平均偏差値（速い馬を加点）
         + res['SmartRC評価pts']   # SmartRC 前走有利不利補正
         + res['馬場適性pts']      # 馬場別成績による適性補正
     )
@@ -2105,6 +2125,7 @@ def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None
             '枠順pts':          round(float(r.get('枠順pts', 0)), 1),
             '昇級pts':          round(float(r.get('昇級pts', 0)), 1),
             'クラス適応pts':    round(float(r.get('クラス適応pts', 0)), 1),
+            '上がりpts':        round(float(r.get('上がりpts', 0)), 1),
             '馬場適性pts':      round(float(r.get('馬場適性pts', 0)), 1),
             'SmartRC評価pts':   round(float(r.get('SmartRC評価pts', 0)), 1),
             'SmartRC評価':      r.get('SmartRC評価'),          # A/B/C/D/E or None

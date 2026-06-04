@@ -40,7 +40,12 @@
     background: rgba(255,255,255,0.05);
     padding: 16px; border-radius: 10px; text-align: center;
   }
-  .summary-value { font-size: 26px; font-weight: bold; color: #f39c12; }
+  .summary-value {
+    font-size: 26px; font-weight: bold; color: #f39c12;
+    word-break: break-all; line-height: 1.2;
+  }
+  .summary-value.small { font-size: 16px; }
+  .summary-value.xsmall { font-size: 13px; }
   .summary-label { font-size: 12px; color: #bdc3c7; margin-top: 4px; }
 
   .shutuba-banner {
@@ -163,9 +168,10 @@
     border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;
   }
   .bango-badge {
-    font-size: 14px; font-weight: bold; color: #f1c40f;
-    background: rgba(241,196,15,0.15);
-    padding: 2px 8px; border-radius: 5px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 26px;
+    border-radius: 5px; font-size: 12px; font-weight: bold;
+    border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;
   }
   .leg-badge {
     padding: 3px 10px; border-radius: 12px;
@@ -324,7 +330,7 @@
         <div class="summary-label">出走頭数</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">ハイペース（テン速度競合3頭）</div>
+        <div class="summary-value xsmall">ミドルペース（テン速度競合3頭）</div>
         <div class="summary-label">ペース予想</div>
       </div>
       <div class="summary-item">
@@ -332,7 +338,7 @@
         <div class="summary-label">最高スコア馬</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">80.6<span style="font-size:10px;color:#f1c40f;font-weight:700;margin-left:4px">(偏差67)</span></div>
+        <div class="summary-value">84.0<span style="font-size:10px;color:#f1c40f;font-weight:700;margin-left:4px">(偏差67)</span></div>
         <div class="summary-label">最高スコア</div>
       </div>
     </div>
@@ -346,7 +352,7 @@
       芝 <b style="color:#27ae60;font-size:15px">良</b>
       ／ダート <b style="color:#27ae60;font-size:15px">良</b>
       
-      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（現在馬場:良 + 降水なし）</span>
+      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（情報取得失敗のためデフォルト(良)）</span>
     </div>
 
   <div class="section">
@@ -355,20 +361,20 @@
       <div class="podium-card first">
         <div class="podium-mark">🥇</div>
         <div class="podium-name">ピカラ</div>
-        <div class="podium-info">5枠 8番 / 先行 ・ 斎藤新 ・ 1.8倍 (1人気)</div>
-        <div class="podium-score">80.6<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 67</div></div>
+        <div class="podium-info">5枠 8番 / 先行 ・ 斎藤新 ・ 想定1番人気</div>
+        <div class="podium-score">84.0<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 67</div></div>
       </div>
       <div class="podium-card second">
         <div class="podium-mark">🥈</div>
         <div class="podium-name">アパレイユ</div>
-        <div class="podium-info">6枠 9番 / 先行 ・ 鮫島克駿 ・ 12.8倍 (4人気)</div>
-        <div class="podium-score">71.9<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 63</div></div>
+        <div class="podium-info">6枠 9番 / 先行 ・ 鮫島克駿 ・ 想定2番人気</div>
+        <div class="podium-score">75.2<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 63</div></div>
       </div>
       <div class="podium-card third">
         <div class="podium-mark">🥉</div>
         <div class="podium-name">メイショウイブキ</div>
-        <div class="podium-info">4枠 6番 / 先行 ・ 団野大成 ・ 24.0倍 (8人気)</div>
-        <div class="podium-score">67.9<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 61</div></div>
+        <div class="podium-info">4枠 6番 / 差し ・ 団野大成 ・ 想定7番人気</div>
+        <div class="podium-score">68.3<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 60</div></div>
       </div>
     </div>
   </div>
@@ -387,7 +393,7 @@
       </span>
       <span style="color:#ccc;font-size:12px;">スコア上位馬がSmartRC推定より4順位上 ― 大きな市場乖離あり</span>
       
-      <span style="margin-left:14px;padding:3px 10px;background:#2c3e50;border-radius:4px;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">メイショウイブキ</b>（予想3位 / SmartRC7番人気 / 乖離+4 / 単勝24.0倍）</span>
+      <span style="margin-left:14px;padding:3px 10px;background:#2c3e50;border-radius:4px;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">メイショウイブキ</b>（予想3位 / 想定7番人気 / 乖離+4 / 単勝24.0倍）</span>
     </div>
     <div class="temp-slider">
       <label style="font-weight:600">モデル信頼度</label>
@@ -424,7 +430,7 @@
     </div>
     <div class="prob-note" id="evNote">
       ※ 勝率はスコアのsoftmax変換による推定値。単勝EV = 勝率推定 × 現在オッズ − 1。<br>
-      <b>採算オッズ</b> = EV がちょうど 0 になるオッズ（損益分岐点）。現在オッズ ≥ 採算オッズなら <span style="color:#2ecc71">緑</span>（割安）、下回れば <span style="color:#e74c3c">赤</span>（割高）。<br>
+      <b>採算オッズ</b> = EV がちょうど 0 になるオッズ（損益分岐点）。実オッズ ≥ 採算オッズなら EV プラスの可能性。<br>
       現在オッズ欄に締切前の実オッズを入力すると EV が即時更新されます。
     </div>
   </div>
@@ -438,10 +444,13 @@
           <th style="white-space:nowrap">順位</th><th style="white-space:nowrap">枠-番</th><th style="white-space:nowrap">馬名</th>
           <th style="white-space:nowrap">脚質</th><th style="white-space:nowrap">スコア</th><th style="white-space:nowrap">市場評価</th>
           <th style="white-space:nowrap" title="SmartRC推定人気順">推定人気</th>
+          <th style="white-space:nowrap" title="前走の馬場・展開有利不利評価 A/B=不利→巻き返し候補 D/E=有利→過信注意">前走評価</th>
+          <th style="white-space:nowrap">斤量</th>
+          <th style="white-space:nowrap">年齢・性別</th>
           <th style="white-space:nowrap">騎手</th>
         </tr>
       </thead>
-      <tbody><tr><td>1</td><td>5枠-8番</td><td><b>ピカラ</b><span class="mini-badge red">距離+2</span><span class="mini-badge blue">コース+9.0</span></td><td>先行</td><td style="white-space:nowrap"><b>80.6</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差67</span></td><td>1.8倍 (1人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">1位</b></td><td>斎藤新</td></tr><tr><td>2</td><td>6枠-9番</td><td><b>アパレイユ</b><span class="mini-badge red">距離+2</span><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+4.4</span></td><td>先行</td><td style="white-space:nowrap"><b>71.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差63</span></td><td>12.8倍 (4人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">2位</b></td><td>鮫島克駿</td></tr><tr><td>3</td><td>4枠-6番</td><td><b>メイショウイブキ</b><span class="mini-badge blue">コース+7.3</span></td><td>先行</td><td style="white-space:nowrap"><b>67.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差61</span></td><td>24.0倍 (8人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">7位</b></td><td>団野大成</td></tr><tr><td>4</td><td>3枠-3番</td><td><b>タイニーワンダー</b><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+6.9</span></td><td>差し</td><td style="white-space:nowrap"><b>63.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差59</span></td><td>8.3倍 (3人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">4位</b></td><td>田山旺佑</td></tr><tr><td>5</td><td>5枠-7番</td><td><b>ゴディアンフィンチ</b><span class="mini-badge red">距離+2</span><span class="mini-badge blue">コース+4.0</span></td><td>差し</td><td style="white-space:nowrap"><b>54.6</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差55</span></td><td>7.9倍 (2人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">3位</b></td><td>吉村誠之</td></tr><tr><td>6</td><td>7枠-12番</td><td><b>フィアーブル</b><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+5.7</span></td><td>先行</td><td style="white-space:nowrap"><b>51.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差54</span></td><td>14.2倍 (5人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">6位</b></td><td>高杉吏麒</td></tr><tr><td>7</td><td>8枠-13番</td><td><b>バトゥカーダ</b><span class="mini-badge blue">コース+5.7</span></td><td>追込</td><td style="white-space:nowrap"><b>44.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差51</span></td><td>41.2倍 (11人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">9位</b></td><td>川須栄彦</td></tr><tr><td>8</td><td>6枠-10番</td><td><b>エコロボルト</b><span class="mini-badge blue">コース+3.3</span></td><td>先行</td><td style="white-space:nowrap"><b>44.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差50</span></td><td>22.5倍 (7人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">8位</b></td><td>松若風馬</td></tr><tr><td>9</td><td>7枠-11番</td><td><b>ジャスティンルマン</b><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+6.7</span></td><td>先行</td><td style="white-space:nowrap"><b>39.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差48</span></td><td>16.7倍 (6人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">5位</b></td><td>亀田温心</td></tr><tr><td>10</td><td>3枠-4番</td><td><b>ゲレーロアスール</b><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+2.2</span></td><td>差し</td><td style="white-space:nowrap"><b>31.0</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差44</span></td><td>55.4倍 (14人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">10位</b></td><td>河原田菜</td></tr><tr><td>11</td><td>2枠-2番</td><td><b>サリカリーフォリア</b><span class="mini-badge purple">休養+1</span><span class="mini-badge blue">コース+7.2</span></td><td>差し</td><td style="white-space:nowrap"><b>22.7</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差41</span></td><td>53.4倍 (13人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">14位</b></td><td>菱田裕二</td></tr><tr><td>12</td><td>8枠-14番</td><td><b>ディープスリー</b><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+5.4</span></td><td>差し</td><td style="white-space:nowrap"><b>19.7</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差39</span></td><td>41.2倍 (12人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">11位</b></td><td>酒井学</td></tr><tr><td>13</td><td>1枠-1番</td><td><b>エルモサカスターノ</b><span class="mini-badge blue">コース+3.7</span></td><td>先行</td><td style="white-space:nowrap"><b>14.6</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差37</span></td><td>28.8倍 (10人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">13位</b></td><td>永島まな</td></tr><tr><td>14</td><td>4枠-5番</td><td><b>グランディマージュ</b><span class="mini-badge blue">コース+3.1</span></td><td>先行</td><td style="white-space:nowrap"><b>3.5</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差32</span></td><td>24.0倍 (9人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">12位</b></td><td>田口貫太</td></tr></tbody>
+      <tbody><tr><td>1</td><td style="white-space:nowrap"><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">5枠</span><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">8番</span></td><td><b>ピカラ</b></td><td>先行</td><td style="white-space:nowrap"><b>84.0</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差67</span></td><td>1.8倍 (1人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">1位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牝</td><td>斎藤新</td></tr><tr><td>2</td><td style="white-space:nowrap"><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">6枠</span><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">9番</span></td><td><b>アパレイユ</b></td><td>先行</td><td style="white-space:nowrap"><b>75.2</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差63</span></td><td>12.8倍 (4人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">2位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牝</td><td>鮫島克駿</td></tr><tr><td>3</td><td style="white-space:nowrap"><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">4枠</span><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">6番</span></td><td><b>メイショウイブキ</b></td><td>差し</td><td style="white-space:nowrap"><b>68.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差60</span></td><td>24.0倍 (8人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">7位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#2ecc71;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">B 不利</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牝</td><td>団野大成</td></tr><tr><td>4</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">3枠</span><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">3番</span></td><td><b>タイニーワンダー</b></td><td>差し</td><td style="white-space:nowrap"><b>65.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差59</span></td><td>8.3倍 (3人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">4位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#e74c3c;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">E 有利</span></td><td style="text-align:center;white-space:nowrap">53.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牝</td><td>田山旺佑</td></tr><tr><td>5</td><td style="white-space:nowrap"><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">5枠</span><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">7番</span></td><td><b>ゴディアンフィンチ</b></td><td>差し</td><td style="white-space:nowrap"><b>55.5</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差55</span></td><td>7.9倍 (2人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">3位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>吉村誠之</td></tr><tr><td>6</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">7枠</span><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">12番</span></td><td><b>フィアーブル</b></td><td>差し</td><td style="white-space:nowrap"><b>48.4</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差52</span></td><td>14.2倍 (5人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">6位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牝</td><td>高杉吏麒</td></tr><tr><td>7</td><td style="white-space:nowrap"><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">8枠</span><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">13番</span></td><td><b>バトゥカーダ</b></td><td>追込</td><td style="white-space:nowrap"><b>44.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差51</span></td><td>41.2倍 (11人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">9位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>川須栄彦</td></tr><tr><td>8</td><td style="white-space:nowrap"><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">6枠</span><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">10番</span></td><td><b>エコロボルト</b></td><td>先行</td><td style="white-space:nowrap"><b>43.6</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差50</span></td><td>22.5倍 (7人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">8位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 セ</td><td>松若風馬</td></tr><tr><td>9</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">7枠</span><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">11番</span></td><td><b>ジャスティンルマン</b></td><td>先行</td><td style="white-space:nowrap"><b>41.0</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差49</span></td><td>16.7倍 (6人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">5位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#e67e22;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">D 有利</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>亀田温心</td></tr><tr><td>10</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">3枠</span><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">4番</span></td><td><b>ゲレーロアスール</b></td><td>差し</td><td style="white-space:nowrap"><b>33.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差46</span></td><td>55.4倍 (14人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">10位</b></td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">53.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>河原田菜</td></tr><tr><td>11</td><td style="white-space:nowrap"><span style="display:inline-block;background:#666666;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">2枠</span><span style="display:inline-block;background:#666666;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">2番</span></td><td><b>サリカリーフォリア</b></td><td>差し</td><td style="white-space:nowrap"><b>18.5</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差40</span></td><td>53.4倍 (13人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">14位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#2ecc71;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">B 不利</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牝</td><td>菱田裕二</td></tr><tr><td>12</td><td style="white-space:nowrap"><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">8枠</span><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">14番</span></td><td><b>ディープスリー</b></td><td>差し</td><td style="white-space:nowrap"><b>15.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差38</span></td><td>41.2倍 (12人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">11位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>酒井学</td></tr><tr><td>13</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FFFFFF;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">1枠</span><span style="display:inline-block;background:#FFFFFF;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">1番</span></td><td><b>エルモサカスターノ</b></td><td>差し</td><td style="white-space:nowrap"><b>12.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差37</span></td><td>28.8倍 (10人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">13位</b></td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">53.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牝</td><td>永島まな</td></tr><tr><td>14</td><td style="white-space:nowrap"><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">4枠</span><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">5番</span></td><td><b>グランディマージュ</b></td><td>先行</td><td style="white-space:nowrap"><b>1.0</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差33</span></td><td>24.0倍 (9人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">12位</b></td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>田口貫太</td></tr></tbody>
     </table>
     </div>
   </div>
@@ -449,10 +458,10 @@
   <div class="section">
     <h2>🏃 展開予想 / 脚質構成</h2>
     <div class="pace-box">
-      <div class="pace-title">ハイペース想定（テン速度競合3頭）</div>
-      <div>逃げ・先行馬が <b>8頭</b> 揃い、展開面での有利・不利が生じます。</div>
+      <div class="pace-title">ミドルペース想定（テン速度競合3頭）</div>
+      <div>逃げ・先行馬が <b>5頭</b> 揃い、展開面での有利・不利が生じます。</div>
     </div>
-    <div class="leg-grid"><div class="leg-item"><div class="leg-color" style="background:#f39c12"></div><b>先行</b><span class="leg-count">8頭</span><div class="leg-bar"><div class="leg-fill" style="width:57%;background:#f39c12"></div></div></div><div class="leg-item"><div class="leg-color" style="background:#3498db"></div><b>差し</b><span class="leg-count">5頭</span><div class="leg-bar"><div class="leg-fill" style="width:36%;background:#3498db"></div></div></div><div class="leg-item"><div class="leg-color" style="background:#9b59b6"></div><b>追込</b><span class="leg-count">1頭</span><div class="leg-bar"><div class="leg-fill" style="width:7%;background:#9b59b6"></div></div></div></div>
+    <div class="leg-grid"><div class="leg-item"><div class="leg-color" style="background:#f39c12"></div><b>先行</b><span class="leg-count">5頭</span><div class="leg-bar"><div class="leg-fill" style="width:36%;background:#f39c12"></div></div></div><div class="leg-item"><div class="leg-color" style="background:#3498db"></div><b>差し</b><span class="leg-count">8頭</span><div class="leg-bar"><div class="leg-fill" style="width:57%;background:#3498db"></div></div></div><div class="leg-item"><div class="leg-color" style="background:#9b59b6"></div><b>追込</b><span class="leg-count">1頭</span><div class="leg-bar"><div class="leg-fill" style="width:7%;background:#9b59b6"></div></div></div></div>
   </div>
 
 <div class="section" id="section-formation">
@@ -483,8 +492,8 @@
 
 <script>
 (function(){
-  const fHorses = [{"name": "ピカラ", "uma": 8, "waku": 5, "kyaku": "先行", "ten_r": 5, "aga_r": 2}, {"name": "アパレイユ", "uma": 9, "waku": 6, "kyaku": "先行", "ten_r": 4, "aga_r": 7}, {"name": "メイショウイブキ", "uma": 6, "waku": 4, "kyaku": "先行", "ten_r": 2, "aga_r": 4}, {"name": "タイニーワンダー", "uma": 3, "waku": 3, "kyaku": "差し", "ten_r": 6, "aga_r": 6}, {"name": "ゴディアンフィンチ", "uma": 7, "waku": 5, "kyaku": "差し", "ten_r": 7, "aga_r": 3}, {"name": "フィアーブル", "uma": 12, "waku": 7, "kyaku": "先行", "ten_r": null, "aga_r": 4}, {"name": "バトゥカーダ", "uma": 13, "waku": 8, "kyaku": "追込", "ten_r": 7, "aga_r": 1}, {"name": "エコロボルト", "uma": 10, "waku": 6, "kyaku": "先行", "ten_r": 2, "aga_r": 7}, {"name": "ジャスティンルマン", "uma": 11, "waku": 7, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "ゲレーロアスール", "uma": 4, "waku": 3, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "サリカリーフォリア", "uma": 2, "waku": 2, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ディープスリー", "uma": 14, "waku": 8, "kyaku": "差し", "ten_r": 1, "aga_r": null}, {"name": "エルモサカスターノ", "uma": 1, "waku": 1, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "グランディマージュ", "uma": 5, "waku": 4, "kyaku": "先行", "ten_r": null, "aga_r": null}];
-  const pace      = 'high';
+  const fHorses = [{"name": "ピカラ", "uma": 8, "waku": 5, "kyaku": "先行", "ten_r": 5, "aga_r": 2}, {"name": "アパレイユ", "uma": 9, "waku": 6, "kyaku": "先行", "ten_r": 4, "aga_r": 7}, {"name": "メイショウイブキ", "uma": 6, "waku": 4, "kyaku": "差し", "ten_r": 2, "aga_r": 4}, {"name": "タイニーワンダー", "uma": 3, "waku": 3, "kyaku": "差し", "ten_r": 6, "aga_r": 6}, {"name": "ゴディアンフィンチ", "uma": 7, "waku": 5, "kyaku": "差し", "ten_r": 7, "aga_r": 3}, {"name": "フィアーブル", "uma": 12, "waku": 7, "kyaku": "差し", "ten_r": null, "aga_r": 4}, {"name": "バトゥカーダ", "uma": 13, "waku": 8, "kyaku": "追込", "ten_r": 7, "aga_r": 1}, {"name": "エコロボルト", "uma": 10, "waku": 6, "kyaku": "先行", "ten_r": 2, "aga_r": 7}, {"name": "ジャスティンルマン", "uma": 11, "waku": 7, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "ゲレーロアスール", "uma": 4, "waku": 3, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "サリカリーフォリア", "uma": 2, "waku": 2, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ディープスリー", "uma": 14, "waku": 8, "kyaku": "差し", "ten_r": 1, "aga_r": null}, {"name": "エルモサカスターノ", "uma": 1, "waku": 1, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "グランディマージュ", "uma": 5, "waku": 4, "kyaku": "先行", "ten_r": null, "aga_r": null}];
+  const pace      = 'mid';
   const N         = 14;
   const direction  = '右';  // '左'=反時計 / '右'=時計回り
 
@@ -710,16 +719,16 @@
 <div class="section" id="section-matrix">
   <h2>🗂 展開マトリクス（脚質 × ペース）</h2>
   <div style="font-size:12px;color:#bdc3c7;margin-bottom:10px">
-    当レースの想定ペース: <b style="color:#f1c40f">★ ハイペース</b> —
+    当レースの想定ペース: <b style="color:#f1c40f">★ ミドルペース</b> —
     ★印の列が今回の展開で有利な脚質グループです。
   </div>
   <div style="overflow-x:auto">
   <table style="border-collapse:collapse;width:100%;font-size:12px">
     <thead><tr>
       <th style="padding:8px;background:#243447;border:1px solid #2c3e50;color:#7f8c8d">脚質</th>
-      <th style="padding:8px;background:#243447;color:#f1c40f;border:1px solid #2c3e50">★ ハイペース</th><th style="padding:8px;background:#243447;color:#7f8c8d;border:1px solid #2c3e50">ミドルペース</th><th style="padding:8px;background:#243447;color:#7f8c8d;border:1px solid #2c3e50">スローペース</th>
+      <th style="padding:8px;background:#243447;color:#7f8c8d;border:1px solid #2c3e50">ハイペース</th><th style="padding:8px;background:#243447;color:#f1c40f;border:1px solid #2c3e50">★ ミドルペース</th><th style="padding:8px;background:#243447;color:#7f8c8d;border:1px solid #2c3e50">スローペース</th>
     </tr></thead>
-    <tbody><tr><td style="padding:8px;font-weight:700;color:#e74c3c;border:1px solid #2c3e50;white-space:nowrap">逃げ</td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;border:2px solid #f1c40f;"><div style="color:#e74c3c;font-weight:700;font-size:12px;margin-bottom:4px">△ 不利</div><span style="color:#555;font-size:11px">該当なし</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#7f8c8d;font-weight:700;font-size:12px;margin-bottom:4px">± 普通</div><span style="color:#555;font-size:11px">該当なし</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#2ecc71;font-weight:700;font-size:12px;margin-bottom:4px">◎ 有利</div><span style="color:#555;font-size:11px">該当なし</span></td></tr><tr><td style="padding:8px;font-weight:700;color:#f39c12;border:1px solid #2c3e50;white-space:nowrap">先行</td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;border:2px solid #f1c40f;"><div style="color:#e74c3c;font-weight:700;font-size:12px;margin-bottom:4px">△ 不利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">8</span>ピカラ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">9</span>アパレイユ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">6</span>メイショウイブキ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">12</span>フィアーブル</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">10</span>エコロボルト</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">11</span>ジャスティンルマン</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FFFFFF;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</span>エルモサカスターノ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">5</span>グランディマージュ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#7f8c8d;font-weight:700;font-size:12px;margin-bottom:4px">± 普通</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">8</span>ピカラ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">9</span>アパレイユ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">6</span>メイショウイブキ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">12</span>フィアーブル</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">10</span>エコロボルト</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">11</span>ジャスティンルマン</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FFFFFF;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</span>エルモサカスターノ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">5</span>グランディマージュ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#2ecc71;font-weight:700;font-size:12px;margin-bottom:4px">◎ 有利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">8</span>ピカラ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">9</span>アパレイユ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">6</span>メイショウイブキ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">12</span>フィアーブル</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">10</span>エコロボルト</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">11</span>ジャスティンルマン</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FFFFFF;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</span>エルモサカスターノ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">5</span>グランディマージュ</span></td></tr><tr><td style="padding:8px;font-weight:700;color:#3498db;border:1px solid #2c3e50;white-space:nowrap">差し</td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;border:2px solid #f1c40f;"><div style="color:#2ecc71;font-weight:700;font-size:12px;margin-bottom:4px">◎ 有利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">3</span>タイニーワンダー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">7</span>ゴディアンフィンチ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">4</span>ゲレーロアスール</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#666666;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">2</span>サリカリーフォリア</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">14</span>ディープスリー</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#7f8c8d;font-weight:700;font-size:12px;margin-bottom:4px">± 普通</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">3</span>タイニーワンダー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">7</span>ゴディアンフィンチ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">4</span>ゲレーロアスール</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#666666;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">2</span>サリカリーフォリア</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">14</span>ディープスリー</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#e74c3c;font-weight:700;font-size:12px;margin-bottom:4px">△ 不利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">3</span>タイニーワンダー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">7</span>ゴディアンフィンチ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">4</span>ゲレーロアスール</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#666666;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">2</span>サリカリーフォリア</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">14</span>ディープスリー</span></td></tr><tr><td style="padding:8px;font-weight:700;color:#9b59b6;border:1px solid #2c3e50;white-space:nowrap">追込</td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;border:2px solid #f1c40f;"><div style="color:#2ecc71;font-weight:700;font-size:12px;margin-bottom:4px">◎ 有利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">13</span>バトゥカーダ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#7f8c8d;font-weight:700;font-size:12px;margin-bottom:4px">± 普通</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">13</span>バトゥカーダ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#e74c3c;font-weight:700;font-size:12px;margin-bottom:4px">△ 不利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">13</span>バトゥカーダ</span></td></tr></tbody>
+    <tbody><tr><td style="padding:8px;font-weight:700;color:#e74c3c;border:1px solid #2c3e50;white-space:nowrap">逃げ</td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#e74c3c;font-weight:700;font-size:12px;margin-bottom:4px">△ 不利</div><span style="color:#555;font-size:11px">該当なし</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;border:2px solid #f1c40f;"><div style="color:#7f8c8d;font-weight:700;font-size:12px;margin-bottom:4px">± 普通</div><span style="color:#555;font-size:11px">該当なし</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#2ecc71;font-weight:700;font-size:12px;margin-bottom:4px">◎ 有利</div><span style="color:#555;font-size:11px">該当なし</span></td></tr><tr><td style="padding:8px;font-weight:700;color:#f39c12;border:1px solid #2c3e50;white-space:nowrap">先行</td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#e74c3c;font-weight:700;font-size:12px;margin-bottom:4px">△ 不利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">8</span>ピカラ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">9</span>アパレイユ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">10</span>エコロボルト</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">11</span>ジャスティンルマン</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">5</span>グランディマージュ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;border:2px solid #f1c40f;"><div style="color:#7f8c8d;font-weight:700;font-size:12px;margin-bottom:4px">± 普通</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">8</span>ピカラ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">9</span>アパレイユ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">10</span>エコロボルト</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">11</span>ジャスティンルマン</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">5</span>グランディマージュ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#2ecc71;font-weight:700;font-size:12px;margin-bottom:4px">◎ 有利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">8</span>ピカラ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">9</span>アパレイユ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#22BB22;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">10</span>エコロボルト</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">11</span>ジャスティンルマン</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">5</span>グランディマージュ</span></td></tr><tr><td style="padding:8px;font-weight:700;color:#3498db;border:1px solid #2c3e50;white-space:nowrap">差し</td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#2ecc71;font-weight:700;font-size:12px;margin-bottom:4px">◎ 有利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">6</span>メイショウイブキ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">3</span>タイニーワンダー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">7</span>ゴディアンフィンチ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">12</span>フィアーブル</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">4</span>ゲレーロアスール</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#666666;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">2</span>サリカリーフォリア</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">14</span>ディープスリー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FFFFFF;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</span>エルモサカスターノ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;border:2px solid #f1c40f;"><div style="color:#7f8c8d;font-weight:700;font-size:12px;margin-bottom:4px">± 普通</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">6</span>メイショウイブキ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">3</span>タイニーワンダー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">7</span>ゴディアンフィンチ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">12</span>フィアーブル</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">4</span>ゲレーロアスール</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#666666;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">2</span>サリカリーフォリア</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">14</span>ディープスリー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FFFFFF;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</span>エルモサカスターノ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#e74c3c;font-weight:700;font-size:12px;margin-bottom:4px">△ 不利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#4488FF;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">6</span>メイショウイブキ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">3</span>タイニーワンダー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#DDDD00;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">7</span>ゴディアンフィンチ</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF8822;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">12</span>フィアーブル</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FF4444;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">4</span>ゲレーロアスール</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#666666;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">2</span>サリカリーフォリア</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">14</span>ディープスリー</span><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#FFFFFF;color:#111;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">1</span>エルモサカスターノ</span></td></tr><tr><td style="padding:8px;font-weight:700;color:#9b59b6;border:1px solid #2c3e50;white-space:nowrap">追込</td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#2ecc71;font-weight:700;font-size:12px;margin-bottom:4px">◎ 有利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">13</span>バトゥカーダ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;border:2px solid #f1c40f;"><div style="color:#7f8c8d;font-weight:700;font-size:12px;margin-bottom:4px">± 普通</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">13</span>バトゥカーダ</span></td><td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;"><div style="color:#e74c3c;font-weight:700;font-size:12px;margin-bottom:4px">△ 不利</div><span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px"><span style="background:#e91e8c;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">13</span>バトゥカーダ</span></td></tr></tbody>
   </table>
   </div>
   <div style="font-size:11px;color:#7f8c8d;margin-top:8px">
@@ -740,7 +749,7 @@
   </div>
 
   <div class="section">
-    <h2>💡 スコア補正の見方 v3（16要素）</h2>
+    <h2>💡 スコア補正の見方（16要素）</h2>
     <div class="adj-legend">
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#e74c3c"></div>
@@ -803,6 +812,10 @@
         <span><b>昇級戦補正</b>（0〜−3pt）: 1クラス昇級−1、2クラス昇級−2、3クラス以上昇級−3</span>
       </div>
       <div class="adj-legend-item">
+        <div class="adj-dot" style="background:#1abc9c"></div>
+        <span><b>クラス適応補正</b>（−2〜+1.5pt）: 今走クラス以上での直近5走（1年以内）の1位との着差加重平均で適応度を評価。着差≤0.2秒→+1.5pt（好走継続）、≤0.5秒→+0.8pt、≤1.0秒→0pt、≤1.8秒→-1.0pt、>1.8秒→-2.0pt（壁）。最低2走以上のデータが必要。未勝利クラスは加点上限+0.5pt。</span>
+      </div>
+      <div class="adj-legend-item">
         <div class="adj-dot" style="background:#f39c12"></div>
         <span><b>SmartRC評価補正</b>（−4.5〜+4.5pt）: 過去5走の馬場・展開有利不利評価（h1〜h5_fr_baba）を加重平均（前走×1.0/前々走×0.6/以降逓減）。A=+4.5/B=+2.5pt 上方修正、D=−2.5/E=−4.5pt 下方修正、C=0pt</span>
       </div>
@@ -822,7 +835,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#DDDD00;color:#111;">5枠</span><span class="bango-badge">8番</span>
+      <span class="waku-badge" style="background:#DDDD00;color:#111;">5枠</span><span class="bango-badge" style="background:#DDDD00;color:#111;">8番</span>
       <h3>ピカラ</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-lo">⚠ データ少</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#17becf">コース +9.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.1</span><span class="adj-badge" style="background:#dbdb8d">着差 +1.2</span><span class="adj-badge" style="background:#16a085">馬場適性 +1.5</span>
@@ -833,7 +846,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">80.6</span>
+        <span class="big-num">84.0</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#e74c3c;color:#fff;line-height:1.3">S</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 67</span>
@@ -859,8 +872,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:7%"></div></div>
-          <span class="val">-1/±15</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:7%"></div></div>
+          <span class="val">+1/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -952,7 +965,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#22BB22;color:#fff;">6枠</span><span class="bango-badge">9番</span>
+      <span class="waku-badge" style="background:#22BB22;color:#fff;">6枠</span><span class="bango-badge" style="background:#22BB22;color:#fff;">9番</span>
       <h3>アパレイユ</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#17becf">コース +4.4</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.2</span><span class="adj-badge" style="background:#dbdb8d">着差 +1.2</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span><span class="adj-badge" style="background:#16a085">馬場適性 +0.5</span>
@@ -963,7 +976,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">71.9</span>
+        <span class="big-num">75.2</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#e74c3c;color:#fff;line-height:1.3">S</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 63</span>
@@ -989,8 +1002,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:13%"></div></div>
-          <span class="val">+2/±15</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:7%"></div></div>
+          <span class="val">+1/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1076,15 +1089,15 @@
 </div>
   </div>
 </div>
-<div class="horse-card rank-3" data-rank="3" data-leg="先行">
+<div class="horse-card rank-3" data-rank="3" data-leg="差し">
   <div class="rank-badge" style="background:#e74c3c">
     <span class="rank-num">3</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#4488FF;color:#fff;">4枠</span><span class="bango-badge">6番</span>
+      <span class="waku-badge" style="background:#4488FF;color:#fff;">4枠</span><span class="bango-badge" style="background:#4488FF;color:#fff;">6番</span>
       <h3>メイショウイブキ</h3>
-      <span class="leg-badge" style="background:#f39c12">先行</span>
+      <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +7.3</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.8</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#16a085">馬場適性 +1.5</span>
       
       
@@ -1093,10 +1106,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">67.9</span>
+        <span class="big-num">68.3</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#e74c3c;color:#fff;line-height:1.3">S</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 61</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 60</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 24.0倍<br>(8人気)
         </span>
@@ -1212,7 +1225,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#FF4444;color:#fff;">3枠</span><span class="bango-badge">3番</span>
+      <span class="waku-badge" style="background:#FF4444;color:#fff;">3枠</span><span class="bango-badge" style="background:#FF4444;color:#fff;">3番</span>
       <h3>タイニーワンダー</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-mid">📊 参考可</span><span class="adj-badge" style="background:#17becf">コース +6.9</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.2</span><span class="adj-badge" style="background:#16a085">馬場適性 +2.0</span>
@@ -1223,7 +1236,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">63.1</span>
+        <span class="big-num">65.1</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#e74c3c;color:#fff;line-height:1.3">S</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 59</span>
@@ -1249,8 +1262,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:7%"></div></div>
-          <span class="val">+1/±15</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1342,7 +1355,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#DDDD00;color:#111;">5枠</span><span class="bango-badge">7番</span>
+      <span class="waku-badge" style="background:#DDDD00;color:#111;">5枠</span><span class="bango-badge" style="background:#DDDD00;color:#111;">7番</span>
       <h3>ゴディアンフィンチ</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#17becf">コース +4.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.4</span><span class="adj-badge" style="background:#16a085">馬場適性 +1.5</span>
@@ -1353,7 +1366,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">54.6</span>
+        <span class="big-num">55.5</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#f39c12;color:#fff;line-height:1.3">A</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 55</span>
@@ -1466,16 +1479,16 @@
 </div>
   </div>
 </div>
-<div class="horse-card rank-4" data-rank="6" data-leg="先行">
-  <div class="rank-badge" style="background:#f39c12">
+<div class="horse-card rank-4" data-rank="6" data-leg="差し">
+  <div class="rank-badge" style="background:#3498db">
     <span class="rank-num">6</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#FF8822;color:#fff;">7枠</span><span class="bango-badge">12番</span>
+      <span class="waku-badge" style="background:#FF8822;color:#fff;">7枠</span><span class="bango-badge" style="background:#FF8822;color:#fff;">12番</span>
       <h3>フィアーブル</h3>
-      <span class="leg-badge" style="background:#f39c12">先行</span>
-      <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +5.7</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.3</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span><span class="adj-badge" style="background:#16a085">馬場適性 +0.5</span>
+      <span class="leg-badge" style="background:#3498db">差し</span>
+      <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +5.7</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.3</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span><span class="adj-badge" style="background:#16a085">馬場適性 +0.5</span>
       
       
       <span class="meta-info">牝3 / 高杉吏麒 / 6走</span>
@@ -1483,10 +1496,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">51.9</span>
+        <span class="big-num">48.4</span>
         <span class="small-label">総合スコア</span>
-        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#f39c12;color:#fff;line-height:1.3">A</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 54</span>
+        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 52</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 14.2倍<br>(5人気)
         </span>
@@ -1544,8 +1557,8 @@
         </div>
         <div class="bar-row adj-row">
           <label>枠順補正</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:75%"></div></div>
-          <span class="val">+1.5/±2</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:25%"></div></div>
+          <span class="val">+0.5/±2</span>
         </div>
         <div class="bar-row adj-row">
           <label>馬場適性</label>
@@ -1602,7 +1615,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#e91e8c;color:#fff;">8枠</span><span class="bango-badge">13番</span>
+      <span class="waku-badge" style="background:#e91e8c;color:#fff;">8枠</span><span class="bango-badge" style="background:#e91e8c;color:#fff;">13番</span>
       <h3>バトゥカーダ</h3>
       <span class="leg-badge" style="background:#9b59b6">追込</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +5.7</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.1</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span>
@@ -1732,7 +1745,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#22BB22;color:#fff;">6枠</span><span class="bango-badge">10番</span>
+      <span class="waku-badge" style="background:#22BB22;color:#fff;">6枠</span><span class="bango-badge" style="background:#22BB22;color:#fff;">10番</span>
       <h3>エコロボルト</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +3.3</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.3</span><span class="adj-badge" style="background:#dbdb8d">着差 +1.2</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span><span class="adj-badge" style="background:#c0392b">馬場適性 -0.5</span>
@@ -1743,7 +1756,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">44.1</span>
+        <span class="big-num">43.6</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 50</span>
@@ -1769,8 +1782,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:13%"></div></div>
-          <span class="val">+2/±15</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:7%"></div></div>
+          <span class="val">+1/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1857,12 +1870,12 @@
   </div>
 </div>
 <div class="horse-card rank-4" data-rank="9" data-leg="先行">
-  <div class="rank-badge" style="background:#16a085">
+  <div class="rank-badge" style="background:#3498db">
     <span class="rank-num">9</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#FF8822;color:#fff;">7枠</span><span class="bango-badge">11番</span>
+      <span class="waku-badge" style="background:#FF8822;color:#fff;">7枠</span><span class="bango-badge" style="background:#FF8822;color:#fff;">11番</span>
       <h3>ジャスティンルマン</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +6.7</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.2</span><span class="adj-badge" style="background:#9edae5">枠順 +1.5</span>
@@ -1873,10 +1886,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">39.9</span>
+        <span class="big-num">41.0</span>
         <span class="small-label">総合スコア</span>
-        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#16a085;color:#fff;line-height:1.3">C</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 48</span>
+        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 49</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 16.7倍<br>(6人気)
         </span>
@@ -1899,8 +1912,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1992,7 +2005,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#FF4444;color:#fff;">3枠</span><span class="bango-badge">4番</span>
+      <span class="waku-badge" style="background:#FF4444;color:#fff;">3枠</span><span class="bango-badge" style="background:#FF4444;color:#fff;">4番</span>
       <h3>ゲレーロアスール</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-mid">📊 参考可</span><span class="adj-badge" style="background:#17becf">コース +2.2</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.3</span><span class="adj-badge" style="background:#dbdb8d">着差 +2.0</span><span class="adj-badge" style="background:#16a085">馬場適性 +0.5</span>
@@ -2003,10 +2016,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">31.0</span>
+        <span class="big-num">33.9</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#16a085;color:#fff;line-height:1.3">C</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 44</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 46</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 55.4倍<br>(14人気)
         </span>
@@ -2029,8 +2042,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -2122,7 +2135,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#666666;color:#fff;">2枠</span><span class="bango-badge">2番</span>
+      <span class="waku-badge" style="background:#666666;color:#fff;">2枠</span><span class="bango-badge" style="background:#666666;color:#fff;">2番</span>
       <h3>サリカリーフォリア</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +7.2</span><span class="adj-badge" style="background:#8c564b">休養 +1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -1.2</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#c0392b">着差 -2.0</span><span class="adj-badge" style="background:#c0392b">馬場適性 -0.5</span>
@@ -2133,10 +2146,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">22.7</span>
+        <span class="big-num">18.5</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 41</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 40</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 53.4倍<br>(13人気)
         </span>
@@ -2159,8 +2172,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:7%"></div></div>
-          <span class="val">-1/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
+          <span class="val">-2/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -2252,7 +2265,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#e91e8c;color:#fff;">8枠</span><span class="bango-badge">14番</span>
+      <span class="waku-badge" style="background:#e91e8c;color:#fff;">8枠</span><span class="bango-badge" style="background:#e91e8c;color:#fff;">14番</span>
       <h3>ディープスリー</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +5.4</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.5</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#c0392b">着差 -2.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span>
@@ -2263,10 +2276,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">19.7</span>
+        <span class="big-num">15.1</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 39</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 38</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 41.2倍<br>(12人気)
         </span>
@@ -2289,8 +2302,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:13%"></div></div>
-          <span class="val">+2/±15</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:7%"></div></div>
+          <span class="val">+1/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -2376,15 +2389,15 @@
 </div>
   </div>
 </div>
-<div class="horse-card rank-4" data-rank="13" data-leg="先行">
+<div class="horse-card rank-4" data-rank="13" data-leg="差し">
   <div class="rank-badge" style="background:#7f8c8d">
     <span class="rank-num">13</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#FFFFFF;color:#111;">1枠</span><span class="bango-badge">1番</span>
+      <span class="waku-badge" style="background:#FFFFFF;color:#111;">1枠</span><span class="bango-badge" style="background:#FFFFFF;color:#111;">1番</span>
       <h3>エルモサカスターノ</h3>
-      <span class="leg-badge" style="background:#f39c12">先行</span>
+      <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-lo">⚠ データ少</span><span class="adj-badge" style="background:#17becf">コース +3.7</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.2</span><span class="adj-badge" style="background:#dbdb8d">着差 +2.0</span><span class="adj-badge" style="background:#16a085">馬場適性 +2.5</span>
       
       
@@ -2393,7 +2406,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">14.6</span>
+        <span class="big-num">12.3</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 37</span>
@@ -2419,8 +2432,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:7%"></div></div>
-          <span class="val">-1/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
+          <span class="val">-2/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -2512,7 +2525,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#4488FF;color:#fff;">4枠</span><span class="bango-badge">5番</span>
+      <span class="waku-badge" style="background:#4488FF;color:#fff;">4枠</span><span class="bango-badge" style="background:#4488FF;color:#fff;">5番</span>
       <h3>グランディマージュ</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-mid">📊 参考可</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +3.1</span><span class="adj-badge" style="background:#c0392b">騎手 -0.2</span><span class="adj-badge" style="background:#dbdb8d">着差 +2.0</span><span class="adj-badge" style="background:#c0392b">馬場適性 -1.0</span>
@@ -2523,10 +2536,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">3.5</span>
+        <span class="big-num">1.0</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 32</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 33</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 24.0倍<br>(9人気)
         </span>
@@ -2549,8 +2562,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -2655,17 +2668,14 @@ function toggleDrill(id, btn) {
 }
 
 // ── 期待値シミュレーター ─────────────────────────────────
-const EV_DATA = [{"馬名": "ピカラ", "馬番": 8, "枠番": 5, "スコア": 80.6, "順位予想": 1, "オッズ": 1.8, "複勝下限": 1.2, "複勝上限": 1.4, "人気": 1, "脚質": "先行", "SmartRC推定人気順": "1", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "アパレイユ", "馬番": 9, "枠番": 6, "スコア": 71.9, "順位予想": 2, "オッズ": 12.8, "複勝下限": 2.4, "複勝上限": 3.5, "人気": 4, "脚質": "先行", "SmartRC推定人気順": "2", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "メイショウイブキ", "馬番": 6, "枠番": 4, "スコア": 67.9, "順位予想": 3, "オッズ": 24.0, "複勝下限": 3.4, "複勝上限": 5.2, "人気": 8, "脚質": "先行", "SmartRC推定人気順": "7", "乖離度": 4, "is_memo": false, "is_ana": false}, {"馬名": "タイニーワンダー", "馬番": 3, "枠番": 3, "スコア": 63.1, "順位予想": 4, "オッズ": 8.3, "複勝下限": 2.0, "複勝上限": 2.8, "人気": 3, "脚質": "差し", "SmartRC推定人気順": "4", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "ゴディアンフィンチ", "馬番": 7, "枠番": 5, "スコア": 54.6, "順位予想": 5, "オッズ": 7.9, "複勝下限": 2.1, "複勝上限": 3.0, "人気": 2, "脚質": "差し", "SmartRC推定人気順": "3", "乖離度": -2, "is_memo": false, "is_ana": false}, {"馬名": "フィアーブル", "馬番": 12, "枠番": 7, "スコア": 51.9, "順位予想": 6, "オッズ": 14.2, "複勝下限": 2.9, "複勝上限": 4.3, "人気": 5, "脚質": "先行", "SmartRC推定人気順": "6", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "バトゥカーダ", "馬番": 13, "枠番": 8, "スコア": 44.9, "順位予想": 7, "オッズ": 41.2, "複勝下限": 3.7, "複勝上限": 5.5, "人気": 11, "脚質": "追込", "SmartRC推定人気順": "9", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "エコロボルト", "馬番": 10, "枠番": 6, "スコア": 44.1, "順位予想": 8, "オッズ": 22.5, "複勝下限": 4.4, "複勝上限": 6.7, "人気": 7, "脚質": "先行", "SmartRC推定人気順": "8", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "ジャスティンルマン", "馬番": 11, "枠番": 7, "スコア": 39.9, "順位予想": 9, "オッズ": 16.7, "複勝下限": 3.2, "複勝上限": 4.9, "人気": 6, "脚質": "先行", "SmartRC推定人気順": "5", "乖離度": -4, "is_memo": false, "is_ana": false}, {"馬名": "ゲレーロアスール", "馬番": 4, "枠番": 3, "スコア": 31.0, "順位予想": 10, "オッズ": 55.4, "複勝下限": 6.7, "複勝上限": 10.3, "人気": 14, "脚質": "差し", "SmartRC推定人気順": "10", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "サリカリーフォリア", "馬番": 2, "枠番": 2, "スコア": 22.7, "順位予想": 11, "オッズ": 53.4, "複勝下限": 6.8, "複勝上限": 10.6, "人気": 13, "脚質": "差し", "SmartRC推定人気順": "14", "乖離度": 3, "is_memo": false, "is_ana": false}, {"馬名": "ディープスリー", "馬番": 14, "枠番": 8, "スコア": 19.7, "順位予想": 12, "オッズ": 41.2, "複勝下限": 8.0, "複勝上限": 12.4, "人気": 12, "脚質": "差し", "SmartRC推定人気順": "11", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "エルモサカスターノ", "馬番": 1, "枠番": 1, "スコア": 14.6, "順位予想": 13, "オッズ": 28.8, "複勝下限": 4.2, "複勝上限": 6.4, "人気": 10, "脚質": "先行", "SmartRC推定人気順": "13", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "グランディマージュ", "馬番": 5, "枠番": 4, "スコア": 3.5, "順位予想": 14, "オッズ": 24.0, "複勝下限": 5.9, "複勝上限": 9.0, "人気": 9, "脚質": "先行", "SmartRC推定人気順": "12", "乖離度": -2, "is_memo": false, "is_ana": false}];
+const EV_DATA = [{"馬名": "ピカラ", "馬番": 8, "枠番": 5, "スコア": 84.0, "順位予想": 1, "オッズ": 1.8, "複勝下限": 1.2, "複勝上限": 1.4, "人気": 1, "脚質": "先行", "SmartRC推定人気順": "1", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "アパレイユ", "馬番": 9, "枠番": 6, "スコア": 75.2, "順位予想": 2, "オッズ": 12.8, "複勝下限": 2.4, "複勝上限": 3.5, "人気": 4, "脚質": "先行", "SmartRC推定人気順": "2", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "メイショウイブキ", "馬番": 6, "枠番": 4, "スコア": 68.3, "順位予想": 3, "オッズ": 24.0, "複勝下限": 3.4, "複勝上限": 5.2, "人気": 8, "脚質": "差し", "SmartRC推定人気順": "7", "乖離度": 4, "is_memo": false, "is_ana": false}, {"馬名": "タイニーワンダー", "馬番": 3, "枠番": 3, "スコア": 65.1, "順位予想": 4, "オッズ": 8.3, "複勝下限": 2.0, "複勝上限": 2.8, "人気": 3, "脚質": "差し", "SmartRC推定人気順": "4", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "ゴディアンフィンチ", "馬番": 7, "枠番": 5, "スコア": 55.5, "順位予想": 5, "オッズ": 7.9, "複勝下限": 2.1, "複勝上限": 3.0, "人気": 2, "脚質": "差し", "SmartRC推定人気順": "3", "乖離度": -2, "is_memo": false, "is_ana": false}, {"馬名": "フィアーブル", "馬番": 12, "枠番": 7, "スコア": 48.4, "順位予想": 6, "オッズ": 14.2, "複勝下限": 2.9, "複勝上限": 4.3, "人気": 5, "脚質": "差し", "SmartRC推定人気順": "6", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "バトゥカーダ", "馬番": 13, "枠番": 8, "スコア": 44.9, "順位予想": 7, "オッズ": 41.2, "複勝下限": 3.7, "複勝上限": 5.5, "人気": 11, "脚質": "追込", "SmartRC推定人気順": "9", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "エコロボルト", "馬番": 10, "枠番": 6, "スコア": 43.6, "順位予想": 8, "オッズ": 22.5, "複勝下限": 4.4, "複勝上限": 6.7, "人気": 7, "脚質": "先行", "SmartRC推定人気順": "8", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "ジャスティンルマン", "馬番": 11, "枠番": 7, "スコア": 41.0, "順位予想": 9, "オッズ": 16.7, "複勝下限": 3.2, "複勝上限": 4.9, "人気": 6, "脚質": "先行", "SmartRC推定人気順": "5", "乖離度": -4, "is_memo": false, "is_ana": false}, {"馬名": "ゲレーロアスール", "馬番": 4, "枠番": 3, "スコア": 33.9, "順位予想": 10, "オッズ": 55.4, "複勝下限": 6.7, "複勝上限": 10.3, "人気": 14, "脚質": "差し", "SmartRC推定人気順": "10", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "サリカリーフォリア", "馬番": 2, "枠番": 2, "スコア": 18.5, "順位予想": 11, "オッズ": 53.4, "複勝下限": 6.8, "複勝上限": 10.6, "人気": 13, "脚質": "差し", "SmartRC推定人気順": "14", "乖離度": 3, "is_memo": false, "is_ana": false}, {"馬名": "ディープスリー", "馬番": 14, "枠番": 8, "スコア": 15.1, "順位予想": 12, "オッズ": 41.2, "複勝下限": 8.0, "複勝上限": 12.4, "人気": 12, "脚質": "差し", "SmartRC推定人気順": "11", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "エルモサカスターノ", "馬番": 1, "枠番": 1, "スコア": 12.3, "順位予想": 13, "オッズ": 28.8, "複勝下限": 4.2, "複勝上限": 6.4, "人気": 10, "脚質": "差し", "SmartRC推定人気順": "13", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "グランディマージュ", "馬番": 5, "枠番": 4, "スコア": 1.0, "順位予想": 14, "オッズ": 24.0, "複勝下限": 5.9, "複勝上限": 9.0, "人気": 9, "脚質": "先行", "SmartRC推定人気順": "12", "乖離度": -2, "is_memo": false, "is_ana": false}];
+// WAKU_BG をメインJSスコープで定義（renderRows内のwakuバッジで参照）
+const WAKU_BG = {1:'#ffffff',2:'#555555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'#22bb22',7:'#ff8822',8:'#ffaacc'};
+const WAKU_FG = {1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111',8:'#111'};
 let currentTab = 'tansho';
 let sortCol    = 'score';
 let sortAsc    = false;   // default: スコア降順
-let _userOdds  = {};     // 馬番 → ユーザー手入力オッズ（案B）
-// オッズ未設定の馬は採算オッズ（1/確率）をデフォルト値として設定
-EV_DATA.forEach(function(h) {
-  if (!h['オッズ'] && h._prob > 0) {
-    _userOdds[h['馬番']] = Math.round((1 / h._prob) * 10) / 10;
-  }
-});
+let _userOdds  = {};     // 馬番 → ユーザー手入力オッズ（採算オッズで初期化 → 手入力で上書き）
 
 // Harville式 上位k着以内確率
 function placeProb(probs, idx, k) {
@@ -2750,29 +2760,31 @@ function renderRows(rows) {
 
   const isFuku = (currentTab === 'fukusho');
   document.getElementById('evBody').innerHTML = sorted.map(h => {
-    const waku_b  = h['枠番'] ? h['枠番'] + '枠-' + (h['馬番'] || '?') + '番' : '未定';
+    const waku_fg = ['','#222','#fff','#fff','#fff','#222','#fff','#fff','#222'];
+    const waku_num = h['枠番'] || 0;
+    const waku_bg_c = WAKU_BG[waku_num] || '#888';
+    const waku_fg_c = waku_fg[waku_num] || '#fff';
+    const waku_b  = h['枠番']
+      ? `<span style="display:inline-block;background:${waku_bg_c};color:${waku_fg_c};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">${h['枠番']}枠</span><span style="display:inline-block;background:${waku_bg_c};color:${waku_fg_c};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">${h['馬番'] || '?'}番</span>`
+      : '<span style="color:#555">未定</span>';
     const probPct = ((h._prob || 0) * 100).toFixed(1) + '%';
     const ev      = h._ev;
     let evStr = '-', evCls = 'ev-neutral', judgement = '-';
     if (ev !== undefined && ev !== null) {
       evStr = ev.toFixed(3);
-      if (h._isDark) {
-        // 大穴馬（50倍超）: 圧縮後のEVでも信頼性に注意表示
-        evCls = ev > 0.05 ? 'ev-neutral' : 'ev-negative';
-        judgement = ev > 0.05 ? '⚠ 大穴注意' : '✕ 見送り';
-      } else {
-        if (ev > 0.05)       { evCls = 'ev-positive'; judgement = '◎ 買い'; }
-        else if (ev >= -0.1) { evCls = 'ev-neutral';  judgement = '△ 様子見'; }
-        else                 { evCls = 'ev-negative';  judgement = '✕ 見送り'; }
-      }
+      // EV値のみで判定（大穴・通常共通基準）
+      if (ev > 0.05)       { evCls = 'ev-positive'; judgement = h._isDark ? '⚠ 大穴注意' : '◎ 買い'; }
+      else if (ev >= -0.1) { evCls = 'ev-neutral';  judgement = '△ 様子見'; }
+      else                 { evCls = 'ev-negative';  judgement = '✕ 見送り'; }
     }
     const barWidth = Math.min(100, (h._prob || 0) * 100 * (isFuku ? 2 : 5));
     const barColor = evCls === 'ev-positive' ? '#2ecc71' :
                      evCls === 'ev-negative' ? '#e74c3c' : '#95a5a6';
     // 採算オッズ（案A）: 1/勝率推定 = EV=0となる損益分岐点
     const beOdds   = (!isFuku && h._prob > 0) ? 1/h._prob : null;
-    const curOdds  = !isFuku ? (_userOdds[h['馬番']] != null ? _userOdds[h['馬番']] : h['オッズ']) : null;
-    const beColor  = beOdds && curOdds ? (curOdds >= beOdds ? '#2ecc71' : '#e74c3c') : '#7f8c8d';
+    // curOdds: 手入力値 or computeEVで初期化済みの採算オッズ
+    const curOdds  = !isFuku ? (_userOdds[h['馬番']] != null ? _userOdds[h['馬番']] : beOdds) : null;
+    const beColor  = beOdds ? '#f1c40f' : '#7f8c8d';  // 採算オッズは黄色固定
     const beCell   = !isFuku
       ? (beOdds ? `<span style="font-weight:700;color:${beColor}">${beOdds.toFixed(1)}倍</span>` : '-')
       : `<span style="color:#555">-</span>`;
@@ -2780,8 +2792,8 @@ function renderRows(rows) {
     const oddsCell = isFuku
       ? (h['複勝下限'] ? h['複勝下限'].toFixed(1) + '〜' + (h['複勝上限'] || '?').toFixed(1) + '倍' : '-')
       : `<input type="number" min="0" max="999" step="0.1"
-           value="${curOdds != null ? curOdds.toFixed(1) : (h['オッズ'] ? '' : (h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0'))}"
-           placeholder="${h['オッズ'] ? h['オッズ'].toFixed(1) : '0.0'}"
+           value="${curOdds != null ? curOdds.toFixed(1) : (h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0')}"
+           placeholder="${h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0'}"
            style="width:68px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;
                   border-radius:4px;padding:2px 5px;font-size:12px;text-align:right"
            oninput="const v=parseFloat(this.value); _userOdds[${h['馬番']}]=(v>0?v:null);
@@ -2845,6 +2857,10 @@ function computeEV(temp) {
   const rows = EV_DATA.map((h, i) => {
     const prob   = isFuku ? placeProb(winProbs, i, 3) : winProbs[i];
     const _rawOdds = isFuku ? h['複勝下限'] : h['オッズ'];
+    // 単勝タブで未入力の場合は採算オッズ(1/prob)で初期化してEVをフラット(≈0)から出発
+    if (!isFuku && _userOdds[h['馬番']] == null && prob > 0) {
+      _userOdds[h['馬番']] = Math.round((1 / prob) * 10) / 10;
+    }
     const odds     = (!isFuku && _userOdds[h['馬番']] != null) ? _userOdds[h['馬番']] : _rawOdds;
     const ev       = (odds !== null && odds !== undefined) ? prob * odds - 1.0 : undefined;
     const isDark = !!(h['オッズ'] && h['オッズ'] > DARK_THRESHOLD);
@@ -2862,7 +2878,7 @@ slider.addEventListener('input', () => {
 computeEV(20);
 
 // ── 積み上げチャート ─────────────────────────────
-const STACK_DATA = {"labels": ["1位 ピカラ", "2位 アパレイユ", "3位 メイショウイブキ", "4位 タイニーワンダー", "5位 ゴディアンフィンチ", "6位 フィアーブル", "7位 バトゥカーダ", "8位 エコロボルト", "9位 ジャスティンルマン", "10位 ゲレーロアスール", "11位 サリカリーフォリア", "12位 ディープスリー", "13位 エルモサカスターノ", "14位 グランディマージュ"], "datasets": [{"label": "最高出力", "data": [24.0, 24.0, 19.9, 18.7, 22.6, 20.0, 17.3, 19.9, 18.6, 15.0, 8.3, 13.1, 0.0, 0.0], "backgroundColor": "#d62728", "stack": "adj"}, {"label": "クラス", "data": [25.0, 18.8, 17.3, 23.6, 16.8, 13.8, 8.4, 10.5, 10.1, 7.5, 4.2, 0.0, 10.1, 3.8], "backgroundColor": "#ff7f0e", "stack": "adj"}, {"label": "タイム", "data": [20.0, 19.0, 17.1, 13.5, 8.6, 13.8, 12.6, 7.7, 7.5, 10.4, 4.9, 2.4, 0.5, 0.0], "backgroundColor": "#1f77b4", "stack": "adj"}, {"label": "展開", "data": [-1, 2, 2, 1, 1, -2, 1, 2, -2, -2, -1, 2, -1, -2], "backgroundColor": "#9467bd", "stack": "adj"}, {"label": "斤量", "data": [0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0, -1.0, 0.0, -1.0], "backgroundColor": "#2ca02c", "stack": "adj"}, {"label": "距離", "data": [2.0, 2.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#e377c2", "stack": "adj"}, {"label": "コース", "data": [9.0, 4.4, 7.3, 6.9, 4.0, 5.7, 5.7, 3.3, 6.7, 2.2, 7.2, 5.4, 3.7, 3.1], "backgroundColor": "#17becf", "stack": "adj"}, {"label": "臨戦", "data": [0.0, -1.0, 0.0, -1.0, 0.0, -1.0, 0.0, 0.0, -1.0, -1.0, 1.0, -1.0, 0.0, 0.0], "backgroundColor": "#8c564b", "stack": "adj"}, {"label": "人気補正", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#bcbd22", "stack": "adj"}, {"label": "騎手", "data": [0.1, 0.2, 0.8, 0.2, -0.4, 0.3, 0.1, 0.3, 0.2, -0.3, -1.2, -0.5, 0.2, -0.2], "backgroundColor": "#aec7e8", "stack": "adj"}, {"label": "馬体重", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#7f7f7f", "stack": "adj"}, {"label": "継続", "data": [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0], "backgroundColor": "#98df8a", "stack": "adj"}, {"label": "着差", "data": [1.2, 1.2, 0.0, 0.0, 0.0, -1.0, -1.0, 1.2, 0.0, 2.0, -2.0, -2.0, 2.0, 2.0], "backgroundColor": "#dbdb8d", "stack": "adj"}, {"label": "枠順", "data": [0.0, 1.5, 0.0, 0.0, 0.0, 1.5, 0.5, 1.5, 1.5, 0.0, 0.0, 0.5, 0.0, 0.0], "backgroundColor": "#9edae5", "stack": "adj"}, {"label": "昇級", "data": [-1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -3.0, 0.0, 0.0, -3.0, -3.0], "backgroundColor": "#c5b0d5", "stack": "adj"}, {"label": "SmartRC評価", "data": [0.0, 0.3, 1.0, -1.6, -0.3, 0.0, 0.7, 0.1, -1.0, -0.7, 1.3, 0.0, 0.0, 1.4], "backgroundColor": "#f39c12", "stack": "adj"}, {"label": "馬場適性", "data": [1.5, 0.5, 1.5, 2.0, 1.5, 0.5, 0.0, -0.5, 0.0, 0.5, -0.5, 0.0, 2.5, -1.0], "backgroundColor": "#16a085", "stack": "adj"}]};
+const STACK_DATA = {"labels": ["1位 ピカラ", "2位 アパレイユ", "3位 メイショウイブキ", "4位 タイニーワンダー", "5位 ゴディアンフィンチ", "6位 フィアーブル", "7位 バトゥカーダ", "8位 エコロボルト", "9位 ジャスティンルマン", "10位 ゲレーロアスール", "11位 サリカリーフォリア", "12位 ディープスリー", "13位 エルモサカスターノ", "14位 グランディマージュ"], "datasets": [{"label": "最高出力", "data": [24.0, 24.0, 19.9, 18.7, 22.6, 20.0, 17.3, 19.9, 18.6, 15.0, 8.3, 13.1, 0.0, 0.0], "backgroundColor": "#d62728", "stack": "adj"}, {"label": "クラス", "data": [25.0, 18.8, 17.3, 23.6, 16.8, 13.8, 8.4, 10.5, 10.1, 7.5, 4.2, 0.0, 10.1, 3.8], "backgroundColor": "#ff7f0e", "stack": "adj"}, {"label": "タイム", "data": [20.0, 19.0, 17.1, 13.5, 8.6, 13.8, 12.6, 7.7, 7.5, 10.4, 4.9, 2.4, 0.5, 0.0], "backgroundColor": "#1f77b4", "stack": "adj"}, {"label": "展開", "data": [1, 1, 2, 0, 1, -2, 1, 1, -3, -3, -2, 1, -2, -3], "backgroundColor": "#9467bd", "stack": "adj"}, {"label": "斤量", "data": [0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0, -1.0, 0.0, -1.0], "backgroundColor": "#2ca02c", "stack": "adj"}, {"label": "距離", "data": [2.0, 2.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#e377c2", "stack": "adj"}, {"label": "コース", "data": [9.0, 4.4, 7.3, 6.9, 4.0, 5.7, 5.7, 3.3, 6.7, 2.2, 7.2, 5.4, 3.7, 3.1], "backgroundColor": "#17becf", "stack": "adj"}, {"label": "臨戦", "data": [0.0, -1.0, 0.0, -1.0, 0.0, -1.0, 0.0, 0.0, -1.0, -1.0, 1.0, -1.0, 0.0, 0.0], "backgroundColor": "#8c564b", "stack": "adj"}, {"label": "人気補正", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#bcbd22", "stack": "adj"}, {"label": "騎手", "data": [0.1, 0.2, 0.8, 0.2, -0.4, 0.3, 0.1, 0.3, 0.2, -0.3, -1.2, -0.5, 0.2, -0.2], "backgroundColor": "#aec7e8", "stack": "adj"}, {"label": "馬体重", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#7f7f7f", "stack": "adj"}, {"label": "継続", "data": [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0], "backgroundColor": "#98df8a", "stack": "adj"}, {"label": "着差", "data": [1.2, 1.2, 0.0, 0.0, 0.0, -1.0, -1.0, 1.2, 0.0, 2.0, -2.0, -2.0, 2.0, 2.0], "backgroundColor": "#dbdb8d", "stack": "adj"}, {"label": "枠順", "data": [0.0, 1.5, 0.0, 0.0, 0.0, 0.5, 0.5, 1.5, 1.5, 0.0, 0.0, 0.5, 0.0, 0.0], "backgroundColor": "#9edae5", "stack": "adj"}, {"label": "昇級", "data": [-1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -3.0, 0.0, 0.0, -3.0, -3.0], "backgroundColor": "#c5b0d5", "stack": "adj"}, {"label": "クラス適応", "data": [0.0, 0.0, 0.0, 0.0, 0.0, -2.0, -1.0, 0.0, -1.0, 0.0, -2.0, -2.0, 0.0, 0.0], "backgroundColor": "#1abc9c", "stack": "adj"}, {"label": "SmartRC評価", "data": [0.0, 0.3, 1.0, -1.6, -0.3, 0.0, 0.7, 0.1, -1.0, -0.7, 1.3, 0.0, 0.0, 1.4], "backgroundColor": "#f39c12", "stack": "adj"}, {"label": "馬場適性", "data": [1.5, 0.5, 1.5, 2.0, 1.5, 0.5, 0.0, -0.5, 0.0, 0.5, -0.5, 0.0, 2.5, -1.0], "backgroundColor": "#16a085", "stack": "adj"}]};
 const stackCtx = document.getElementById('scoreStackChart');
 if (stackCtx) {
   new Chart(stackCtx.getContext('2d'), {
@@ -2897,7 +2913,7 @@ if (stackCtx) {
 
 // ── 補正項目別ランキング ──────────────────────────────────────────
 (function() {
-  const ITEM_RANKINGS = [{"label": "最高出力", "color": "#d62728", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 24.0}, {"umaban": 9, "name": "アパレイユ", "val": 24.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 22.6}, {"umaban": 12, "name": "フィアーブル", "val": 20.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 19.9}, {"umaban": 10, "name": "エコロボルト", "val": 19.9}, {"umaban": 3, "name": "タイニーワンダー", "val": 18.7}, {"umaban": 11, "name": "ジャスティンルマン", "val": 18.6}, {"umaban": 13, "name": "バトゥカーダ", "val": 17.3}, {"umaban": 4, "name": "ゲレーロアスール", "val": 15.0}, {"umaban": 14, "name": "ディープスリー", "val": 13.1}, {"umaban": 2, "name": "サリカリーフォリア", "val": 8.3}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "クラス", "color": "#ff7f0e", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 25.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 23.6}, {"umaban": 9, "name": "アパレイユ", "val": 18.8}, {"umaban": 6, "name": "メイショウイブキ", "val": 17.3}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 16.8}, {"umaban": 12, "name": "フィアーブル", "val": 13.8}, {"umaban": 10, "name": "エコロボルト", "val": 10.5}, {"umaban": 11, "name": "ジャスティンルマン", "val": 10.1}, {"umaban": 1, "name": "エルモサカスターノ", "val": 10.1}, {"umaban": 13, "name": "バトゥカーダ", "val": 8.4}, {"umaban": 4, "name": "ゲレーロアスール", "val": 7.5}, {"umaban": 2, "name": "サリカリーフォリア", "val": 4.2}, {"umaban": 5, "name": "グランディマージュ", "val": 3.8}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}]}, {"label": "タイム", "color": "#1f77b4", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 20.0}, {"umaban": 9, "name": "アパレイユ", "val": 19.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 17.1}, {"umaban": 12, "name": "フィアーブル", "val": 13.8}, {"umaban": 3, "name": "タイニーワンダー", "val": 13.5}, {"umaban": 13, "name": "バトゥカーダ", "val": 12.6}, {"umaban": 4, "name": "ゲレーロアスール", "val": 10.4}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 8.6}, {"umaban": 10, "name": "エコロボルト", "val": 7.7}, {"umaban": 11, "name": "ジャスティンルマン", "val": 7.5}, {"umaban": 2, "name": "サリカリーフォリア", "val": 4.9}, {"umaban": 14, "name": "ディープスリー", "val": 2.4}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.5}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "展開", "color": "#9467bd", "ranked": [{"umaban": 9, "name": "アパレイユ", "val": 2.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 2.0}, {"umaban": 10, "name": "エコロボルト", "val": 2.0}, {"umaban": 14, "name": "ディープスリー", "val": 2.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 1.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 1.0}, {"umaban": 8, "name": "ピカラ", "val": -1.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": -1.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": -1.0}, {"umaban": 12, "name": "フィアーブル", "val": -2.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": -2.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": -2.0}, {"umaban": 5, "name": "グランディマージュ", "val": -2.0}]}, {"label": "斤量", "color": "#2ca02c", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": -1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": -1.0}, {"umaban": 10, "name": "エコロボルト", "val": -1.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": -1.0}, {"umaban": 14, "name": "ディープスリー", "val": -1.0}, {"umaban": 5, "name": "グランディマージュ", "val": -1.0}]}, {"label": "距離", "color": "#e377c2", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 2.0}, {"umaban": 9, "name": "アパレイユ", "val": 2.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 2.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "コース", "color": "#17becf", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 9.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 7.3}, {"umaban": 2, "name": "サリカリーフォリア", "val": 7.2}, {"umaban": 3, "name": "タイニーワンダー", "val": 6.9}, {"umaban": 11, "name": "ジャスティンルマン", "val": 6.7}, {"umaban": 12, "name": "フィアーブル", "val": 5.7}, {"umaban": 13, "name": "バトゥカーダ", "val": 5.7}, {"umaban": 14, "name": "ディープスリー", "val": 5.4}, {"umaban": 9, "name": "アパレイユ", "val": 4.4}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 4.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 3.7}, {"umaban": 10, "name": "エコロボルト", "val": 3.3}, {"umaban": 5, "name": "グランディマージュ", "val": 3.1}, {"umaban": 4, "name": "ゲレーロアスール", "val": 2.2}]}, {"label": "臨戦", "color": "#8c564b", "ranked": [{"umaban": 2, "name": "サリカリーフォリア", "val": 1.0}, {"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": -1.0}, {"umaban": 3, "name": "タイニーワンダー", "val": -1.0}, {"umaban": 12, "name": "フィアーブル", "val": -1.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": -1.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": -1.0}, {"umaban": 14, "name": "ディープスリー", "val": -1.0}]}, {"label": "人気補正", "color": "#bcbd22", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "騎手", "color": "#aec7e8", "ranked": [{"umaban": 6, "name": "メイショウイブキ", "val": 0.8}, {"umaban": 12, "name": "フィアーブル", "val": 0.3}, {"umaban": 10, "name": "エコロボルト", "val": 0.3}, {"umaban": 9, "name": "アパレイユ", "val": 0.2}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.2}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.2}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.2}, {"umaban": 8, "name": "ピカラ", "val": 0.1}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.1}, {"umaban": 5, "name": "グランディマージュ", "val": -0.2}, {"umaban": 4, "name": "ゲレーロアスール", "val": -0.3}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": -0.4}, {"umaban": 14, "name": "ディープスリー", "val": -0.5}, {"umaban": 2, "name": "サリカリーフォリア", "val": -1.2}]}, {"label": "馬体重", "color": "#7f7f7f", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "継続", "color": "#98df8a", "ranked": [{"umaban": 6, "name": "メイショウイブキ", "val": 1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 1.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 1.0}, {"umaban": 14, "name": "ディープスリー", "val": 1.0}, {"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "着差", "color": "#dbdb8d", "ranked": [{"umaban": 4, "name": "ゲレーロアスール", "val": 2.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 2.0}, {"umaban": 5, "name": "グランディマージュ", "val": 2.0}, {"umaban": 8, "name": "ピカラ", "val": 1.2}, {"umaban": 9, "name": "アパレイユ", "val": 1.2}, {"umaban": 10, "name": "エコロボルト", "val": 1.2}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": -1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": -1.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": -2.0}, {"umaban": 14, "name": "ディープスリー", "val": -2.0}]}, {"label": "枠順", "color": "#9edae5", "ranked": [{"umaban": 9, "name": "アパレイユ", "val": 1.5}, {"umaban": 12, "name": "フィアーブル", "val": 1.5}, {"umaban": 10, "name": "エコロボルト", "val": 1.5}, {"umaban": 11, "name": "ジャスティンルマン", "val": 1.5}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.5}, {"umaban": 14, "name": "ディープスリー", "val": 0.5}, {"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "昇級", "color": "#c5b0d5", "ranked": [{"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 8, "name": "ピカラ", "val": -1.0}, {"umaban": 9, "name": "アパレイユ", "val": -1.0}, {"umaban": 10, "name": "エコロボルト", "val": -1.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": -3.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": -3.0}, {"umaban": 5, "name": "グランディマージュ", "val": -3.0}]}, {"label": "SmartRC評価", "color": "#f39c12", "ranked": [{"umaban": 5, "name": "グランディマージュ", "val": 1.4}, {"umaban": 2, "name": "サリカリーフォリア", "val": 1.3}, {"umaban": 6, "name": "メイショウイブキ", "val": 1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.7}, {"umaban": 9, "name": "アパレイユ", "val": 0.3}, {"umaban": 10, "name": "エコロボルト", "val": 0.1}, {"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": -0.3}, {"umaban": 4, "name": "ゲレーロアスール", "val": -0.7}, {"umaban": 11, "name": "ジャスティンルマン", "val": -1.0}, {"umaban": 3, "name": "タイニーワンダー", "val": -1.6}]}, {"label": "馬場適性", "color": "#16a085", "ranked": [{"umaban": 1, "name": "エルモサカスターノ", "val": 2.5}, {"umaban": 3, "name": "タイニーワンダー", "val": 2.0}, {"umaban": 8, "name": "ピカラ", "val": 1.5}, {"umaban": 6, "name": "メイショウイブキ", "val": 1.5}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 1.5}, {"umaban": 9, "name": "アパレイユ", "val": 0.5}, {"umaban": 12, "name": "フィアーブル", "val": 0.5}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.5}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": -0.5}, {"umaban": 2, "name": "サリカリーフォリア", "val": -0.5}, {"umaban": 5, "name": "グランディマージュ", "val": -1.0}]}];
+  const ITEM_RANKINGS = [{"label": "最高出力", "color": "#d62728", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 24.0}, {"umaban": 9, "name": "アパレイユ", "val": 24.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 22.6}, {"umaban": 12, "name": "フィアーブル", "val": 20.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 19.9}, {"umaban": 10, "name": "エコロボルト", "val": 19.9}, {"umaban": 3, "name": "タイニーワンダー", "val": 18.7}, {"umaban": 11, "name": "ジャスティンルマン", "val": 18.6}, {"umaban": 13, "name": "バトゥカーダ", "val": 17.3}, {"umaban": 4, "name": "ゲレーロアスール", "val": 15.0}, {"umaban": 14, "name": "ディープスリー", "val": 13.1}, {"umaban": 2, "name": "サリカリーフォリア", "val": 8.3}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "クラス", "color": "#ff7f0e", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 25.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 23.6}, {"umaban": 9, "name": "アパレイユ", "val": 18.8}, {"umaban": 6, "name": "メイショウイブキ", "val": 17.3}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 16.8}, {"umaban": 12, "name": "フィアーブル", "val": 13.8}, {"umaban": 10, "name": "エコロボルト", "val": 10.5}, {"umaban": 11, "name": "ジャスティンルマン", "val": 10.1}, {"umaban": 1, "name": "エルモサカスターノ", "val": 10.1}, {"umaban": 13, "name": "バトゥカーダ", "val": 8.4}, {"umaban": 4, "name": "ゲレーロアスール", "val": 7.5}, {"umaban": 2, "name": "サリカリーフォリア", "val": 4.2}, {"umaban": 5, "name": "グランディマージュ", "val": 3.8}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}]}, {"label": "タイム", "color": "#1f77b4", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 20.0}, {"umaban": 9, "name": "アパレイユ", "val": 19.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 17.1}, {"umaban": 12, "name": "フィアーブル", "val": 13.8}, {"umaban": 3, "name": "タイニーワンダー", "val": 13.5}, {"umaban": 13, "name": "バトゥカーダ", "val": 12.6}, {"umaban": 4, "name": "ゲレーロアスール", "val": 10.4}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 8.6}, {"umaban": 10, "name": "エコロボルト", "val": 7.7}, {"umaban": 11, "name": "ジャスティンルマン", "val": 7.5}, {"umaban": 2, "name": "サリカリーフォリア", "val": 4.9}, {"umaban": 14, "name": "ディープスリー", "val": 2.4}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.5}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "展開", "color": "#9467bd", "ranked": [{"umaban": 6, "name": "メイショウイブキ", "val": 2.0}, {"umaban": 8, "name": "ピカラ", "val": 1.0}, {"umaban": 9, "name": "アパレイユ", "val": 1.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 1.0}, {"umaban": 10, "name": "エコロボルト", "val": 1.0}, {"umaban": 14, "name": "ディープスリー", "val": 1.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": -2.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": -2.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": -2.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": -3.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": -3.0}, {"umaban": 5, "name": "グランディマージュ", "val": -3.0}]}, {"label": "斤量", "color": "#2ca02c", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": -1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": -1.0}, {"umaban": 10, "name": "エコロボルト", "val": -1.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": -1.0}, {"umaban": 14, "name": "ディープスリー", "val": -1.0}, {"umaban": 5, "name": "グランディマージュ", "val": -1.0}]}, {"label": "距離", "color": "#e377c2", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 2.0}, {"umaban": 9, "name": "アパレイユ", "val": 2.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 2.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "コース", "color": "#17becf", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 9.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 7.3}, {"umaban": 2, "name": "サリカリーフォリア", "val": 7.2}, {"umaban": 3, "name": "タイニーワンダー", "val": 6.9}, {"umaban": 11, "name": "ジャスティンルマン", "val": 6.7}, {"umaban": 12, "name": "フィアーブル", "val": 5.7}, {"umaban": 13, "name": "バトゥカーダ", "val": 5.7}, {"umaban": 14, "name": "ディープスリー", "val": 5.4}, {"umaban": 9, "name": "アパレイユ", "val": 4.4}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 4.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 3.7}, {"umaban": 10, "name": "エコロボルト", "val": 3.3}, {"umaban": 5, "name": "グランディマージュ", "val": 3.1}, {"umaban": 4, "name": "ゲレーロアスール", "val": 2.2}]}, {"label": "臨戦", "color": "#8c564b", "ranked": [{"umaban": 2, "name": "サリカリーフォリア", "val": 1.0}, {"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": -1.0}, {"umaban": 3, "name": "タイニーワンダー", "val": -1.0}, {"umaban": 12, "name": "フィアーブル", "val": -1.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": -1.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": -1.0}, {"umaban": 14, "name": "ディープスリー", "val": -1.0}]}, {"label": "人気補正", "color": "#bcbd22", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "騎手", "color": "#aec7e8", "ranked": [{"umaban": 6, "name": "メイショウイブキ", "val": 0.8}, {"umaban": 12, "name": "フィアーブル", "val": 0.3}, {"umaban": 10, "name": "エコロボルト", "val": 0.3}, {"umaban": 9, "name": "アパレイユ", "val": 0.2}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.2}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.2}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.2}, {"umaban": 8, "name": "ピカラ", "val": 0.1}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.1}, {"umaban": 5, "name": "グランディマージュ", "val": -0.2}, {"umaban": 4, "name": "ゲレーロアスール", "val": -0.3}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": -0.4}, {"umaban": 14, "name": "ディープスリー", "val": -0.5}, {"umaban": 2, "name": "サリカリーフォリア", "val": -1.2}]}, {"label": "馬体重", "color": "#7f7f7f", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "継続", "color": "#98df8a", "ranked": [{"umaban": 6, "name": "メイショウイブキ", "val": 1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 1.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 1.0}, {"umaban": 14, "name": "ディープスリー", "val": 1.0}, {"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "着差", "color": "#dbdb8d", "ranked": [{"umaban": 4, "name": "ゲレーロアスール", "val": 2.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 2.0}, {"umaban": 5, "name": "グランディマージュ", "val": 2.0}, {"umaban": 8, "name": "ピカラ", "val": 1.2}, {"umaban": 9, "name": "アパレイユ", "val": 1.2}, {"umaban": 10, "name": "エコロボルト", "val": 1.2}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": -1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": -1.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": -2.0}, {"umaban": 14, "name": "ディープスリー", "val": -2.0}]}, {"label": "枠順", "color": "#9edae5", "ranked": [{"umaban": 9, "name": "アパレイユ", "val": 1.5}, {"umaban": 10, "name": "エコロボルト", "val": 1.5}, {"umaban": 11, "name": "ジャスティンルマン", "val": 1.5}, {"umaban": 12, "name": "フィアーブル", "val": 0.5}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.5}, {"umaban": 14, "name": "ディープスリー", "val": 0.5}, {"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}]}, {"label": "昇級", "color": "#c5b0d5", "ranked": [{"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 8, "name": "ピカラ", "val": -1.0}, {"umaban": 9, "name": "アパレイユ", "val": -1.0}, {"umaban": 10, "name": "エコロボルト", "val": -1.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": -3.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": -3.0}, {"umaban": 5, "name": "グランディマージュ", "val": -3.0}]}, {"label": "クラス適応", "color": "#1abc9c", "ranked": [{"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 9, "name": "アパレイユ", "val": 0.0}, {"umaban": 6, "name": "メイショウイブキ", "val": 0.0}, {"umaban": 3, "name": "タイニーワンダー", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": 0.0}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 5, "name": "グランディマージュ", "val": 0.0}, {"umaban": 13, "name": "バトゥカーダ", "val": -1.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": -1.0}, {"umaban": 12, "name": "フィアーブル", "val": -2.0}, {"umaban": 2, "name": "サリカリーフォリア", "val": -2.0}, {"umaban": 14, "name": "ディープスリー", "val": -2.0}]}, {"label": "SmartRC評価", "color": "#f39c12", "ranked": [{"umaban": 5, "name": "グランディマージュ", "val": 1.4}, {"umaban": 2, "name": "サリカリーフォリア", "val": 1.3}, {"umaban": 6, "name": "メイショウイブキ", "val": 1.0}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.7}, {"umaban": 9, "name": "アパレイユ", "val": 0.3}, {"umaban": 10, "name": "エコロボルト", "val": 0.1}, {"umaban": 8, "name": "ピカラ", "val": 0.0}, {"umaban": 12, "name": "フィアーブル", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 1, "name": "エルモサカスターノ", "val": 0.0}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": -0.3}, {"umaban": 4, "name": "ゲレーロアスール", "val": -0.7}, {"umaban": 11, "name": "ジャスティンルマン", "val": -1.0}, {"umaban": 3, "name": "タイニーワンダー", "val": -1.6}]}, {"label": "馬場適性", "color": "#16a085", "ranked": [{"umaban": 1, "name": "エルモサカスターノ", "val": 2.5}, {"umaban": 3, "name": "タイニーワンダー", "val": 2.0}, {"umaban": 8, "name": "ピカラ", "val": 1.5}, {"umaban": 6, "name": "メイショウイブキ", "val": 1.5}, {"umaban": 7, "name": "ゴディアンフィンチ", "val": 1.5}, {"umaban": 9, "name": "アパレイユ", "val": 0.5}, {"umaban": 12, "name": "フィアーブル", "val": 0.5}, {"umaban": 4, "name": "ゲレーロアスール", "val": 0.5}, {"umaban": 13, "name": "バトゥカーダ", "val": 0.0}, {"umaban": 11, "name": "ジャスティンルマン", "val": 0.0}, {"umaban": 14, "name": "ディープスリー", "val": 0.0}, {"umaban": 10, "name": "エコロボルト", "val": -0.5}, {"umaban": 2, "name": "サリカリーフォリア", "val": -0.5}, {"umaban": 5, "name": "グランディマージュ", "val": -1.0}]}];
   const grid = document.getElementById('itemRankingGrid');
   if (!grid) return;
   const RANK_ICONS = ['🥇','🥈','🥉'];

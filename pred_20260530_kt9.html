@@ -40,7 +40,12 @@
     background: rgba(255,255,255,0.05);
     padding: 16px; border-radius: 10px; text-align: center;
   }
-  .summary-value { font-size: 26px; font-weight: bold; color: #f39c12; }
+  .summary-value {
+    font-size: 26px; font-weight: bold; color: #f39c12;
+    word-break: break-all; line-height: 1.2;
+  }
+  .summary-value.small { font-size: 16px; }
+  .summary-value.xsmall { font-size: 13px; }
   .summary-label { font-size: 12px; color: #bdc3c7; margin-top: 4px; }
 
   .shutuba-banner {
@@ -163,9 +168,10 @@
     border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;
   }
   .bango-badge {
-    font-size: 14px; font-weight: bold; color: #f1c40f;
-    background: rgba(241,196,15,0.15);
-    padding: 2px 8px; border-radius: 5px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 26px;
+    border-radius: 5px; font-size: 12px; font-weight: bold;
+    border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;
   }
   .leg-badge {
     padding: 3px 10px; border-radius: 12px;
@@ -324,15 +330,15 @@
         <div class="summary-label">出走頭数</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">スローペース（テン速度競合3頭）</div>
+        <div class="summary-value xsmall">スローペース（テン速度競合3頭）</div>
         <div class="summary-label">ペース予想</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">イッテラッシ</div>
+        <div class="summary-value small">ビービークローサー</div>
         <div class="summary-label">最高スコア馬</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">74.9<span style="font-size:10px;color:#f1c40f;font-weight:700;margin-left:4px">(偏差65)</span></div>
+        <div class="summary-value">76.3<span style="font-size:10px;color:#f1c40f;font-weight:700;margin-left:4px">(偏差64)</span></div>
         <div class="summary-label">最高スコア</div>
       </div>
     </div>
@@ -346,7 +352,7 @@
       芝 <b style="color:#27ae60;font-size:15px">良</b>
       ／ダート <b style="color:#27ae60;font-size:15px">良</b>
       
-      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（現在馬場:良 + 降水なし）</span>
+      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（情報取得失敗のためデフォルト(良)）</span>
     </div>
 
   <div class="section">
@@ -354,21 +360,21 @@
     <div class="podium">
       <div class="podium-card first">
         <div class="podium-mark">🥇</div>
-        <div class="podium-name">イッテラッシャイ</div>
-        <div class="podium-info">8枠 8番 / 先行 ・ 斎藤新 ・ -倍 (-人気)</div>
-        <div class="podium-score">74.9<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 65</div></div>
+        <div class="podium-name">ビービークローサー</div>
+        <div class="podium-info">4枠 4番 / 差し ・ 坂井瑠星 ・ 想定4番人気</div>
+        <div class="podium-score">76.3<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 64</div></div>
       </div>
       <div class="podium-card second">
         <div class="podium-mark">🥈</div>
-        <div class="podium-name">ビービークローサー</div>
-        <div class="podium-info">4枠 4番 / 差し ・ 坂井瑠星 ・ -倍 (-人気)</div>
-        <div class="podium-score">73.3<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 64</div></div>
+        <div class="podium-name">イッテラッシャイ</div>
+        <div class="podium-info">8枠 8番 / 先行 ・ 斎藤新 ・ 想定1番人気</div>
+        <div class="podium-score">76.0<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 64</div></div>
       </div>
       <div class="podium-card third">
         <div class="podium-mark">🥉</div>
         <div class="podium-name">ソルチェリア</div>
-        <div class="podium-info">7枠 7番 / 先行 ・ 幸英明 ・ -倍 (-人気)</div>
-        <div class="podium-score">58.7<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 58</div></div>
+        <div class="podium-info">7枠 7番 / 先行 ・ 幸英明 ・ 想定2番人気</div>
+        <div class="podium-score">59.7<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 57</div></div>
       </div>
     </div>
   </div>
@@ -385,9 +391,9 @@
                    padding:3px 14px;border-radius:5px;border:2px solid #f39c12;">
         🟡 要検討
       </span>
-      <span style="color:#ccc;font-size:12px;">SmartRC推定から2順位上の乖離あり（中穴の可能性）</span>
+      <span style="color:#ccc;font-size:12px;">SmartRC推定から3順位上の乖離あり（中穴の可能性）</span>
       
-      <span style="margin-left:14px;padding:3px 10px;background:#2c3e50;border-radius:4px;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">ビービークローサー</b>（予想2位 / SmartRC4番人気 / 乖離+2 / 単勝-）</span>
+      <span style="margin-left:14px;padding:3px 10px;background:#2c3e50;border-radius:4px;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">ビービークローサー</b>（予想1位 / 想定4番人気 / 乖離+3 / 単勝-）</span>
     </div>
     <div class="temp-slider">
       <label style="font-weight:600">モデル信頼度</label>
@@ -424,7 +430,7 @@
     </div>
     <div class="prob-note" id="evNote">
       ※ 勝率はスコアのsoftmax変換による推定値。単勝EV = 勝率推定 × 現在オッズ − 1。<br>
-      <b>採算オッズ</b> = EV がちょうど 0 になるオッズ（損益分岐点）。現在オッズ ≥ 採算オッズなら <span style="color:#2ecc71">緑</span>（割安）、下回れば <span style="color:#e74c3c">赤</span>（割高）。<br>
+      <b>採算オッズ</b> = EV がちょうど 0 になるオッズ（損益分岐点）。実オッズ ≥ 採算オッズなら EV プラスの可能性。<br>
       現在オッズ欄に締切前の実オッズを入力すると EV が即時更新されます。
     </div>
   </div>
@@ -438,10 +444,13 @@
           <th style="white-space:nowrap">順位</th><th style="white-space:nowrap">枠-番</th><th style="white-space:nowrap">馬名</th>
           <th style="white-space:nowrap">脚質</th><th style="white-space:nowrap">スコア</th><th style="white-space:nowrap">市場評価</th>
           <th style="white-space:nowrap" title="SmartRC推定人気順">推定人気</th>
+          <th style="white-space:nowrap" title="前走の馬場・展開有利不利評価 A/B=不利→巻き返し候補 D/E=有利→過信注意">前走評価</th>
+          <th style="white-space:nowrap">斤量</th>
+          <th style="white-space:nowrap">年齢・性別</th>
           <th style="white-space:nowrap">騎手</th>
         </tr>
       </thead>
-      <tbody><tr><td>1</td><td>8枠-8番</td><td><b>イッテラッシャイ</b><span class="mini-badge red">距離+2</span><span class="mini-badge purple">休養+1</span><span class="mini-badge blue">コース+2.6</span></td><td>先行</td><td style="white-space:nowrap"><b>74.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差65</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">1位</b></td><td>斎藤新</td></tr><tr><td>2</td><td>4枠-4番</td><td><b>ビービークローサー</b><span class="mini-badge red">距離+2</span><span class="mini-badge blue">コース+3.3</span></td><td>差し</td><td style="white-space:nowrap"><b>73.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差64</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">4位</b></td><td>坂井瑠星</td></tr><tr><td>3</td><td>7枠-7番</td><td><b>ソルチェリア</b><span class="mini-badge red">距離+2</span><span class="mini-badge blue">コース+4.8</span></td><td>先行</td><td style="white-space:nowrap"><b>58.7</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差58</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">2位</b></td><td>幸英明</td></tr><tr><td>4</td><td>5枠-5番</td><td><b>タガノアバンドーネ</b><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+6.9</span></td><td>先行</td><td style="white-space:nowrap"><b>49.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差53</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">3位</b></td><td>川田将雅</td></tr><tr><td>5</td><td>2枠-2番</td><td><b>ケンタッキーホーム</b><span class="mini-badge blue">コース+7.4</span></td><td>差し</td><td style="white-space:nowrap"><b>44.5</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差51</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">5位</b></td><td>田口貫太</td></tr><tr><td>6</td><td>6枠-6番</td><td><b>ビズロード</b><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+3.7</span></td><td>先行</td><td style="white-space:nowrap"><b>22.8</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差42</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">8位</b></td><td>菱田裕二</td></tr><tr><td>7</td><td>1枠-1番</td><td><b>スターシップ</b><span class="mini-badge red">コース-1.0</span></td><td>差し</td><td style="white-space:nowrap"><b>19.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差40</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">6位</b></td><td>松若風馬</td></tr><tr><td>8</td><td>3枠-3番</td><td><b>ケンフィールド</b><span class="mini-badge purple">休養-1</span><span class="mini-badge blue">コース+6.3</span></td><td>先行</td><td style="white-space:nowrap"><b>18.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差40</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">7位</b></td><td>高杉吏麒</td></tr><tr><td>9</td><td>8枠-9番</td><td><b>サイモンゼスト</b><span class="mini-badge blue">コース+3.1</span></td><td>差し</td><td style="white-space:nowrap"><b>14.0</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差38</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">9位</b></td><td>酒井学</td></tr></tbody>
+      <tbody><tr><td>1</td><td style="white-space:nowrap"><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">4枠</span><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">4番</span></td><td><b>ビービークローサー</b></td><td>差し</td><td style="white-space:nowrap"><b>76.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差64</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">4位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#e67e22;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">D 有利</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>坂井瑠星</td></tr><tr><td>2</td><td style="white-space:nowrap"><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">8枠</span><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">8番</span></td><td><b>イッテラッシャイ</b></td><td>先行</td><td style="white-space:nowrap"><b>76.0</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差64</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">1位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>斎藤新</td></tr><tr><td>3</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">7枠</span><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">7番</span></td><td><b>ソルチェリア</b></td><td>先行</td><td style="white-space:nowrap"><b>59.7</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差57</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">2位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>幸英明</td></tr><tr><td>4</td><td style="white-space:nowrap"><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">5枠</span><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">5番</span></td><td><b>タガノアバンドーネ</b></td><td>先行</td><td style="white-space:nowrap"><b>50.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差54</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">3位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>川田将雅</td></tr><tr><td>5</td><td style="white-space:nowrap"><span style="display:inline-block;background:#666666;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">2枠</span><span style="display:inline-block;background:#666666;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">2番</span></td><td><b>ケンタッキーホーム</b></td><td>差し</td><td style="white-space:nowrap"><b>45.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差52</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">5位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#2ecc71;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">B 不利</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>田口貫太</td></tr><tr><td>6</td><td style="white-space:nowrap"><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">6枠</span><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">6番</span></td><td><b>ビズロード</b></td><td>先行</td><td style="white-space:nowrap"><b>21.0</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差42</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">8位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 セ</td><td>菱田裕二</td></tr><tr><td>7</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FFFFFF;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">1枠</span><span style="display:inline-block;background:#FFFFFF;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">1番</span></td><td><b>スターシップ</b></td><td>差し</td><td style="white-space:nowrap"><b>16.6</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差40</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">6位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#2ecc71;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">B 不利</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>松若風馬</td></tr><tr><td>8</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">3枠</span><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">3番</span></td><td><b>ケンフィールド</b></td><td>先行</td><td style="white-space:nowrap"><b>15.8</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差39</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">7位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>高杉吏麒</td></tr><tr><td>9</td><td style="white-space:nowrap"><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">8枠</span><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">9番</span></td><td><b>サイモンゼスト</b></td><td>差し</td><td style="white-space:nowrap"><b>12.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差38</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">9位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">3歳 牡</td><td>酒井学</td></tr></tbody>
     </table>
     </div>
   </div>
@@ -483,7 +492,7 @@
 
 <script>
 (function(){
-  const fHorses = [{"name": "イッテラッシャイ", "uma": 8, "waku": 8, "kyaku": "先行", "ten_r": 2, "aga_r": 2}, {"name": "ビービークローサー", "uma": 4, "waku": 4, "kyaku": "差し", "ten_r": 1, "aga_r": 1}, {"name": "ソルチェリア", "uma": 7, "waku": 7, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "タガノアバンドーネ", "uma": 5, "waku": 5, "kyaku": "先行", "ten_r": 3, "aga_r": 4}, {"name": "ケンタッキーホーム", "uma": 2, "waku": 2, "kyaku": "差し", "ten_r": null, "aga_r": 3}, {"name": "ビズロード", "uma": 6, "waku": 6, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "スターシップ", "uma": 1, "waku": 1, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ケンフィールド", "uma": 3, "waku": 3, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "サイモンゼスト", "uma": 9, "waku": 8, "kyaku": "差し", "ten_r": 4, "aga_r": null}];
+  const fHorses = [{"name": "ビービークローサー", "uma": 4, "waku": 4, "kyaku": "差し", "ten_r": 1, "aga_r": 1}, {"name": "イッテラッシャイ", "uma": 8, "waku": 8, "kyaku": "先行", "ten_r": 2, "aga_r": 2}, {"name": "ソルチェリア", "uma": 7, "waku": 7, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "タガノアバンドーネ", "uma": 5, "waku": 5, "kyaku": "先行", "ten_r": 3, "aga_r": 4}, {"name": "ケンタッキーホーム", "uma": 2, "waku": 2, "kyaku": "差し", "ten_r": null, "aga_r": 3}, {"name": "ビズロード", "uma": 6, "waku": 6, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "スターシップ", "uma": 1, "waku": 1, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ケンフィールド", "uma": 3, "waku": 3, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "サイモンゼスト", "uma": 9, "waku": 8, "kyaku": "差し", "ten_r": 4, "aga_r": null}];
   const pace      = 'low';
   const N         = 9;
   const direction  = '右';  // '左'=反時計 / '右'=時計回り
@@ -740,7 +749,7 @@
   </div>
 
   <div class="section">
-    <h2>💡 スコア補正の見方 v3（16要素）</h2>
+    <h2>💡 スコア補正の見方（16要素）</h2>
     <div class="adj-legend">
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#e74c3c"></div>
@@ -803,6 +812,10 @@
         <span><b>昇級戦補正</b>（0〜−3pt）: 1クラス昇級−1、2クラス昇級−2、3クラス以上昇級−3</span>
       </div>
       <div class="adj-legend-item">
+        <div class="adj-dot" style="background:#1abc9c"></div>
+        <span><b>クラス適応補正</b>（−2〜+1.5pt）: 今走クラス以上での直近5走（1年以内）の1位との着差加重平均で適応度を評価。着差≤0.2秒→+1.5pt（好走継続）、≤0.5秒→+0.8pt、≤1.0秒→0pt、≤1.8秒→-1.0pt、>1.8秒→-2.0pt（壁）。最低2走以上のデータが必要。未勝利クラスは加点上限+0.5pt。</span>
+      </div>
+      <div class="adj-legend-item">
         <div class="adj-dot" style="background:#f39c12"></div>
         <span><b>SmartRC評価補正</b>（−4.5〜+4.5pt）: 過去5走の馬場・展開有利不利評価（h1〜h5_fr_baba）を加重平均（前走×1.0/前々走×0.6/以降逓減）。A=+4.5/B=+2.5pt 上方修正、D=−2.5/E=−4.5pt 下方修正、C=0pt</span>
       </div>
@@ -816,154 +829,24 @@
   <div class="section">
     <h2>🐴 全18頭 詳細スコア（📋で過去走ドリルダウン）</h2>
     <div class="horses-grid">
-<div class="horse-card rank-1" data-rank="1" data-leg="先行">
+<div class="horse-card rank-1" data-rank="1" data-leg="差し">
   <div class="rank-badge" style="background:#e74c3c">
     <span class="rank-num">1</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#e91e8c;color:#fff;">8枠</span><span class="bango-badge">8番</span>
-      <h3>イッテラッシャイ</h3>
-      <span class="leg-badge" style="background:#f39c12">先行</span>
-      <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#17becf">コース +2.6</span><span class="adj-badge" style="background:#8c564b">休養 +1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.1</span><span class="adj-badge" style="background:#dbdb8d">着差 +1.6</span><span class="adj-badge" style="background:#16a085">馬場適性 +3.0</span>
-      
-      
-      <span class="meta-info">牡3 / 斎藤新 / 5走</span>
-      <button class="drill-btn" onclick="toggleDrill('h0', this)">📋 過去走</button>
-    </div>
-    <div class="score-row">
-      <div class="total-score">
-        <span class="big-num">74.9</span>
-        <span class="small-label">総合スコア</span>
-        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#e74c3c;color:#fff;line-height:1.3">S</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 65</span>
-        <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
-          単勝 -倍<br>(-人気)
-        </span>
-      </div>
-      <div class="score-bars">
-        <div class="bar-row">
-          <label>最高出力</label>
-          <div class="bar"><div class="fill" style="width:86%;background:#e74c3c"></div></div>
-          <span class="val">30.0/35</span>
-        </div>
-        <div class="bar-row">
-          <label>クラス補正</label>
-          <div class="bar"><div class="fill" style="width:77%;background:#f39c12"></div></div>
-          <span class="val">19.3/25</span>
-        </div>
-        <div class="bar-row">
-          <label>タイム偏差</label>
-          <div class="bar"><div class="fill" style="width:67%;background:#3498db"></div></div>
-          <span class="val">16.7/25</span>
-        </div>
-        <div class="bar-row">
-          <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:20%"></div></div>
-          <span class="val">+3/±15</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>斤量補正</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:33%"></div></div>
-          <span class="val">-1.0/±3</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>距離補正</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:50%"></div></div>
-          <span class="val">+2/−4</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>コース適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:52%"></div></div>
-          <span class="val">+2.6/±5</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>臨戦補正</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:14%"></div></div>
-          <span class="val">+1/−7</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>人気補正</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
-          <span class="val">+0.0/+3</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>騎手実績</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:5%"></div></div>
-          <span class="val">-0.1/±2</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>枠順補正</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
-          <span class="val">+0.0/±2</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>馬場適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:100%"></div></div>
-          <span class="val">+3.0/±3</span>
-        </div>
-      </div>
-    </div>
-    <div class="extra-info">
-      <span>補正最良: <b>113</b></span>
-      <span>上がり平均: <b>37.4</b></span>
-      <span>平均通過: <b>4.6</b></span>
-      <span>コース類似度: <b>0.68</b></span>
-      <span>父: ミスチヴィアスアレックス</span>
-      <span>母父: ディープスカイ</span>
-      <span>時計データ: 5/5走</span>
-      <span style="color:#aaa">🏋️ 坂路:12.10s ウッド:11.20s</span>
-    </div>
-    
-<div class="drilldown-wrap" id="drill-h0" style="display:none;">
-  <div class="drilldown-header">
-    <span>📋 過去走詳細 (5走)</span>
-    <span class="drill-legend">
-      <span class="td-pos">■</span>平均より速い
-      <span class="td-neg">■</span>平均より遅い
-      &nbsp;
-      <span class="sim-hi">■</span>類似コース
-      <span class="sim-mid">■</span>やや類似
-      <span class="sim-lo">■</span>異質コース
-      &nbsp;
-      <span class="pci-hi">■</span>ハイペース
-      <span class="pci-lo">■</span>スローペース
-    </span>
-  </div>
-  <div style="overflow-x:auto">
-  <table class="past-table">
-    <thead>
-      <tr>
-        <th>日付</th><th>場所</th><th>コース</th><th>クラス</th>
-        <th>着順</th><th>走破タイム</th><th>馬場</th>
-        <th>平均差</th><th>コース適性</th><th>PCI</th>
-        <th>上がり3F</th><th>4角</th><th>騎手</th><th>斤量</th>
-      </tr>
-    </thead>
-    <tbody><tr><td>2026-04-19</td><td>中山</td><td><span class="course-tag">中山ダート1800m</span></td><td>1勝</td><td class="center"><b>1/6</b></td><td class="center">1:50.80</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-3.00s</span></td><td class="center"><span class="sim-hi">0.80</span></td><td class="center"><span class="pci-hi">49.3</span></td><td class="center">37.1</td><td class="center">1</td><td>戸崎圭太</td><td class="center">57.0</td></tr><tr><td>2026-03-28</td><td>中山</td><td><span class="course-tag">中山ダート1800m</span></td><td>OP</td><td class="center"><b>4/10</b></td><td class="center">1:51.70</td><td class="center">重 <small style="color:#888">-0.72s</small></td><td class="center"><span class="td-neg">+0.42s</span></td><td class="center"><span class="sim-hi">0.80</span></td><td class="center"><span class="pci-hi">47.8</span></td><td class="center">37.8</td><td class="center">4</td><td>横山武史</td><td class="center">57.0</td></tr><tr><td>2026-02-22</td><td>東京</td><td><span class="course-tag">東京ダート1600m</span></td><td>OP</td><td class="center"><b>3/10</b></td><td class="center">1:37.10</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.50s</span></td><td class="center"><span class="sim-lo">0.48</span></td><td class="center"><span class="pci-hi">44.9</span></td><td class="center">37.6</td><td class="center">3</td><td>戸崎圭太</td><td class="center">57.0</td></tr><tr><td>2025-12-13</td><td>中山</td><td><span class="course-tag">中山ダート1800m</span></td><td>未勝利</td><td class="center"><b>1/16</b></td><td class="center">1:55.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-2.40s</span></td><td class="center"><span class="sim-hi">0.80</span></td><td class="center">50.4</td><td class="center">38.4</td><td class="center">2</td><td>戸崎圭太</td><td class="center">56.0</td></tr><tr><td>2025-10-19</td><td>東京</td><td><span class="course-tag">東京ダート1600m</span></td><td>新馬</td><td class="center"><b>3/16</b></td><td class="center">1:40.40</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.00s</span></td><td class="center"><span class="sim-lo">0.48</span></td><td class="center"><span class="pci-lo">57.8</span></td><td class="center">35.9</td><td class="center">13</td><td>石橋脩</td><td class="center">56.0</td></tr></tbody>
-  </table>
-  </div>
-</div>
-  </div>
-</div>
-<div class="horse-card rank-2" data-rank="2" data-leg="差し">
-  <div class="rank-badge" style="background:#e74c3c">
-    <span class="rank-num">2</span>
-  </div>
-  <div class="horse-main">
-    <div class="horse-header">
-      <span class="waku-badge" style="background:#4488FF;color:#fff;">4枠</span><span class="bango-badge">4番</span>
+      <span class="waku-badge" style="background:#4488FF;color:#fff;">4枠</span><span class="bango-badge" style="background:#4488FF;color:#fff;">4番</span>
       <h3>ビービークローサー</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-mid">📊 参考可</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#17becf">コース +3.3</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.7</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#dbdb8d">着差 +1.6</span><span class="adj-badge" style="background:#16a085">馬場適性 +3.0</span>
       
       
       <span class="meta-info">牡3 / 坂井瑠星 / 4走</span>
-      <button class="drill-btn" onclick="toggleDrill('h1', this)">📋 過去走</button>
+      <button class="drill-btn" onclick="toggleDrill('h0', this)">📋 過去走</button>
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">73.3</span>
+        <span class="big-num">76.3</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#e74c3c;color:#fff;line-height:1.3">S</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 64</span>
@@ -1045,7 +928,7 @@
       <span style="color:#aaa">🏋️ 坂路:12.20s </span>
     </div>
     
-<div class="drilldown-wrap" id="drill-h1" style="display:none;">
+<div class="drilldown-wrap" id="drill-h0" style="display:none;">
   <div class="drilldown-header">
     <span>📋 過去走詳細 (4走)</span>
     <span class="drill-legend">
@@ -1076,13 +959,143 @@
 </div>
   </div>
 </div>
+<div class="horse-card rank-2" data-rank="2" data-leg="先行">
+  <div class="rank-badge" style="background:#e74c3c">
+    <span class="rank-num">2</span>
+  </div>
+  <div class="horse-main">
+    <div class="horse-header">
+      <span class="waku-badge" style="background:#e91e8c;color:#fff;">8枠</span><span class="bango-badge" style="background:#e91e8c;color:#fff;">8番</span>
+      <h3>イッテラッシャイ</h3>
+      <span class="leg-badge" style="background:#f39c12">先行</span>
+      <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#17becf">コース +2.6</span><span class="adj-badge" style="background:#8c564b">休養 +1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.1</span><span class="adj-badge" style="background:#dbdb8d">着差 +1.6</span><span class="adj-badge" style="background:#16a085">馬場適性 +3.0</span>
+      
+      
+      <span class="meta-info">牡3 / 斎藤新 / 5走</span>
+      <button class="drill-btn" onclick="toggleDrill('h1', this)">📋 過去走</button>
+    </div>
+    <div class="score-row">
+      <div class="total-score">
+        <span class="big-num">76.0</span>
+        <span class="small-label">総合スコア</span>
+        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#e74c3c;color:#fff;line-height:1.3">S</span></div>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 64</span>
+        <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
+          単勝 -倍<br>(-人気)
+        </span>
+      </div>
+      <div class="score-bars">
+        <div class="bar-row">
+          <label>最高出力</label>
+          <div class="bar"><div class="fill" style="width:86%;background:#e74c3c"></div></div>
+          <span class="val">30.0/35</span>
+        </div>
+        <div class="bar-row">
+          <label>クラス補正</label>
+          <div class="bar"><div class="fill" style="width:77%;background:#f39c12"></div></div>
+          <span class="val">19.3/25</span>
+        </div>
+        <div class="bar-row">
+          <label>タイム偏差</label>
+          <div class="bar"><div class="fill" style="width:67%;background:#3498db"></div></div>
+          <span class="val">16.7/25</span>
+        </div>
+        <div class="bar-row">
+          <label>展開適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:20%"></div></div>
+          <span class="val">+3/±15</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>斤量補正</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:33%"></div></div>
+          <span class="val">-1.0/±3</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>距離補正</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:50%"></div></div>
+          <span class="val">+2/−4</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>コース適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:52%"></div></div>
+          <span class="val">+2.6/±5</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>臨戦補正</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:14%"></div></div>
+          <span class="val">+1/−7</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>人気補正</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/+3</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>騎手実績</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:5%"></div></div>
+          <span class="val">-0.1/±2</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>枠順補正</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±2</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:100%"></div></div>
+          <span class="val">+3.0/±3</span>
+        </div>
+      </div>
+    </div>
+    <div class="extra-info">
+      <span>補正最良: <b>113</b></span>
+      <span>上がり平均: <b>37.4</b></span>
+      <span>平均通過: <b>4.6</b></span>
+      <span>コース類似度: <b>0.68</b></span>
+      <span>父: ミスチヴィアスアレックス</span>
+      <span>母父: ディープスカイ</span>
+      <span>時計データ: 5/5走</span>
+      <span style="color:#aaa">🏋️ 坂路:12.10s ウッド:11.20s</span>
+    </div>
+    
+<div class="drilldown-wrap" id="drill-h1" style="display:none;">
+  <div class="drilldown-header">
+    <span>📋 過去走詳細 (5走)</span>
+    <span class="drill-legend">
+      <span class="td-pos">■</span>平均より速い
+      <span class="td-neg">■</span>平均より遅い
+      &nbsp;
+      <span class="sim-hi">■</span>類似コース
+      <span class="sim-mid">■</span>やや類似
+      <span class="sim-lo">■</span>異質コース
+      &nbsp;
+      <span class="pci-hi">■</span>ハイペース
+      <span class="pci-lo">■</span>スローペース
+    </span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="past-table">
+    <thead>
+      <tr>
+        <th>日付</th><th>場所</th><th>コース</th><th>クラス</th>
+        <th>着順</th><th>走破タイム</th><th>馬場</th>
+        <th>平均差</th><th>コース適性</th><th>PCI</th>
+        <th>上がり3F</th><th>4角</th><th>騎手</th><th>斤量</th>
+      </tr>
+    </thead>
+    <tbody><tr><td>2026-04-19</td><td>中山</td><td><span class="course-tag">中山ダート1800m</span></td><td>1勝</td><td class="center"><b>1/6</b></td><td class="center">1:50.80</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-3.00s</span></td><td class="center"><span class="sim-hi">0.80</span></td><td class="center"><span class="pci-hi">49.3</span></td><td class="center">37.1</td><td class="center">1</td><td>戸崎圭太</td><td class="center">57.0</td></tr><tr><td>2026-03-28</td><td>中山</td><td><span class="course-tag">中山ダート1800m</span></td><td>OP</td><td class="center"><b>4/10</b></td><td class="center">1:51.70</td><td class="center">重 <small style="color:#888">-0.72s</small></td><td class="center"><span class="td-neg">+0.42s</span></td><td class="center"><span class="sim-hi">0.80</span></td><td class="center"><span class="pci-hi">47.8</span></td><td class="center">37.8</td><td class="center">4</td><td>横山武史</td><td class="center">57.0</td></tr><tr><td>2026-02-22</td><td>東京</td><td><span class="course-tag">東京ダート1600m</span></td><td>OP</td><td class="center"><b>3/10</b></td><td class="center">1:37.10</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.50s</span></td><td class="center"><span class="sim-lo">0.48</span></td><td class="center"><span class="pci-hi">44.9</span></td><td class="center">37.6</td><td class="center">3</td><td>戸崎圭太</td><td class="center">57.0</td></tr><tr><td>2025-12-13</td><td>中山</td><td><span class="course-tag">中山ダート1800m</span></td><td>未勝利</td><td class="center"><b>1/16</b></td><td class="center">1:55.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-2.40s</span></td><td class="center"><span class="sim-hi">0.80</span></td><td class="center">50.4</td><td class="center">38.4</td><td class="center">2</td><td>戸崎圭太</td><td class="center">56.0</td></tr><tr><td>2025-10-19</td><td>東京</td><td><span class="course-tag">東京ダート1600m</span></td><td>新馬</td><td class="center"><b>3/16</b></td><td class="center">1:40.40</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.00s</span></td><td class="center"><span class="sim-lo">0.48</span></td><td class="center"><span class="pci-lo">57.8</span></td><td class="center">35.9</td><td class="center">13</td><td>石橋脩</td><td class="center">56.0</td></tr></tbody>
+  </table>
+  </div>
+</div>
+  </div>
+</div>
 <div class="horse-card rank-3" data-rank="3" data-leg="先行">
   <div class="rank-badge" style="background:#f39c12">
     <span class="rank-num">3</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#FF8822;color:#fff;">7枠</span><span class="bango-badge">7番</span>
+      <span class="waku-badge" style="background:#FF8822;color:#fff;">7枠</span><span class="bango-badge" style="background:#FF8822;color:#fff;">7番</span>
       <h3>ソルチェリア</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#e377c2">距離 +2.0</span><span class="adj-badge" style="background:#17becf">コース +4.8</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.7</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#16a085">馬場適性 +2.0</span>
@@ -1093,10 +1106,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">58.7</span>
+        <span class="big-num">59.7</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#f39c12;color:#fff;line-height:1.3">A</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 58</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 57</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1207,12 +1220,12 @@
   </div>
 </div>
 <div class="horse-card rank-4" data-rank="4" data-leg="先行">
-  <div class="rank-badge" style="background:#3498db">
+  <div class="rank-badge" style="background:#f39c12">
     <span class="rank-num">4</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#DDDD00;color:#111;">5枠</span><span class="bango-badge">5番</span>
+      <span class="waku-badge" style="background:#DDDD00;color:#111;">5枠</span><span class="bango-badge" style="background:#DDDD00;color:#111;">5番</span>
       <h3>タガノアバンドーネ</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +6.9</span><span class="adj-badge" style="background:#c0392b">休養 -1.4</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.3</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#dbdb8d">着差 +1.6</span><span class="adj-badge" style="background:#16a085">馬場適性 +3.0</span>
@@ -1223,10 +1236,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">49.1</span>
+        <span class="big-num">50.3</span>
         <span class="small-label">総合スコア</span>
-        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 53</span>
+        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#f39c12;color:#fff;line-height:1.3">A</span></div>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 54</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1342,7 +1355,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#666666;color:#fff;">2枠</span><span class="bango-badge">2番</span>
+      <span class="waku-badge" style="background:#666666;color:#fff;">2枠</span><span class="bango-badge" style="background:#666666;color:#fff;">2番</span>
       <h3>ケンタッキーホーム</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +7.4</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#dbdb8d">着差 +1.6</span><span class="adj-badge" style="background:#16a085">馬場適性 +1.0</span>
@@ -1353,10 +1366,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">44.5</span>
+        <span class="big-num">45.3</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 51</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 52</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1472,7 +1485,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#22BB22;color:#fff;">6枠</span><span class="bango-badge">6番</span>
+      <span class="waku-badge" style="background:#22BB22;color:#fff;">6枠</span><span class="bango-badge" style="background:#22BB22;color:#fff;">6番</span>
       <h3>ビズロード</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-lo">⚠ データ少</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +3.7</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.9</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#16a085">馬場適性 +2.0</span>
@@ -1483,7 +1496,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">22.8</span>
+        <span class="big-num">21.0</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 42</span>
@@ -1509,8 +1522,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1602,7 +1615,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#FFFFFF;color:#111;">1枠</span><span class="bango-badge">1番</span>
+      <span class="waku-badge" style="background:#FFFFFF;color:#111;">1枠</span><span class="bango-badge" style="background:#FFFFFF;color:#111;">1番</span>
       <h3>スターシップ</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-lo">⚠ データ少</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#c0392b">コース -1.0</span><span class="adj-badge" style="background:#aec7e8">騎手 +0.2</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#dbdb8d">着差 +0.8</span><span class="adj-badge" style="background:#16a085">馬場適性 +2.0</span>
@@ -1613,7 +1626,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">19.9</span>
+        <span class="big-num">16.6</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 40</span>
@@ -1639,8 +1652,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1732,7 +1745,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#FF4444;color:#fff;">3枠</span><span class="bango-badge">3番</span>
+      <span class="waku-badge" style="background:#FF4444;color:#fff;">3枠</span><span class="bango-badge" style="background:#FF4444;color:#fff;">3番</span>
       <h3>ケンフィールド</h3>
       <span class="leg-badge" style="background:#f39c12">先行</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +6.3</span><span class="adj-badge" style="background:#c0392b">休養 -1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.1</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span><span class="adj-badge" style="background:#c0392b">馬場適性 -0.5</span>
@@ -1743,10 +1756,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">18.9</span>
+        <span class="big-num">15.8</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 40</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 39</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1769,8 +1782,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1862,7 +1875,7 @@
   </div>
   <div class="horse-main">
     <div class="horse-header">
-      <span class="waku-badge" style="background:#e91e8c;color:#fff;">8枠</span><span class="bango-badge">9番</span>
+      <span class="waku-badge" style="background:#e91e8c;color:#fff;">8枠</span><span class="bango-badge" style="background:#e91e8c;color:#fff;">9番</span>
       <h3>サイモンゼスト</h3>
       <span class="leg-badge" style="background:#3498db">差し</span>
       <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#c0392b">斤量 -1.0</span><span class="adj-badge" style="background:#17becf">コース +3.1</span><span class="adj-badge" style="background:#c0392b">騎手 -2.0</span><span class="adj-badge" style="background:#98df8a">継続騎乗 +1.0</span><span class="adj-badge" style="background:#c0392b">着差 -2.0</span><span class="adj-badge" style="background:#c0392b">馬場適性 -1.0</span>
@@ -1873,7 +1886,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">14.0</span>
+        <span class="big-num">12.9</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 38</span>
@@ -2005,17 +2018,14 @@ function toggleDrill(id, btn) {
 }
 
 // ── 期待値シミュレーター ─────────────────────────────────
-const EV_DATA = [{"馬名": "イッテラッシャイ", "馬番": 8, "枠番": 8, "スコア": 74.9, "順位予想": 1, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "1", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "ビービークローサー", "馬番": 4, "枠番": 4, "スコア": 73.3, "順位予想": 2, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "4", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "ソルチェリア", "馬番": 7, "枠番": 7, "スコア": 58.7, "順位予想": 3, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "2", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "タガノアバンドーネ", "馬番": 5, "枠番": 5, "スコア": 49.1, "順位予想": 4, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "3", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "ケンタッキーホーム", "馬番": 2, "枠番": 2, "スコア": 44.5, "順位予想": 5, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "5", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "ビズロード", "馬番": 6, "枠番": 6, "スコア": 22.8, "順位予想": 6, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "8", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "スターシップ", "馬番": 1, "枠番": 1, "スコア": 19.9, "順位予想": 7, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "6", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "ケンフィールド", "馬番": 3, "枠番": 3, "スコア": 18.9, "順位予想": 8, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "7", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "サイモンゼスト", "馬番": 9, "枠番": 8, "スコア": 14.0, "順位予想": 9, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "9", "乖離度": 0, "is_memo": false, "is_ana": false}];
+const EV_DATA = [{"馬名": "ビービークローサー", "馬番": 4, "枠番": 4, "スコア": 76.3, "順位予想": 1, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "4", "乖離度": 3, "is_memo": false, "is_ana": false}, {"馬名": "イッテラッシャイ", "馬番": 8, "枠番": 8, "スコア": 76.0, "順位予想": 2, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "1", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "ソルチェリア", "馬番": 7, "枠番": 7, "スコア": 59.7, "順位予想": 3, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "2", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "タガノアバンドーネ", "馬番": 5, "枠番": 5, "スコア": 50.3, "順位予想": 4, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "3", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "ケンタッキーホーム", "馬番": 2, "枠番": 2, "スコア": 45.3, "順位予想": 5, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "5", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "ビズロード", "馬番": 6, "枠番": 6, "スコア": 21.0, "順位予想": 6, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "8", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "スターシップ", "馬番": 1, "枠番": 1, "スコア": 16.6, "順位予想": 7, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "6", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "ケンフィールド", "馬番": 3, "枠番": 3, "スコア": 15.8, "順位予想": 8, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "7", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "サイモンゼスト", "馬番": 9, "枠番": 8, "スコア": 12.9, "順位予想": 9, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "9", "乖離度": 0, "is_memo": false, "is_ana": false}];
+// WAKU_BG をメインJSスコープで定義（renderRows内のwakuバッジで参照）
+const WAKU_BG = {1:'#ffffff',2:'#555555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'#22bb22',7:'#ff8822',8:'#ffaacc'};
+const WAKU_FG = {1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111',8:'#111'};
 let currentTab = 'tansho';
 let sortCol    = 'score';
 let sortAsc    = false;   // default: スコア降順
-let _userOdds  = {};     // 馬番 → ユーザー手入力オッズ（案B）
-// オッズ未設定の馬は採算オッズ（1/確率）をデフォルト値として設定
-EV_DATA.forEach(function(h) {
-  if (!h['オッズ'] && h._prob > 0) {
-    _userOdds[h['馬番']] = Math.round((1 / h._prob) * 10) / 10;
-  }
-});
+let _userOdds  = {};     // 馬番 → ユーザー手入力オッズ（採算オッズで初期化 → 手入力で上書き）
 
 // Harville式 上位k着以内確率
 function placeProb(probs, idx, k) {
@@ -2100,29 +2110,31 @@ function renderRows(rows) {
 
   const isFuku = (currentTab === 'fukusho');
   document.getElementById('evBody').innerHTML = sorted.map(h => {
-    const waku_b  = h['枠番'] ? h['枠番'] + '枠-' + (h['馬番'] || '?') + '番' : '未定';
+    const waku_fg = ['','#222','#fff','#fff','#fff','#222','#fff','#fff','#222'];
+    const waku_num = h['枠番'] || 0;
+    const waku_bg_c = WAKU_BG[waku_num] || '#888';
+    const waku_fg_c = waku_fg[waku_num] || '#fff';
+    const waku_b  = h['枠番']
+      ? `<span style="display:inline-block;background:${waku_bg_c};color:${waku_fg_c};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">${h['枠番']}枠</span><span style="display:inline-block;background:${waku_bg_c};color:${waku_fg_c};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">${h['馬番'] || '?'}番</span>`
+      : '<span style="color:#555">未定</span>';
     const probPct = ((h._prob || 0) * 100).toFixed(1) + '%';
     const ev      = h._ev;
     let evStr = '-', evCls = 'ev-neutral', judgement = '-';
     if (ev !== undefined && ev !== null) {
       evStr = ev.toFixed(3);
-      if (h._isDark) {
-        // 大穴馬（50倍超）: 圧縮後のEVでも信頼性に注意表示
-        evCls = ev > 0.05 ? 'ev-neutral' : 'ev-negative';
-        judgement = ev > 0.05 ? '⚠ 大穴注意' : '✕ 見送り';
-      } else {
-        if (ev > 0.05)       { evCls = 'ev-positive'; judgement = '◎ 買い'; }
-        else if (ev >= -0.1) { evCls = 'ev-neutral';  judgement = '△ 様子見'; }
-        else                 { evCls = 'ev-negative';  judgement = '✕ 見送り'; }
-      }
+      // EV値のみで判定（大穴・通常共通基準）
+      if (ev > 0.05)       { evCls = 'ev-positive'; judgement = h._isDark ? '⚠ 大穴注意' : '◎ 買い'; }
+      else if (ev >= -0.1) { evCls = 'ev-neutral';  judgement = '△ 様子見'; }
+      else                 { evCls = 'ev-negative';  judgement = '✕ 見送り'; }
     }
     const barWidth = Math.min(100, (h._prob || 0) * 100 * (isFuku ? 2 : 5));
     const barColor = evCls === 'ev-positive' ? '#2ecc71' :
                      evCls === 'ev-negative' ? '#e74c3c' : '#95a5a6';
     // 採算オッズ（案A）: 1/勝率推定 = EV=0となる損益分岐点
     const beOdds   = (!isFuku && h._prob > 0) ? 1/h._prob : null;
-    const curOdds  = !isFuku ? (_userOdds[h['馬番']] != null ? _userOdds[h['馬番']] : h['オッズ']) : null;
-    const beColor  = beOdds && curOdds ? (curOdds >= beOdds ? '#2ecc71' : '#e74c3c') : '#7f8c8d';
+    // curOdds: 手入力値 or computeEVで初期化済みの採算オッズ
+    const curOdds  = !isFuku ? (_userOdds[h['馬番']] != null ? _userOdds[h['馬番']] : beOdds) : null;
+    const beColor  = beOdds ? '#f1c40f' : '#7f8c8d';  // 採算オッズは黄色固定
     const beCell   = !isFuku
       ? (beOdds ? `<span style="font-weight:700;color:${beColor}">${beOdds.toFixed(1)}倍</span>` : '-')
       : `<span style="color:#555">-</span>`;
@@ -2130,8 +2142,8 @@ function renderRows(rows) {
     const oddsCell = isFuku
       ? (h['複勝下限'] ? h['複勝下限'].toFixed(1) + '〜' + (h['複勝上限'] || '?').toFixed(1) + '倍' : '-')
       : `<input type="number" min="0" max="999" step="0.1"
-           value="${curOdds != null ? curOdds.toFixed(1) : (h['オッズ'] ? '' : (h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0'))}"
-           placeholder="${h['オッズ'] ? h['オッズ'].toFixed(1) : '0.0'}"
+           value="${curOdds != null ? curOdds.toFixed(1) : (h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0')}"
+           placeholder="${h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0'}"
            style="width:68px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;
                   border-radius:4px;padding:2px 5px;font-size:12px;text-align:right"
            oninput="const v=parseFloat(this.value); _userOdds[${h['馬番']}]=(v>0?v:null);
@@ -2195,6 +2207,10 @@ function computeEV(temp) {
   const rows = EV_DATA.map((h, i) => {
     const prob   = isFuku ? placeProb(winProbs, i, 3) : winProbs[i];
     const _rawOdds = isFuku ? h['複勝下限'] : h['オッズ'];
+    // 単勝タブで未入力の場合は採算オッズ(1/prob)で初期化してEVをフラット(≈0)から出発
+    if (!isFuku && _userOdds[h['馬番']] == null && prob > 0) {
+      _userOdds[h['馬番']] = Math.round((1 / prob) * 10) / 10;
+    }
     const odds     = (!isFuku && _userOdds[h['馬番']] != null) ? _userOdds[h['馬番']] : _rawOdds;
     const ev       = (odds !== null && odds !== undefined) ? prob * odds - 1.0 : undefined;
     const isDark = !!(h['オッズ'] && h['オッズ'] > DARK_THRESHOLD);
@@ -2212,7 +2228,7 @@ slider.addEventListener('input', () => {
 computeEV(20);
 
 // ── 積み上げチャート ─────────────────────────────
-const STACK_DATA = {"labels": ["1位 イッテラッシャイ", "2位 ビービークローサー", "3位 ソルチェリア", "4位 タガノアバンドーネ", "5位 ケンタッキーホーム", "6位 ビズロード", "7位 スターシップ", "8位 ケンフィールド", "9位 サイモンゼスト"], "datasets": [{"label": "最高出力", "data": [30.0, 19.9, 19.9, 13.6, 13.6, 0.0, 14.5, 9.1, 9.1], "backgroundColor": "#d62728", "stack": "adj"}, {"label": "クラス", "data": [19.3, 25.0, 17.3, 15.5, 14.7, 14.7, 6.2, 2.4, 0.0], "backgroundColor": "#ff7f0e", "stack": "adj"}, {"label": "タイム", "data": [16.7, 19.3, 14.6, 10.7, 10.6, 8.5, 0.0, 9.7, 4.5], "backgroundColor": "#1f77b4", "stack": "adj"}, {"label": "展開", "data": [3, 3, -3, 2, -2, -2, -2, -2, 3], "backgroundColor": "#9467bd", "stack": "adj"}, {"label": "斤量", "data": [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0], "backgroundColor": "#2ca02c", "stack": "adj"}, {"label": "距離", "data": [2.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#e377c2", "stack": "adj"}, {"label": "コース", "data": [2.6, 3.3, 4.8, 6.9, 7.4, 3.7, -1.0, 6.3, 3.1], "backgroundColor": "#17becf", "stack": "adj"}, {"label": "臨戦", "data": [1.0, 0.0, 0.0, -1.4, 0.0, -1.0, 0.0, -1.0, 0.0], "backgroundColor": "#8c564b", "stack": "adj"}, {"label": "人気補正", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#bcbd22", "stack": "adj"}, {"label": "騎手", "data": [-0.1, 0.7, 0.7, 0.3, -0.0, 0.9, 0.2, -0.1, -2.0], "backgroundColor": "#aec7e8", "stack": "adj"}, {"label": "馬体重", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#7f7f7f", "stack": "adj"}, {"label": "継続", "data": [0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0], "backgroundColor": "#98df8a", "stack": "adj"}, {"label": "着差", "data": [1.6, 1.6, 0.0, 1.6, 1.6, 0.0, 0.8, -1.0, -2.0], "backgroundColor": "#dbdb8d", "stack": "adj"}, {"label": "枠順", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0], "backgroundColor": "#9edae5", "stack": "adj"}, {"label": "昇級", "data": [-3.0, -3.0, 0.0, -3.0, -3.0, -3.0, -3.0, -3.0, 0.0], "backgroundColor": "#c5b0d5", "stack": "adj"}, {"label": "SmartRC評価", "data": [0.3, -1.4, 0.0, -0.3, 1.0, -0.4, 2.5, 0.0, -0.2], "backgroundColor": "#f39c12", "stack": "adj"}, {"label": "馬場適性", "data": [3.0, 3.0, 2.0, 3.0, 1.0, 2.0, 2.0, -0.5, -1.0], "backgroundColor": "#16a085", "stack": "adj"}]};
+const STACK_DATA = {"labels": ["1位 ビービークローサー", "2位 イッテラッシャイ", "3位 ソルチェリア", "4位 タガノアバンドーネ", "5位 ケンタッキーホーム", "6位 ビズロード", "7位 スターシップ", "8位 ケンフィールド", "9位 サイモンゼスト"], "datasets": [{"label": "最高出力", "data": [19.9, 30.0, 19.9, 13.6, 13.6, 0.0, 14.5, 9.1, 9.1], "backgroundColor": "#d62728", "stack": "adj"}, {"label": "クラス", "data": [25.0, 19.3, 17.3, 15.5, 14.7, 14.7, 6.2, 2.4, 0.0], "backgroundColor": "#ff7f0e", "stack": "adj"}, {"label": "タイム", "data": [19.3, 16.7, 14.6, 10.7, 10.6, 8.5, 0.0, 9.7, 4.5], "backgroundColor": "#1f77b4", "stack": "adj"}, {"label": "展開", "data": [3, 3, -3, 2, -2, -3, -3, -3, 3], "backgroundColor": "#9467bd", "stack": "adj"}, {"label": "斤量", "data": [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0], "backgroundColor": "#2ca02c", "stack": "adj"}, {"label": "距離", "data": [2.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#e377c2", "stack": "adj"}, {"label": "コース", "data": [3.3, 2.6, 4.8, 6.9, 7.4, 3.7, -1.0, 6.3, 3.1], "backgroundColor": "#17becf", "stack": "adj"}, {"label": "臨戦", "data": [0.0, 1.0, 0.0, -1.4, 0.0, -1.0, 0.0, -1.0, 0.0], "backgroundColor": "#8c564b", "stack": "adj"}, {"label": "人気補正", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#bcbd22", "stack": "adj"}, {"label": "騎手", "data": [0.7, -0.1, 0.7, 0.3, -0.0, 0.9, 0.2, -0.1, -2.0], "backgroundColor": "#aec7e8", "stack": "adj"}, {"label": "馬体重", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#7f7f7f", "stack": "adj"}, {"label": "継続", "data": [1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0], "backgroundColor": "#98df8a", "stack": "adj"}, {"label": "着差", "data": [1.6, 1.6, 0.0, 1.6, 1.6, 0.0, 0.8, -1.0, -2.0], "backgroundColor": "#dbdb8d", "stack": "adj"}, {"label": "枠順", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0], "backgroundColor": "#9edae5", "stack": "adj"}, {"label": "昇級", "data": [-3.0, -3.0, 0.0, -3.0, -3.0, -3.0, -3.0, -3.0, 0.0], "backgroundColor": "#c5b0d5", "stack": "adj"}, {"label": "クラス適応", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#1abc9c", "stack": "adj"}, {"label": "SmartRC評価", "data": [-1.4, 0.3, 0.0, -0.3, 1.0, -0.4, 2.5, 0.0, -0.2], "backgroundColor": "#f39c12", "stack": "adj"}, {"label": "馬場適性", "data": [3.0, 3.0, 2.0, 3.0, 1.0, 2.0, 2.0, -0.5, -1.0], "backgroundColor": "#16a085", "stack": "adj"}]};
 const stackCtx = document.getElementById('scoreStackChart');
 if (stackCtx) {
   new Chart(stackCtx.getContext('2d'), {
@@ -2247,7 +2263,7 @@ if (stackCtx) {
 
 // ── 補正項目別ランキング ──────────────────────────────────────────
 (function() {
-  const ITEM_RANKINGS = [{"label": "最高出力", "color": "#d62728", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 30.0}, {"umaban": 4, "name": "ビービークローサー", "val": 19.9}, {"umaban": 7, "name": "ソルチェリア", "val": 19.9}, {"umaban": 1, "name": "スターシップ", "val": 14.5}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 13.6}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 13.6}, {"umaban": 3, "name": "ケンフィールド", "val": 9.1}, {"umaban": 9, "name": "サイモンゼスト", "val": 9.1}, {"umaban": 6, "name": "ビズロード", "val": 0.0}]}, {"label": "クラス", "color": "#ff7f0e", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 25.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 19.3}, {"umaban": 7, "name": "ソルチェリア", "val": 17.3}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 15.5}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 14.7}, {"umaban": 6, "name": "ビズロード", "val": 14.7}, {"umaban": 1, "name": "スターシップ", "val": 6.2}, {"umaban": 3, "name": "ケンフィールド", "val": 2.4}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "タイム", "color": "#1f77b4", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 19.3}, {"umaban": 8, "name": "イッテラッシャイ", "val": 16.7}, {"umaban": 7, "name": "ソルチェリア", "val": 14.6}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 10.7}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 10.6}, {"umaban": 3, "name": "ケンフィールド", "val": 9.7}, {"umaban": 6, "name": "ビズロード", "val": 8.5}, {"umaban": 9, "name": "サイモンゼスト", "val": 4.5}, {"umaban": 1, "name": "スターシップ", "val": 0.0}]}, {"label": "展開", "color": "#9467bd", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 3.0}, {"umaban": 4, "name": "ビービークローサー", "val": 3.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 3.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 2.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": -2.0}, {"umaban": 6, "name": "ビズロード", "val": -2.0}, {"umaban": 1, "name": "スターシップ", "val": -2.0}, {"umaban": 3, "name": "ケンフィールド", "val": -2.0}, {"umaban": 7, "name": "ソルチェリア", "val": -3.0}]}, {"label": "斤量", "color": "#2ca02c", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": -1.0}, {"umaban": 4, "name": "ビービークローサー", "val": -1.0}, {"umaban": 7, "name": "ソルチェリア", "val": -1.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": -1.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": -1.0}, {"umaban": 6, "name": "ビズロード", "val": -1.0}, {"umaban": 1, "name": "スターシップ", "val": -1.0}, {"umaban": 3, "name": "ケンフィールド", "val": -1.0}, {"umaban": 9, "name": "サイモンゼスト", "val": -1.0}]}, {"label": "距離", "color": "#e377c2", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 2.0}, {"umaban": 4, "name": "ビービークローサー", "val": 2.0}, {"umaban": 7, "name": "ソルチェリア", "val": 2.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "コース", "color": "#17becf", "ranked": [{"umaban": 2, "name": "ケンタッキーホーム", "val": 7.4}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 6.9}, {"umaban": 3, "name": "ケンフィールド", "val": 6.3}, {"umaban": 7, "name": "ソルチェリア", "val": 4.8}, {"umaban": 6, "name": "ビズロード", "val": 3.7}, {"umaban": 4, "name": "ビービークローサー", "val": 3.3}, {"umaban": 9, "name": "サイモンゼスト", "val": 3.1}, {"umaban": 8, "name": "イッテラッシャイ", "val": 2.6}, {"umaban": 1, "name": "スターシップ", "val": -1.0}]}, {"label": "臨戦", "color": "#8c564b", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 1.0}, {"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": -1.0}, {"umaban": 3, "name": "ケンフィールド", "val": -1.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": -1.4}]}, {"label": "人気補正", "color": "#bcbd22", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "騎手", "color": "#aec7e8", "ranked": [{"umaban": 6, "name": "ビズロード", "val": 0.9}, {"umaban": 4, "name": "ビービークローサー", "val": 0.7}, {"umaban": 7, "name": "ソルチェリア", "val": 0.7}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.3}, {"umaban": 1, "name": "スターシップ", "val": 0.2}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": -0.1}, {"umaban": 3, "name": "ケンフィールド", "val": -0.1}, {"umaban": 9, "name": "サイモンゼスト", "val": -2.0}]}, {"label": "馬体重", "color": "#7f7f7f", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "継続", "color": "#98df8a", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 1.0}, {"umaban": 7, "name": "ソルチェリア", "val": 1.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 1.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 1.0}, {"umaban": 6, "name": "ビズロード", "val": 1.0}, {"umaban": 1, "name": "スターシップ", "val": 1.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 1.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}]}, {"label": "着差", "color": "#dbdb8d", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 1.6}, {"umaban": 4, "name": "ビービークローサー", "val": 1.6}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 1.6}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 1.6}, {"umaban": 1, "name": "スターシップ", "val": 0.8}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": -1.0}, {"umaban": 9, "name": "サイモンゼスト", "val": -2.0}]}, {"label": "枠順", "color": "#9edae5", "ranked": [{"umaban": 3, "name": "ケンフィールド", "val": 0.5}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "昇級", "color": "#c5b0d5", "ranked": [{"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": -3.0}, {"umaban": 4, "name": "ビービークローサー", "val": -3.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": -3.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": -3.0}, {"umaban": 6, "name": "ビズロード", "val": -3.0}, {"umaban": 1, "name": "スターシップ", "val": -3.0}, {"umaban": 3, "name": "ケンフィールド", "val": -3.0}]}, {"label": "SmartRC評価", "color": "#f39c12", "ranked": [{"umaban": 1, "name": "スターシップ", "val": 2.5}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 1.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.3}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": -0.2}, {"umaban": 5, "name": "タガノアバンドーネ", "val": -0.3}, {"umaban": 6, "name": "ビズロード", "val": -0.4}, {"umaban": 4, "name": "ビービークローサー", "val": -1.4}]}, {"label": "馬場適性", "color": "#16a085", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 3.0}, {"umaban": 4, "name": "ビービークローサー", "val": 3.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 3.0}, {"umaban": 7, "name": "ソルチェリア", "val": 2.0}, {"umaban": 6, "name": "ビズロード", "val": 2.0}, {"umaban": 1, "name": "スターシップ", "val": 2.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 1.0}, {"umaban": 3, "name": "ケンフィールド", "val": -0.5}, {"umaban": 9, "name": "サイモンゼスト", "val": -1.0}]}];
+  const ITEM_RANKINGS = [{"label": "最高出力", "color": "#d62728", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 30.0}, {"umaban": 4, "name": "ビービークローサー", "val": 19.9}, {"umaban": 7, "name": "ソルチェリア", "val": 19.9}, {"umaban": 1, "name": "スターシップ", "val": 14.5}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 13.6}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 13.6}, {"umaban": 3, "name": "ケンフィールド", "val": 9.1}, {"umaban": 9, "name": "サイモンゼスト", "val": 9.1}, {"umaban": 6, "name": "ビズロード", "val": 0.0}]}, {"label": "クラス", "color": "#ff7f0e", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 25.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 19.3}, {"umaban": 7, "name": "ソルチェリア", "val": 17.3}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 15.5}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 14.7}, {"umaban": 6, "name": "ビズロード", "val": 14.7}, {"umaban": 1, "name": "スターシップ", "val": 6.2}, {"umaban": 3, "name": "ケンフィールド", "val": 2.4}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "タイム", "color": "#1f77b4", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 19.3}, {"umaban": 8, "name": "イッテラッシャイ", "val": 16.7}, {"umaban": 7, "name": "ソルチェリア", "val": 14.6}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 10.7}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 10.6}, {"umaban": 3, "name": "ケンフィールド", "val": 9.7}, {"umaban": 6, "name": "ビズロード", "val": 8.5}, {"umaban": 9, "name": "サイモンゼスト", "val": 4.5}, {"umaban": 1, "name": "スターシップ", "val": 0.0}]}, {"label": "展開", "color": "#9467bd", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 3.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 3.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 3.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 2.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": -2.0}, {"umaban": 7, "name": "ソルチェリア", "val": -3.0}, {"umaban": 6, "name": "ビズロード", "val": -3.0}, {"umaban": 1, "name": "スターシップ", "val": -3.0}, {"umaban": 3, "name": "ケンフィールド", "val": -3.0}]}, {"label": "斤量", "color": "#2ca02c", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": -1.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": -1.0}, {"umaban": 7, "name": "ソルチェリア", "val": -1.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": -1.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": -1.0}, {"umaban": 6, "name": "ビズロード", "val": -1.0}, {"umaban": 1, "name": "スターシップ", "val": -1.0}, {"umaban": 3, "name": "ケンフィールド", "val": -1.0}, {"umaban": 9, "name": "サイモンゼスト", "val": -1.0}]}, {"label": "距離", "color": "#e377c2", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 2.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 2.0}, {"umaban": 7, "name": "ソルチェリア", "val": 2.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "コース", "color": "#17becf", "ranked": [{"umaban": 2, "name": "ケンタッキーホーム", "val": 7.4}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 6.9}, {"umaban": 3, "name": "ケンフィールド", "val": 6.3}, {"umaban": 7, "name": "ソルチェリア", "val": 4.8}, {"umaban": 6, "name": "ビズロード", "val": 3.7}, {"umaban": 4, "name": "ビービークローサー", "val": 3.3}, {"umaban": 9, "name": "サイモンゼスト", "val": 3.1}, {"umaban": 8, "name": "イッテラッシャイ", "val": 2.6}, {"umaban": 1, "name": "スターシップ", "val": -1.0}]}, {"label": "臨戦", "color": "#8c564b", "ranked": [{"umaban": 8, "name": "イッテラッシャイ", "val": 1.0}, {"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": -1.0}, {"umaban": 3, "name": "ケンフィールド", "val": -1.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": -1.4}]}, {"label": "人気補正", "color": "#bcbd22", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "騎手", "color": "#aec7e8", "ranked": [{"umaban": 6, "name": "ビズロード", "val": 0.9}, {"umaban": 4, "name": "ビービークローサー", "val": 0.7}, {"umaban": 7, "name": "ソルチェリア", "val": 0.7}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.3}, {"umaban": 1, "name": "スターシップ", "val": 0.2}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": -0.1}, {"umaban": 3, "name": "ケンフィールド", "val": -0.1}, {"umaban": 9, "name": "サイモンゼスト", "val": -2.0}]}, {"label": "馬体重", "color": "#7f7f7f", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "継続", "color": "#98df8a", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 1.0}, {"umaban": 7, "name": "ソルチェリア", "val": 1.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 1.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 1.0}, {"umaban": 6, "name": "ビズロード", "val": 1.0}, {"umaban": 1, "name": "スターシップ", "val": 1.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 1.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}]}, {"label": "着差", "color": "#dbdb8d", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 1.6}, {"umaban": 8, "name": "イッテラッシャイ", "val": 1.6}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 1.6}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 1.6}, {"umaban": 1, "name": "スターシップ", "val": 0.8}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": -1.0}, {"umaban": 9, "name": "サイモンゼスト", "val": -2.0}]}, {"label": "枠順", "color": "#9edae5", "ranked": [{"umaban": 3, "name": "ケンフィールド", "val": 0.5}, {"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "昇級", "color": "#c5b0d5", "ranked": [{"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}, {"umaban": 4, "name": "ビービークローサー", "val": -3.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": -3.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": -3.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": -3.0}, {"umaban": 6, "name": "ビズロード", "val": -3.0}, {"umaban": 1, "name": "スターシップ", "val": -3.0}, {"umaban": 3, "name": "ケンフィールド", "val": -3.0}]}, {"label": "クラス適応", "color": "#1abc9c", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 0.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.0}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 0.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 0.0}, {"umaban": 6, "name": "ビズロード", "val": 0.0}, {"umaban": 1, "name": "スターシップ", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": 0.0}]}, {"label": "SmartRC評価", "color": "#f39c12", "ranked": [{"umaban": 1, "name": "スターシップ", "val": 2.5}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 1.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 0.3}, {"umaban": 7, "name": "ソルチェリア", "val": 0.0}, {"umaban": 3, "name": "ケンフィールド", "val": 0.0}, {"umaban": 9, "name": "サイモンゼスト", "val": -0.2}, {"umaban": 5, "name": "タガノアバンドーネ", "val": -0.3}, {"umaban": 6, "name": "ビズロード", "val": -0.4}, {"umaban": 4, "name": "ビービークローサー", "val": -1.4}]}, {"label": "馬場適性", "color": "#16a085", "ranked": [{"umaban": 4, "name": "ビービークローサー", "val": 3.0}, {"umaban": 8, "name": "イッテラッシャイ", "val": 3.0}, {"umaban": 5, "name": "タガノアバンドーネ", "val": 3.0}, {"umaban": 7, "name": "ソルチェリア", "val": 2.0}, {"umaban": 6, "name": "ビズロード", "val": 2.0}, {"umaban": 1, "name": "スターシップ", "val": 2.0}, {"umaban": 2, "name": "ケンタッキーホーム", "val": 1.0}, {"umaban": 3, "name": "ケンフィールド", "val": -0.5}, {"umaban": 9, "name": "サイモンゼスト", "val": -1.0}]}];
   const grid = document.getElementById('itemRankingGrid');
   if (!grid) return;
   const RANK_ICONS = ['🥇','🥈','🥉'];

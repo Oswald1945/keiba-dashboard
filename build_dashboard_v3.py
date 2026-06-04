@@ -602,12 +602,34 @@ for h in horses:
     if _is_ana_am:
         badges += '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>'
 
-    # SmartRC推定人気列: 数字のみ表示
+    # SmartRC推定人気列
     src_rank  = h.get('SmartRC推定人気順')
-    if src_rank is not None:
-        src_ninki_cell = f'<td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">{src_rank}位</b></td>'
+    src_ninki_cell = (f'<td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">{src_rank}位</b></td>'
+                      if src_rank is not None else '<td style="text-align:center;color:#555">-</td>')
+
+    # SmartRC前走評価列 (A/B/C/D/E)
+    _sr_hyoka = h.get('SmartRC評価')  # A/B/C/D/E or None
+    _SR_COLOR = {'A': '#27ae60', 'B': '#2ecc71', 'C': '#7f8c8d', 'D': '#e67e22', 'E': '#e74c3c'}
+    _SR_LABEL = {'A': 'A 不利', 'B': 'B 不利', 'C': 'C 中立', 'D': 'D 有利', 'E': 'E 有利'}
+    if _sr_hyoka and _sr_hyoka in _SR_COLOR:
+        _sc = _SR_COLOR[_sr_hyoka]
+        _sl = _SR_LABEL[_sr_hyoka]
+        sr_eval_cell = (f'<td style="text-align:center;white-space:nowrap">'
+                        f'<span style="background:{_sc};color:#fff;font-size:11px;font-weight:700;'
+                        f'padding:2px 7px;border-radius:4px;">{_sl}</span></td>')
     else:
-        src_ninki_cell = '<td style="text-align:center;color:#555">-</td>'
+        sr_eval_cell = '<td style="text-align:center;color:#555">-</td>'
+
+    # 斤量列
+    kinryo_val = h.get('今走斤量')
+    kinryo_cell = (f'<td style="text-align:center;white-space:nowrap">{kinryo_val}kg</td>'
+                   if kinryo_val else '<td style="text-align:center;color:#555">-</td>')
+
+    # 年齢・性別列
+    age_val = h.get('年齢')
+    sex_val = h.get('性別', '')
+    age_cell = (f'<td style="text-align:center;white-space:nowrap">{age_val}歳 {sex_val}</td>'
+                if age_val else '<td style="text-align:center;color:#555">-</td>')
 
     all_marks += (
         f'<tr>'
@@ -618,6 +640,9 @@ for h in horses:
         f'<td style="white-space:nowrap"><b>{h["総合スコア"]:.1f}</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差{_dev_t}</span></td>'
         f'<td>{fmt(h.get("単勝オッズ"), 1)}倍 ({fmt_int(h.get("人気"))}人気)</td>'
         f'{src_ninki_cell}'
+        f'{sr_eval_cell}'
+        f'{kinryo_cell}'
+        f'{age_cell}'
         f'<td>{h["騎手"]}</td>'
         f'</tr>'
     )
@@ -1651,6 +1676,9 @@ html = f'''<!DOCTYPE html>
           <th style="white-space:nowrap">順位</th><th style="white-space:nowrap">枠-番</th><th style="white-space:nowrap">馬名</th>
           <th style="white-space:nowrap">脚質</th><th style="white-space:nowrap">スコア</th><th style="white-space:nowrap">市場評価</th>
           <th style="white-space:nowrap" title="SmartRC推定人気順">推定人気</th>
+          <th style="white-space:nowrap" title="前走の馬場・展開有利不利評価 A/B=不利→巻き返し候補 D/E=有利→過信注意">SmartRC前走</th>
+          <th style="white-space:nowrap">斤量</th>
+          <th style="white-space:nowrap">年齢・性別</th>
           <th style="white-space:nowrap">騎手</th>
         </tr>
       </thead>

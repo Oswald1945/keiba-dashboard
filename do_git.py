@@ -19,7 +19,7 @@ env["GIT_COMMITTER_NAME"] = "kuroame"
 env["GIT_COMMITTER_EMAIL"] = "jrock.b.b.express@gmail.com"
 r = subprocess.run(
     ["git", "commit", "-m",
-     "feat: time relaxation, kai-day bias, training floor, smartrc E coeff"],
+     "fix: apply score floor only to data-poor horses (past races <= 3)"],
     cwd=repo, capture_output=True, text=True, env=env
 )
 print("[3] git commit:", r.returncode)

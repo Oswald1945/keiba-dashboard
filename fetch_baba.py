@@ -161,6 +161,34 @@ def parse_baba_jotai(html: str) -> tuple[str | None, str | None]:
     return shiba, dart
 
 
+def parse_course(html: str) -> tuple[str | None, bool]:
+    """
+    HTML から使用コース（A/B/C/D）とコース替わり初週フラグを解析。
+    戻り値: (course_letter, is_course_change_week)
+      course_letter: 'A'/'B'/'C'/'D' or None
+      is_course_change_week: True = 今週がコース替わり初週
+    """
+    course = None
+    is_change = False
+
+    # 使用コースのパース
+    # パターン1: <strong>C</strong>コース（HTMLタグ内に文字が入る形式）
+    m = re.search(r'使用コース.{0,300}?<strong>\s*([A-D])\s*</strong>\s*コース', html, re.DOTALL)
+    if m:
+        course = m.group(1)
+    # パターン2: プレーンテキスト形式「使用コース C コース」
+    if not course:
+        m = re.search(r'使用コース\s*([A-D])\s*コース', html)
+        if m:
+            course = m.group(1)
+
+    # コース替わり初週の検出: 「今週から[X]コースを使用」
+    if re.search(r'今週から[A-D]コースを使用', html):
+        is_change = True
+
+    return course, is_change
+
+
 def parse_cushion_value(html: str) -> float | None:
     """クッション値（数値）を解析。動的ロードの場合は None。"""
     # クッション値の近くにある数値（X.X 形式）を探す
@@ -336,22 +364,25 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
         shiba_baba, dart_baba  = parse_baba_jotai(parse_html)
         cushion                = parse_cushion_value(parse_html)
         rain_mm                = parse_weekly_rain(html, date_str)  # 降水量は全体から
+        course, is_course_change = parse_course(parse_html)
 
-        print(f'  [parse]   芝:{shiba_baba}  ダート:{dart_baba}  クッション:{cushion}  降水量:{rain_mm}mm')
+        print(f'  [parse]   芝:{shiba_baba}  ダート:{dart_baba}  クッション:{cushion}  降水量:{rain_mm}mm  使用コース:{course}  コース替わり初週:{is_course_change}')
 
         est_shiba, shiba_reason = estimate_race_baba(shiba_baba, rain_mm)
         est_dart,  _            = estimate_race_baba(dart_baba,  rain_mm)
 
         return {
-            '場所':          venue_name,
-            '取得日時':      datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            '芝馬場':        shiba_baba,
-            'ダート馬場':    dart_baba,
-            'クッション値':  cushion,
-            '降水量_mm':     rain_mm,
-            '推定馬場_芝':   est_shiba,
-            '推定馬場_ダート': est_dart,
-            '推定根拠':      shiba_reason,
+            '場所':              venue_name,
+            '取得日時':          datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            '芝馬場':            shiba_baba,
+            'ダート馬場':        dart_baba,
+            'クッション値':      cushion,
+            '降水量_mm':         rain_mm,
+            '使用コース':        course,           # 'A'/'B'/'C'/'D' or None
+            'コース替わり初週':  is_course_change,  # True = 今週がコース替わり初週
+            '推定馬場_芝':       est_shiba,
+            '推定馬場_ダート':   est_dart,
+            '推定根拠':          shiba_reason,
         }
 
     # どのページでも該当会場が見つからなかった場合
@@ -363,9 +394,15 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
         'ダート馬場':    None,
         'クッション値':  None,
         '降水量_mm':     None,
-        '推定馬場_芝':   '良',
-        '推定馬場_ダート': '良',
-        '推定根拠':      '情報取得失敗のためデフォルト(良)',
+        '推定馬場_芝':      '良',
+        '推定馬場_ダート':  '良',
+        '使用コース':       None,
+        'コース替わり初週': False,
+        '推定馬場_芝':      '良',
+        '推定馬場_ダート':  '良',
+        '使用コース':       None,
+        'コース替わり初週': False,
+        '推定根拠':         '情報取得失敗のためデフォルト(良)',
     }
 
 

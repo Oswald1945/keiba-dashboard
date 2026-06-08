@@ -84,7 +84,10 @@ def clear_done_markers(race_ids: list):
     for race_id in race_ids:
         marker = SCRIPT_DIR / f'{race_id}_review.done'
         if marker.exists():
-            marker.unlink()
+            try:
+                marker.unlink()
+            except PermissionError:
+                pass  # サンドボックス環境では削除不可の場合があるため無視
 
 
 def main():
@@ -197,8 +200,6 @@ def main():
     finally:
         # 一時ファイルを削除
         remove_from_input(copied_files)
-        print(f'\n[resample] 一時ファイル {len(copied_files)}件を削除しました')
-
     print('\n[resample] 完了')
 
 

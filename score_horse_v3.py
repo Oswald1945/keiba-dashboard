@@ -39,7 +39,7 @@ SMARTRC_HYOKA_PTS = {
     'B': +2.5,   # やや不利
     'C':  0.0,   # 中立
     'D': -2.5,   # やや有利な展開に恵まれた → 下方修正
-    'E': -4.5,   # 大きく有利 → 強めに下方修正
+    'E': -3.0,   # 大きく有利 → 下方修正（実力馬の過剰ペナルティを緩和: -4.5→-3.0）
 }
 
 
@@ -58,6 +58,27 @@ def load_smartrc_data(json_path: str) -> dict:
     horses = obj.get('horses', {})
     print(f"  [SmartRC] {len(horses)}頭分のデータを読み込みました ({p.name})")
     return horses
+
+
+def extract_kai_day(smartrc_json_path: str) -> int:
+    """
+    smartrc JSON の rcode（16桁: YYYYMMDDPPKKDDRR）から開催日次を取得。
+    例: rcode='2026060705030208' → KK=03, DD=02 → 開催日次=2
+    取得失敗時は 0 を返す。
+    """
+    import pathlib
+    p = pathlib.Path(smartrc_json_path)
+    if not p.exists():
+        return 0
+    try:
+        with open(p, encoding='utf-8') as f:
+            obj = json.load(f)
+        rcode = str(obj.get('rcode', ''))
+        if len(rcode) >= 14:
+            return int(rcode[12:14])
+    except Exception:
+        pass
+    return 0
 
 
 def calc_smartrc_pts(hyoka: str) -> float:
@@ -1150,6 +1171,101 @@ def compute_training_pts(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# C-3b  調教偏差値ベース スコアフロア（データ不足馬向け）
+# ─────────────────────────────────────────────────────────────────────────────
+
+def calc_training_floor_map(
+    horses_list: list,
+    sakuro_df: pd.DataFrame,
+    wood_df: pd.DataFrame,
+    race_date: date = RACE_DATE,
+    window_days: int = 14,
+) -> dict:
+    """
+    データ不足馬（過去走なし or 走数極少）のスコアフロアを
+    坂路/ウッドLap1のフィールド内偏差値から算出する。
+
+    フロア設定:
+      調教偏差値 > 60 (フィールド上位16%) → 35pt
+      調教偏差値 > 55                    → 28pt
+      調教偏差値 > 45                    → 20pt
+      調教偏差値 ≤ 45 or データなし       → 12pt
+
+    Returns: horse_name → floor_pts
+    """
+    cutoff_int = int((race_date - timedelta(days=window_days)).strftime('%Y%m%d'))
+    race_int   = int(race_date.strftime('%Y%m%d'))
+
+    sakuro_best: dict = {}
+    wood_best:   dict = {}
+
+    if sakuro_df is not None:
+        try:
+            sdf = sakuro_df.copy()
+            date_s = pd.to_numeric(sdf['年月日'], errors='coerce')
+            sdf = sdf[date_s.between(cutoff_int, race_int)]
+            for horse in horses_list:
+                sub = sdf[sdf['馬名'] == horse]
+                if sub.empty: continue
+                vals = pd.to_numeric(sub['Lap1'], errors='coerce').dropna()
+                if vals.empty: continue
+                sakuro_best[horse] = float(vals.min())  # 最速ラップ
+        except Exception as e:
+            print(f"  [C-3b] 坂路読み込みエラー: {e}")
+
+    if wood_df is not None:
+        try:
+            wdf = wood_df.copy()
+            date_w = pd.to_numeric(wdf['年月日'], errors='coerce')
+            wdf = wdf[date_w.between(cutoff_int, race_int)]
+            lap_col = 'Lap1' if 'Lap1' in wdf.columns else '1F'
+            for horse in horses_list:
+                sub = wdf[wdf['馬名'] == horse].copy()
+                if sub.empty: continue
+                sub['lap_num'] = pd.to_numeric(sub[lap_col], errors='coerce')
+                sub = sub[sub['lap_num'] < 15.0]
+                if sub.empty: continue
+                wood_best[horse] = float(sub['lap_num'].min())
+        except Exception as e:
+            print(f"  [C-3b] ウッド読み込みエラー: {e}")
+
+    # フィールド全体の平均・標準偏差を計算（偏差値の基準）
+    all_sakuro = list(sakuro_best.values())
+    all_wood   = list(wood_best.values())
+    sakuro_mean = float(np.mean(all_sakuro)) if all_sakuro else None
+    sakuro_std  = float(np.std(all_sakuro))  if len(all_sakuro) >= 2 else None
+    wood_mean   = float(np.mean(all_wood))   if all_wood else None
+    wood_std    = float(np.std(all_wood))    if len(all_wood) >= 2 else None
+
+    def lap_to_dev(lap_val: float, mean: float, std: float) -> float:
+        """Lap値(小さいほど速い)→偏差値(大きいほど良い)"""
+        if std is None or std == 0:
+            return 50.0
+        return (mean - lap_val) / std * 10 + 50  # 反転: 速い=高偏差値
+
+    floor_map: dict = {}
+    for horse in horses_list:
+        dev = None
+        if horse in sakuro_best and sakuro_mean is not None and sakuro_std is not None:
+            dev = lap_to_dev(sakuro_best[horse], sakuro_mean, sakuro_std)
+        elif horse in wood_best and wood_mean is not None and wood_std is not None:
+            dev = lap_to_dev(wood_best[horse], wood_mean, wood_std)
+
+        if dev is None:
+            floor_map[horse] = 12.0   # 調教データなし
+        elif dev > 60:
+            floor_map[horse] = 35.0   # 上位16%: 明らかに動いている
+        elif dev > 55:
+            floor_map[horse] = 28.0   # 上位31%: 良い動き
+        elif dev > 45:
+            floor_map[horse] = 20.0   # 平均付近
+        else:
+            floor_map[horse] = 12.0   # 平均以下
+
+    return floor_map
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # A-8  展開pts（位置取り確率ベース）
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -1203,6 +1319,9 @@ def calc_tenkai_pts_all(
     num_horses: int,
     smartrc_ten_ranks: dict = None,
     target_dist: int = 0,
+    kai_day: int = 0,                # 開催日次（SmartRC rcodeから取得）
+    is_course_change: bool = False,  # コース替わり初週フラグ（babaページから取得）
+    surface: str = '芝',             # 芝/ダート（バイアスは芝のみ適用）
 ) -> 'pd.Series':
     """
     展開有利不利スコア（全馬一括計算、±5pt）
@@ -1219,6 +1338,9 @@ def calc_tenkai_pts_all(
     4. 同ゾーン競合（混雑）ペナルティ: 許容頭数超過分 × -0.7pt
     5. コース特性×内枠優先: 小回りほど内枠ボーナス大
     6. [C案] 1200m以下スプリント補正: 先行ゾーンに+0.5追加
+    7. [②] 開催週バイアス（芝のみ）:
+       コース替わり初週/開催前半 → 前残りバイアス（先行+, 差し-）
+       開催後半 → 差し向きバイアス（先行-, 差し+）
     """
     import numpy as np
 
@@ -1334,7 +1456,34 @@ def calc_tenkai_pts_all(
         results.append(pt)
 
     pts = pd.Series(results, index=res.index)
-    return pts.clip(-5.0, 5.0)  # [B案] ±4→±5 に拡大
+
+    # ── 7. 開催週バイアス補正（芝のみ）────────────────────────────────
+    # is_course_change: babaページ「今週から[X]コースを使用」で確定
+    # kai_day: SmartRC rcodeから取得した開催日次（土日2日=1週）
+    # 正値 = 差し向きバイアス, 負値 = 前残りバイアス
+    if surface == '芝':
+        if is_course_change:
+            _kai_bias = -0.7   # コース替わり確定 → 前残り強
+        elif kai_day >= 7:
+            _kai_bias = +1.0   # 開催終盤（4週目以降）→ 差し向き強
+        elif kai_day >= 5:
+            _kai_bias = +0.5   # 開催後半（3週目）→ 差し向き
+        elif kai_day >= 3:
+            _kai_bias = -0.25  # 開催第2週 → 前残りやや残る（コース替わり可能性あり）
+        elif kai_day >= 1:
+            _kai_bias = -0.5   # 開催初週（1・2日目）→ 前残り
+        else:
+            _kai_bias = 0.0    # kai_day不明
+
+        if _kai_bias != 0.0:
+            # _zone列はこの関数内で res に付与済み（zone 0=逃げ〜4=後方）
+            bias_adj = res['_zone'].map(
+                lambda z: (-_kai_bias if int(z) <= 2 else _kai_bias)
+            )
+            pts = pts + bias_adj
+            print(f"  [②開催週バイアス] surface={surface} kai_day={kai_day} is_course_change={is_course_change} → bias={_kai_bias:+.2f}")
+
+    return pts.clip(-5.0, 5.0)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # メイン処理
@@ -1352,6 +1501,8 @@ def compute_scores(
     baba:        str  = '良',      # 馬場状態: 良/稍重/重/不良
     target_class: str = '',        # 今走クラス名（昇級戦判定用）
     smartrc_data: dict = None,     # SmartRC horses辞書 (load_smartrc_data()の戻り値)
+    kai_day: int = 0,              # 開催日次（SmartRC rcodeから取得）
+    is_course_change: bool = False, # コース替わり初週フラグ（babaページから取得）
 ) -> tuple:
     """
     18頭分のスコアを計算。
@@ -1905,7 +2056,10 @@ def compute_scores(
 
     res['最高出力pts'] = to_points(res['最高出力_dev'].tolist(), 30)
     res['クラスpts']   = to_points(res['クラス_dev'].tolist(),   25)
-    res['時計pts']     = to_points(res['時計_dev'].tolist(),     20)
+    # 時計pts: 天井を偏差値65(+1.5σ)→75(+2.5σ)に緩和し上限も25ptに拡張
+    # 旧: (d-35)/30*20 → dev65で上限, 上位6%が天井に張り付いていた
+    # 新: (d-35)/40*25 → dev75で上限, 天井到達率を~6%→~0.6%に改善
+    res['時計pts']     = [max(0.0, min(25.0, (d - 35) / 40 * 25.0)) for d in res['時計_dev'].tolist()]
 
     # 上がり3F補正: ±3pt（上がり速い馬を加点、遅い馬を減点）
     res['上がりpts'] = to_symmetric_points(res['上がり_dev'].tolist(), 3)
@@ -1995,12 +2149,16 @@ def compute_scores(
     num_horses = len(res)
 
     # 展開pts: ゾーン×ペース×混雑×内枠を総合評価（±5pt）
+    _surface = 'ダート' if 'ダート' in target_course else '芝'
     res['展開pts'] = calc_tenkai_pts_all(
         res,
         target_course=target_course,
         today_pace=today_pace,
         num_horses=num_horses,
         target_dist=target_dist,
+        kai_day=kai_day,
+        is_course_change=is_course_change,
+        surface=_surface,
     )
 
     res['枠順pts'] = res.apply(
@@ -2025,6 +2183,27 @@ def compute_scores(
     _min_score = res['総合スコア'].min()
     if _min_score < 1.0:
         res['総合スコア'] = res['総合スコア'] - _min_score + 1.0
+
+    # ── C-3b 調教偏差値ベース スコアフロア ─────────────────────────────────
+    # 過去走なし or 総合スコアが極端に低い馬に対して、
+    # 坂路/ウッドLap1のフィールド内偏差値に基づくフロアを適用する。
+    # 「過去走データがない = 弱い馬」ではなく「評価不能」として扱い、
+    # 好調教馬が不当に低スコアになるのを防ぐ。
+    _floor_map = calc_training_floor_map(
+        horses, sakuro_df, wood_df, race_date
+    )
+    _floor_applied = []
+    for _idx, _row in res.iterrows():
+        _hname = _row['馬名']
+        _floor = _floor_map.get(_hname, 12.0)
+        # 過去走なし馬、または総合スコアがフロアを下回る馬に適用
+        if (_row.get('過去走なし', False) or res.at[_idx, '総合スコア'] < _floor):
+            _old = res.at[_idx, '総合スコア']
+            if _old < _floor:
+                res.at[_idx, '総合スコア'] = _floor
+                _floor_applied.append(f"{_hname}({_old:.1f}→{_floor:.1f}pt)")
+    if _floor_applied:
+        print(f"  [C-3b] 調教フロア適用: {', '.join(_floor_applied)}")
 
     # 出馬表に単勝オッズ列がない場合、過去走から引き継いだオッズをクリア
     # （採算オッズをダッシュボード側で表示するため）
@@ -2175,6 +2354,8 @@ if __name__ == '__main__':
     ap.add_argument('--baba',    default='良',
                     choices=['良','稍重','重','不良'],
                     help='馬場状態（デフォルト:良）')
+    ap.add_argument('--baba-json', default=None, dest='baba_json',
+                    help='馬場情報JSON（fetch_baba.py出力）。使用コース・コース替わり初週の取得に使用')
     ap.add_argument('--smartrc', default=None,
                     help='SmartRC JSON ファイルパス (smartrc_fetch.py --out で生成)')
     ap.add_argument('--outdir',  default=None,
@@ -2312,6 +2493,26 @@ if __name__ == '__main__':
     if args.smartrc:
         smartrc_data = load_smartrc_data(args.smartrc)
 
+    # ── 開催週バイアス用: kai_day / is_course_change を取得 ──────────────
+    _kai_day = 0
+    _is_course_change = False
+    if args.smartrc:
+        _kai_day = extract_kai_day(args.smartrc)
+        if _kai_day:
+            print(f"  [②開催週] SmartRC rcode から開催日次={_kai_day} を取得")
+    if args.baba_json:
+        try:
+            with open(args.baba_json, encoding='utf-8') as _bf:
+                _baba_obj = json.load(_bf)
+            _is_course_change = bool(_baba_obj.get('\u30b3\u30fc\u30b9\u66ff\u308f\u308a\u521d\u9031', False))
+            _course_used = _baba_obj.get('\u4f7f\u7528\u30b3\u30fc\u30b9')
+            if _is_course_change:
+                print(f"  [\u2461\u958b\u50ac\u9031] babaJSON \u304b\u3089\u30b3\u30fc\u30b9\u66ff\u308f\u308a\u521d\u9031\u30d5\u30e9\u30b0=True (\u4f7f\u7528\u30b3\u30fc\u30b9:{_course_used})")
+            elif _course_used:
+                print(f"  [\u2461\u958b\u50ac\u9031] babaJSON \u4f7f\u7528\u30b3\u30fc\u30b9:{_course_used} (\u30b3\u30fc\u30b9\u66ff\u308f\u308a\u306a\u3057)")
+        except Exception as _be:
+            print(f"  [\u2461\u958b\u50ac\u9031] babaJSON \u8aad\u307f\u8fbc\u307f\u30a8\u30e9\u30fc: {_be}")
+
     res, meta, past_races_map = compute_scores(
         df, course_times,
         shutuba_df=shutuba_df,
@@ -2323,8 +2524,9 @@ if __name__ == '__main__':
         baba=args.baba,
         target_class=_target_class,
         smartrc_data=smartrc_data,
+        kai_day=_kai_day,
+        is_course_change=_is_course_change,
     )
-
     meta['race_info'] = _race_info
 
     import os as _os2

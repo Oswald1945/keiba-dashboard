@@ -365,6 +365,8 @@ def process_race(race_id, files) -> pathlib.Path | None:
         if smartrc_json:
             cmd += ['--smartrc', smartrc_json]
             print(f'  [SmartRC] 評価証正を適用: {smartrc_json.name}')
+        if baba_json and baba_json.exists():
+            cmd += ['--baba-json', str(baba_json)]
         run_cmd(cmd, 'score')
         if not DRY_RUN:
             src_json   = OUT_DIR / 'horses_data.json'

@@ -174,7 +174,9 @@ def main():
 
         # 予想生成
         print(f'\n[resample] 予想ダッシュボード生成中...')
-        cmd_pred = [sys.executable, str(SCRIPT_DIR / 'run_new.py'), '--force']
+        # --all 時はブラウザ自動起動を抑制
+        no_browser_flag = ['--no-browser'] if args.all else []
+        cmd_pred = [sys.executable, str(SCRIPT_DIR / 'run_new.py'), '--force'] + no_browser_flag
         result = subprocess.run(cmd_pred, cwd=str(SCRIPT_DIR))
 
         # 回顧生成
@@ -192,7 +194,7 @@ def main():
                             shutil.copy2(result_file, dst)
                             copied_files.append(dst)
                 clear_done_markers([rid for rid, _ in rev_targets])
-                cmd_rev = [sys.executable, str(SCRIPT_DIR / 'run_new.py'), '--review', '--force']
+                cmd_rev = [sys.executable, str(SCRIPT_DIR / 'run_new.py'), '--review', '--force'] + no_browser_flag
                 subprocess.run(cmd_rev, cwd=str(SCRIPT_DIR))
             else:
                 print('\n[resample] 回顧対象（結果ファイルあり）なし → スキップ')

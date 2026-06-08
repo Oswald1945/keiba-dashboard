@@ -2532,8 +2532,20 @@ if __name__ == '__main__':
     meta['race_info'] = _race_info
 
     import os as _os2
-    out_data = build_horses_json(res, meta, past_races_map)
+    out_data= build_horses_json(res, meta, past_races_map)
     out_json = _os2.path.join(_outdir, 'horses_data.json')
     with open(out_json, 'w', encoding='utf-8') as _f:
         json.dump(out_data, _f, ensure_ascii=False, indent=2)
-    print(f'[完了] {out_json} に保存しました')
+    print(f'[\u5b8c\u4e86] {out_json} \u306b\u4fdd\u5b58\u3057\u307e\u3057\u305f')
+
+    # ── scores.csv 出力 ──────────────────────────────────────────
+    _score_cols = ['馬名', '脚質', '順位予想', '総合スコア',
+                   '最高出力pts', 'クラスpts', '時計pts', '展開pts',
+                   '斤量pts', '距離pts', 'コース適性pts', '臨戦pts',
+                   '人気補正pts', '騎手pts', '馬体重pts', '継続pts',
+                   '着差pts', '枠順pts', '昇級pts', '馬場適性pts',
+                   'SmartRC評価pts']
+    _avail = [c for c in _score_cols if c in res.columns]
+    _sdf = res.sort_values('総合スコア', ascending=False).reset_index(drop=True)
+    _sdf['順位予想'] = range(1, len(_sdf) + 1)
+    _sdf[_avail].to_csv(_os2.path.join(_outdir, 'scores.csv'), index=False, encoding='utf-8-sig')

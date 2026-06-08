@@ -2185,10 +2185,11 @@ def compute_scores(
         res['総合スコア'] = res['総合スコア'] - _min_score + 1.0
 
     # ── C-3b 調教偏差値ベース スコアフロア ─────────────────────────────────
-    # 過去走なし or 総合スコアが極端に低い馬に対して、
+    # 過去走データ不足馬（過去走なし or 走数極少3走以内）に対して、
     # 坂路/ウッドLap1のフィールド内偏差値に基づくフロアを適用する。
     # 「過去走データがない = 弱い馬」ではなく「評価不能」として扱い、
     # 好調教馬が不当に低スコアになるのを防ぐ。
+    # ※ 過去走が十分ある馬には適用しない（スコアが低くても正当な評価として扱う）
     _floor_map = calc_training_floor_map(
         horses, sakuro_df, wood_df, race_date
     )
@@ -2196,12 +2197,13 @@ def compute_scores(
     for _idx, _row in res.iterrows():
         _hname = _row['馬名']
         _floor = _floor_map.get(_hname, 12.0)
-        # 過去走なし馬、または総合スコアがフロアを下回る馬に適用
-        if (_row.get('過去走なし', False) or res.at[_idx, '総合スコア'] < _floor):
+        _n_races = int(_row.get('出走数', 0))
+        # 過去走データ不足馬のみ適用（過去走なし or 走数3走以内）
+        if _row.get('過去走なし', False) or _n_races <= 3:
             _old = res.at[_idx, '総合スコア']
             if _old < _floor:
                 res.at[_idx, '総合スコア'] = _floor
-                _floor_applied.append(f"{_hname}({_old:.1f}→{_floor:.1f}pt)")
+                _floor_applied.append(f"{_hname}({_old:.1f}→{_floor:.1f}pt, {_n_races}走)")
     if _floor_applied:
         print(f"  [C-3b] 調教フロア適用: {', '.join(_floor_applied)}")
 

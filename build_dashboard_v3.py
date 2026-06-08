@@ -784,9 +784,9 @@ else:
     _rec_bg     = '#3a1a1a'
     _rec_reason = 'スコア上位3頭とSmartRC推定が概ね一致（妙味薄）'
 
-# ── 自信ありバッジ（妙味有 かつ 偏差値≥65 or リード≥15pt） ────
+# ── 自信ありバッジ（偏差値≥65 or リード≥15pt ― 妙味判定とは独立） ────
 _jishin_html = ''
-if _jishin_flag and '妙味有' in _rec_badge:
+if _jishin_flag:
     _reasons = []
     if _pred1_dev >= 65:
         _reasons.append(f'偏差値{_pred1_dev}')
@@ -1615,25 +1615,30 @@ html = f'''<!DOCTYPE html>
   <!-- 期待値シミュレーター -->
   <div class="section">
     <h2>💰 期待値シミュレーター</h2>
-    <!-- レース推奨度バナー -->
+    <!-- 1行目: 市場乖離バナー（妙味判定） -->
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
-                padding:10px 16px;margin-bottom:14px;border-radius:8px;
+                padding:10px 16px;margin-bottom:8px;border-radius:8px;
                 background:{_rec_bg};border:1px solid {_rec_color};">
       <span style="font-size:15px;font-weight:900;color:{_rec_color};
                    padding:3px 14px;border-radius:5px;border:2px solid {_rec_color};">
         {_rec_badge}
       </span>
       <span style="color:#ccc;font-size:12px;">{_rec_reason}</span>
-      {_jishin_html}
       {_best_html}
     </div>
-    <div class="temp-slider">
-      <label style="font-weight:600">モデル信頼度</label>
-      <span style="color:#7f8c8d;font-size:11px">本命重視</span>
-      <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
-      <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
-      <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
-      <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
+    <!-- 2行目: モデル信頼度スライダー ＋ 自信ありバッジ -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;
+                padding:8px 16px;margin-bottom:14px;border-radius:8px;
+                background:#1c2a3a;border:1px solid #2c3e50;">
+      <div class="temp-slider" style="margin:0;flex:1;min-width:260px;">
+        <label style="font-weight:600">モデル信頼度</label>
+        <span style="color:#7f8c8d;font-size:11px">本命重視</span>
+        <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
+        <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
+        <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
+        <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
+      </div>
+      {_jishin_html}
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="ev-tab active" id="tabTanshо" onclick="switchTab('tansho')">単勝 EV</button>

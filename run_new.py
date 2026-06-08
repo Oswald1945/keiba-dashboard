@@ -46,6 +46,7 @@ DRY_RUN     = '--dry' in sys.argv or '--dry-run' in sys.argv
 FORCE_SHARE = '--share' in sys.argv  # pred生成済のHTMLも強制公開
 FORCE_PRED   = '--force' in sys.argv  # pred生成済でも強制再生成
 FORCE_REVIEW = '--force' in sys.argv  # review生成済でも強制再生成
+NO_BROWSER   = '--no-browser' in sys.argv  # ブラウザ自動起動を抑制
 
 SHARE_URL_LOG = SCRIPT_DIR / 'shared_urls.txt'
 GITHUB_PAGES_BASE = 'https://oswald1945.github.io/keiba-dashboard'
@@ -447,10 +448,12 @@ def process_race(race_id, files) -> pathlib.Path | None:
                     with open(SHARE_URL_LOG, 'w', encoding='utf-8') as _lg:
                         for _k, _v in sorted(_ex.items()):
                             _lg.write(f'{_k}\t{_v}\n')
-                    webbrowser.open(share_url)
+                    if not NO_BROWSER:
+                        webbrowser.open(share_url)
                 else:
-                    webbrowser.open(review_html_p.as_uri())
-                    print(f'  [browser] {review_html_p.name} をローカルで開きました')
+                    if not NO_BROWSER:
+                        webbrowser.open(review_html_p.as_uri())
+                        print(f'  [browser] {review_html_p.name} をローカルで開きました')
 
     pred_ok   = already_pred   or generated_pred
     review_ok = already_review or generated_review or result is None

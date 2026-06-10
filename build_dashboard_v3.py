@@ -784,37 +784,48 @@ else:
     _rec_bg     = '#3a1a1a'
     _rec_reason = 'スコア上位3頭とSmartRC推定が概ね一致（妙味薄）'
 
-# ── 自信ありバッジ（偏差値≥65 or リード≥15pt ― 妙味判定とは独立） ────
+# ── 本命馬自信ありバッジ（偏差値≥65 or リード≥15pt ― 妙味判定とは独立） ────
 _jishin_html = ''
 if _jishin_flag:
-    _reasons = []
-    if _pred1_dev >= 65:
-        _reasons.append(f'偏差値{_pred1_dev}')
-    if _score_lead >= 15:
-        _reasons.append(f'リード{_score_lead:.1f}pt')
+    _dev_str = f'偏差値{_pred1_dev}' if _pred1_dev >= 65 else ''
+    _lead_str = f'リード{_score_lead:.1f}pt' if _score_lead >= 15 else ''
+    _sub = ' / '.join(filter(None, [_dev_str, _lead_str]))
     _jishin_html = (
-        f'<span style="display:inline-flex;align-items:center;gap:5px;'
-        f'margin-left:10px;padding:4px 12px;border-radius:6px;'
-        f'background:linear-gradient(135deg,#f39c12,#e67e22);'
-        f'color:#fff;font-size:13px;font-weight:900;'
-        f'box-shadow:0 0 8px rgba(243,156,18,0.6);">'
-        f'⭐ 自信あり'
-        f'<span style="font-size:10px;font-weight:400;opacity:0.9">'
-        f'（{" / ".join(_reasons)}）</span>'
+        f'<span style="display:inline-flex;align-items:center;gap:6px;'
+        f'padding:5px 14px;border-radius:6px;background:#2c3e50;'
+        f'border:1px solid #f39c12;font-size:12px;">'
+        f'⭐ 本命馬自信あり: '
+        f'<b style="color:#f1c40f">{_pred1_name}</b>'
+        f'<span style="color:#f39c12;font-weight:700">({_sub})</span>'
         f'</span>'
     )
 
+# ── 注目馬バッジ ────────────────────────────────────────────
 _best_html = ''
 if _best_val and _best_val['乖離'] >= 2:
     _odds_str = (f'{_best_val["オッズ"]:.1f}倍'
                  if _best_val.get('オッズ') else '-')
     _best_html = (
-        f'<span style="margin-left:14px;padding:3px 10px;'
-        f'background:#2c3e50;border-radius:4px;font-size:12px;">'
-        f'💎 注目馬: <b style="color:#f1c40f">{_best_val["馬名"]}</b>'
-        f'（予想{_best_val["予想順位"]}位 / 想定{_best_val["SmartRC推定"]}番人気'
-        f' / 乖離+{_best_val["乖離"]} / 単勝{_odds_str}）'
+        f'<span style="display:inline-flex;align-items:center;gap:6px;'
+        f'padding:5px 14px;border-radius:6px;background:#2c3e50;'
+        f'border:1px solid #3498db;font-size:12px;">'
+        f'💎 注目馬: '
+        f'<b style="color:#f1c40f">{_best_val["馬名"]}</b>'
+        f'<span style="color:#aaa;">（予想{_best_val["予想順位"]}位 / 想定{_best_val["SmartRC推定"]}番人気'
+        f' / 乖離+{_best_val["乖離"]} / 単勝{_odds_str}）</span>'
         f'</span>'
+    )
+
+# ── バッジエリア（注目馬 / 本命馬自信あり ― どちらもなければ非表示） ────
+_badge_area_html = ''
+if _jishin_html or _best_html:
+    _badge_area_html = (
+        f'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;'
+        f'padding:10px 16px;margin-bottom:8px;border-radius:8px;'
+        f'background:#1e2d3d;border:1px solid #2e4055;">'
+        f'{_jishin_html}'
+        f'{_best_html}'
+        f'</div>'
     )
 
 # ── 補正積み上げチャートデータ ──────────────────────────────────
@@ -1615,7 +1626,7 @@ html = f'''<!DOCTYPE html>
   <!-- 期待値シミュレーター -->
   <div class="section">
     <h2>💰 期待値シミュレーター</h2>
-    <!-- 1行目: 市場乖離バナー（妙味判定） -->
+    <!-- 1行目: 市場乖離バナー（妙味判定のみ） -->
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
                 padding:10px 16px;margin-bottom:8px;border-radius:8px;
                 background:{_rec_bg};border:1px solid {_rec_color};">
@@ -1624,21 +1635,17 @@ html = f'''<!DOCTYPE html>
         {_rec_badge}
       </span>
       <span style="color:#ccc;font-size:12px;">{_rec_reason}</span>
-      {_best_html}
     </div>
-    <!-- 2行目: モデル信頼度スライダー ＋ 自信ありバッジ -->
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;
-                padding:8px 16px;margin-bottom:14px;border-radius:8px;
-                background:#1c2a3a;border:1px solid #2c3e50;">
-      <div class="temp-slider" style="margin:0;flex:1;min-width:260px;">
-        <label style="font-weight:600">モデル信頼度</label>
-        <span style="color:#7f8c8d;font-size:11px">本命重視</span>
-        <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
-        <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
-        <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
-        <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
-      </div>
-      {_jishin_html}
+    <!-- 2行目: 注目馬 / 本命馬自信あり バッジエリア（該当なければ非表示） -->
+    {_badge_area_html}
+    <!-- 3行目: モデル信頼度スライダー -->
+    <div class="temp-slider" style="margin-bottom:14px;">
+      <label style="font-weight:600">モデル信頼度</label>
+      <span style="color:#7f8c8d;font-size:11px">本命重視</span>
+      <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
+      <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
+      <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
+      <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="ev-tab active" id="tabTanshо" onclick="switchTab('tansho')">単勝 EV</button>

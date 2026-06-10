@@ -377,7 +377,7 @@
   <!-- 期待値シミュレーター -->
   <div class="section">
     <h2>💰 期待値シミュレーター</h2>
-    <!-- 1行目: 市場乖離バナー（妙味判定） -->
+    <!-- 1行目: 市場乖離バナー（妙味判定のみ） -->
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
                 padding:10px 16px;margin-bottom:8px;border-radius:8px;
                 background:#1a3a28;border:1px solid #27ae60;">
@@ -386,21 +386,17 @@
         🟢 妙味有
       </span>
       <span style="color:#ccc;font-size:12px;">スコア上位馬がSmartRC推定より6順位上 ― 大きな市場乖離あり</span>
-      <span style="margin-left:14px;padding:3px 10px;background:#2c3e50;border-radius:4px;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">ベラジオワールド</b>（予想1位 / 想定7番人気 / 乖離+6 / 単勝-）</span>
     </div>
-    <!-- 2行目: モデル信頼度スライダー ＋ 自信ありバッジ -->
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;
-                padding:8px 16px;margin-bottom:14px;border-radius:8px;
-                background:#1c2a3a;border:1px solid #2c3e50;">
-      <div class="temp-slider" style="margin:0;flex:1;min-width:260px;">
-        <label style="font-weight:600">モデル信頼度</label>
-        <span style="color:#7f8c8d;font-size:11px">本命重視</span>
-        <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
-        <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
-        <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
-        <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
-      </div>
-      <span style="display:inline-flex;align-items:center;gap:5px;margin-left:10px;padding:4px 12px;border-radius:6px;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;font-size:13px;font-weight:900;box-shadow:0 0 8px rgba(243,156,18,0.6);">⭐ 自信あり<span style="font-size:10px;font-weight:400;opacity:0.9">（偏差値67）</span></span>
+    <!-- 2行目: 注目馬 / 本命馬自信あり バッジエリア（該当なければ非表示） -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 16px;margin-bottom:8px;border-radius:8px;background:#1e2d3d;border:1px solid #2e4055;"><span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:6px;background:#2c3e50;border:1px solid #f39c12;font-size:12px;">⭐ 本命馬自信あり: <b style="color:#f1c40f">ベラジオワールド</b><span style="color:#f39c12;font-weight:700">(偏差値67)</span></span><span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:6px;background:#2c3e50;border:1px solid #3498db;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">ベラジオワールド</b><span style="color:#aaa;">（予想1位 / 想定7番人気 / 乖離+6 / 単勝-）</span></span></div>
+    <!-- 3行目: モデル信頼度スライダー -->
+    <div class="temp-slider" style="margin-bottom:14px;">
+      <label style="font-weight:600">モデル信頼度</label>
+      <span style="color:#7f8c8d;font-size:11px">本命重視</span>
+      <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
+      <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
+      <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
+      <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="ev-tab active" id="tabTanshо" onclick="switchTab('tansho')">単勝 EV</button>

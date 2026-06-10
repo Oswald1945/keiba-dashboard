@@ -19,7 +19,7 @@ env["GIT_COMMITTER_NAME"] = "kuroame"
 env["GIT_COMMITTER_EMAIL"] = "jrock.b.b.express@gmail.com"
 r = subprocess.run(
     ["git", "commit", "-m",
-     "ui: separate 妙味判定 and 自信あり into 2-row layout; fix: resample --no-browser"],
+     "ui: add badge area for 注目馬/本命馬自信あり; rename 自信あり badge with horse name"],
     cwd=repo, capture_output=True, text=True, env=env
 )
 print("[3] git commit:", r.returncode)

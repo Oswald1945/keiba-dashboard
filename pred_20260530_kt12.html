@@ -347,13 +347,7 @@
   <div class="shutuba-banner">
       ✅ 出馬表データ反映済み（枠番・馬番・騎手・斤量・オッズが最新です）
     </div>
-  <div class="shutuba-banner" style="background:linear-gradient(135deg,#1a3a6b 0%,#2c5282 100%);color:#fff;border-left:4px solid #f1c40f;margin-bottom:8px">
-      🌤 <b>推定馬場状態</b>（京都）：
-      芝 <b style="color:#27ae60;font-size:15px">良</b>
-      ／ダート <b style="color:#27ae60;font-size:15px">良</b>
-      
-      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（情報取得失敗のためデフォルト(良)）</span>
-    </div>
+  
 
   <div class="section">
     <h2>🏆 上位3頭 予想</h2>
@@ -383,25 +377,30 @@
   <!-- 期待値シミュレーター -->
   <div class="section">
     <h2>💰 期待値シミュレーター</h2>
-    <!-- レース推奨度バナー -->
+    <!-- 1行目: 市場乖離バナー（妙味判定） -->
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
-                padding:10px 16px;margin-bottom:14px;border-radius:8px;
+                padding:10px 16px;margin-bottom:8px;border-radius:8px;
                 background:#1a3a28;border:1px solid #27ae60;">
       <span style="font-size:15px;font-weight:900;color:#27ae60;
                    padding:3px 14px;border-radius:5px;border:2px solid #27ae60;">
         🟢 妙味有
       </span>
       <span style="color:#ccc;font-size:12px;">スコア上位馬がSmartRC推定より9順位上 ― 大きな市場乖離あり</span>
-      
       <span style="margin-left:14px;padding:3px 10px;background:#2c3e50;border-radius:4px;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">サマースイートピー</b>（予想2位 / 想定11番人気 / 乖離+9 / 単勝-）</span>
     </div>
-    <div class="temp-slider">
-      <label style="font-weight:600">モデル信頼度</label>
-      <span style="color:#7f8c8d;font-size:11px">本命重視</span>
-      <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
-      <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
-      <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
-      <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
+    <!-- 2行目: モデル信頼度スライダー ＋ 自信ありバッジ -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;
+                padding:8px 16px;margin-bottom:14px;border-radius:8px;
+                background:#1c2a3a;border:1px solid #2c3e50;">
+      <div class="temp-slider" style="margin:0;flex:1;min-width:260px;">
+        <label style="font-weight:600">モデル信頼度</label>
+        <span style="color:#7f8c8d;font-size:11px">本命重視</span>
+        <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
+        <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
+        <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
+        <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
+      </div>
+      
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="ev-tab active" id="tabTanshо" onclick="switchTab('tansho')">単勝 EV</button>

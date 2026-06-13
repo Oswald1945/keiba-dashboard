@@ -330,7 +330,7 @@
         <div class="summary-label">出走頭数</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">スローペース</div>
+        <div class="summary-value xsmall">スローペース（テン速度競合3頭）</div>
         <div class="summary-label">ペース予想</div>
       </div>
       <div class="summary-item">
@@ -361,20 +361,20 @@
       <div class="podium-card first">
         <div class="podium-mark">🥇</div>
         <div class="podium-name">ディアウス</div>
-        <div class="podium-info">4枠 4番 / 差し ・ 吉田隼人 ・ -人気</div>
+        <div class="podium-info">4枠 4番 / 差し ・ 吉田隼人 ・ 想定1番人気</div>
         <div class="podium-score">65.8<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 67</div></div>
       </div>
       <div class="podium-card second">
         <div class="podium-mark">🥈</div>
         <div class="podium-name">チギリ</div>
-        <div class="podium-info">3枠 3番 / 差し ・ 長浜鴻緒 ・ -人気</div>
-        <div class="podium-score">60.3<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 63</div></div>
+        <div class="podium-info">3枠 3番 / 差し ・ 長浜鴻緒 ・ 想定4番人気</div>
+        <div class="podium-score">61.8<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 64</div></div>
       </div>
       <div class="podium-card third">
         <div class="podium-mark">🥉</div>
         <div class="podium-name">ジュンラトゥール</div>
-        <div class="podium-info">8枠 12番 / 差し ・ 富田暁 ・ -人気</div>
-        <div class="podium-score">50.8<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 57</div></div>
+        <div class="podium-info">8枠 12番 / 差し ・ 富田暁 ・ 想定5番人気</div>
+        <div class="podium-score">50.0<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 56</div></div>
       </div>
     </div>
   </div>
@@ -386,15 +386,15 @@
     <!-- 1行目: 市場乖離バナー（妙味判定のみ） -->
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
                 padding:10px 16px;margin-bottom:8px;border-radius:8px;
-                background:#3a1a1a;border:1px solid #e74c3c;">
-      <span style="font-size:15px;font-weight:900;color:#e74c3c;
-                   padding:3px 14px;border-radius:5px;border:2px solid #e74c3c;">
-        🔴 妙味薄
+                background:#3a2e10;border:1px solid #f39c12;">
+      <span style="font-size:15px;font-weight:900;color:#f39c12;
+                   padding:3px 14px;border-radius:5px;border:2px solid #f39c12;">
+        🟡 要検討
       </span>
-      <span style="color:#ccc;font-size:12px;">スコア上位3頭とSmartRC推定が概ね一致（妙味薄）</span>
+      <span style="color:#ccc;font-size:12px;">SmartRC推定から2順位上の乖離あり（中穴の可能性）</span>
     </div>
     <!-- 2行目: 注目馬 / 本命馬自信あり バッジエリア（該当なければ非表示） -->
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 16px;margin-bottom:8px;border-radius:8px;background:#1e2d3d;border:1px solid #2e4055;"><span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:6px;background:#2c3e50;border:1px solid #f39c12;font-size:12px;">⭐ 本命馬自信あり: <b style="color:#f1c40f">ディアウス</b><span style="color:#f39c12;font-weight:700">(偏差値67)</span></span></div>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 16px;margin-bottom:8px;border-radius:8px;background:#1e2d3d;border:1px solid #2e4055;"><span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:6px;background:#2c3e50;border:1px solid #f39c12;font-size:12px;">⭐ 本命馬自信あり: <b style="color:#f1c40f">ディアウス</b><span style="color:#f39c12;font-weight:700">(偏差値67)</span></span><span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:6px;background:#2c3e50;border:1px solid #3498db;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">チギリ</b><span style="color:#aaa;">（予想2位 / 想定4番人気 / 乖離+2 / 単勝-）</span></span></div>
     <!-- 3行目: モデル信頼度スライダー -->
     <div class="temp-slider" style="margin-bottom:14px;">
       <label style="font-weight:600">モデル信頼度</label>
@@ -451,7 +451,7 @@
           <th style="white-space:nowrap">騎手</th>
         </tr>
       </thead>
-      <tbody><tr><td>1</td><td style="white-space:nowrap"><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">4枠</span><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">4番</span></td><td><b>ディアウス</b><span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span></td><td>差し</td><td style="white-space:nowrap"><b>65.8</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差67</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>吉田隼人</td></tr><tr><td>2</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">3枠</span><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">3番</span></td><td><b>チギリ</b><span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span></td><td>差し</td><td style="white-space:nowrap"><b>60.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差63</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">52.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牝</td><td>長浜鴻緒</td></tr><tr><td>3</td><td style="white-space:nowrap"><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">8枠</span><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">12番</span></td><td><b>ジュンラトゥール</b><span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span></td><td>差し</td><td style="white-space:nowrap"><b>50.8</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差57</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">56.0kg</td><td style="text-align:center;white-space:nowrap">5歳 牡</td><td>富田暁</td></tr><tr><td>4</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FFFFFF;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">1枠</span><span style="display:inline-block;background:#FFFFFF;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">1番</span></td><td><b>リッチブラック</b></td><td>先行</td><td style="white-space:nowrap"><b>49.9</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差56</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">53.0kg</td><td style="text-align:center;white-space:nowrap">7歳 牡</td><td>川又賢治</td></tr><tr><td>5</td><td style="white-space:nowrap"><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">5枠</span><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">5番</span></td><td><b>エアニゲラ</b></td><td>逃げ</td><td style="white-space:nowrap"><b>47.2</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差54</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">53.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牝</td><td>舟山瑠泉</td></tr><tr><td>6</td><td style="white-space:nowrap"><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">8枠</span><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">11番</span></td><td><b>マーウォルス</b></td><td>差し</td><td style="white-space:nowrap"><b>43.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差52</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">56.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>佐々木大</td></tr><tr><td>7</td><td style="white-space:nowrap"><span style="display:inline-block;background:#666666;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">2枠</span><span style="display:inline-block;background:#666666;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">2番</span></td><td><b>フェスタリア</b></td><td>差し</td><td style="white-space:nowrap"><b>41.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差50</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>今村聖奈</td></tr><tr><td>8</td><td style="white-space:nowrap"><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">6枠</span><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">8番</span></td><td><b>メイショウタイピン</b></td><td>差し</td><td style="white-space:nowrap"><b>39.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差49</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>池添謙一</td></tr><tr><td>9</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">7枠</span><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">9番</span></td><td><b>レイザリオ</b></td><td>差し</td><td style="white-space:nowrap"><b>30.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差43</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>岩田康誠</td></tr><tr><td>10</td><td style="white-space:nowrap"><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">6枠</span><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">7番</span></td><td><b>タイヨウフレア</b></td><td>差し</td><td style="white-space:nowrap"><b>22.2</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差38</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">52.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牝</td><td>横山琉人</td></tr><tr><td>11</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">7枠</span><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">10番</span></td><td><b>ラマンシュ</b></td><td>差し</td><td style="white-space:nowrap"><b>18.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差35</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">56.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>斎藤新</td></tr><tr><td>12</td><td style="white-space:nowrap"><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">5枠</span><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">6番</span></td><td><b>アールプロスト</b></td><td>追込</td><td style="white-space:nowrap"><b>17.2</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差35</span></td><td>-倍 (-人気)</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;color:#555">-</td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>小沢大仁</td></tr></tbody>
+      <tbody><tr><td>1</td><td style="white-space:nowrap"><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">4枠</span><span style="display:inline-block;background:#4488FF;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">4番</span></td><td><b>ディアウス</b></td><td>差し</td><td style="white-space:nowrap"><b>65.8</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差67</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">1位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">57.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>吉田隼人</td></tr><tr><td>2</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">3枠</span><span style="display:inline-block;background:#FF4444;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">3番</span></td><td><b>チギリ</b></td><td>差し</td><td style="white-space:nowrap"><b>61.8</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差64</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">4位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#e67e22;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">D 有利</span></td><td style="text-align:center;white-space:nowrap">52.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牝</td><td>長浜鴻緒</td></tr><tr><td>3</td><td style="white-space:nowrap"><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">8枠</span><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">12番</span></td><td><b>ジュンラトゥール</b></td><td>差し</td><td style="white-space:nowrap"><b>50.0</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差56</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">5位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">56.0kg</td><td style="text-align:center;white-space:nowrap">5歳 牡</td><td>富田暁</td></tr><tr><td>4</td><td style="white-space:nowrap"><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">5枠</span><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">5番</span></td><td><b>エアニゲラ</b></td><td>逃げ</td><td style="white-space:nowrap"><b>48.7</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差56</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">6位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">53.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牝</td><td>舟山瑠泉</td></tr><tr><td>5</td><td style="white-space:nowrap"><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">8枠</span><span style="display:inline-block;background:#e91e8c;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">11番</span></td><td><b>マーウォルス</b></td><td>差し</td><td style="white-space:nowrap"><b>46.4</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差54</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">7位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">56.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>佐々木大</td></tr><tr><td>6</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FFFFFF;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">1枠</span><span style="display:inline-block;background:#FFFFFF;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">1番</span></td><td><b>リッチブラック</b></td><td>先行</td><td style="white-space:nowrap"><b>44.2</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差53</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">12位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">53.0kg</td><td style="text-align:center;white-space:nowrap">7歳 牡</td><td>川又賢治</td></tr><tr><td>7</td><td style="white-space:nowrap"><span style="display:inline-block;background:#666666;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">2枠</span><span style="display:inline-block;background:#666666;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">2番</span></td><td><b>フェスタリア</b></td><td>差し</td><td style="white-space:nowrap"><b>39.8</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差50</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">10位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>今村聖奈</td></tr><tr><td>8</td><td style="white-space:nowrap"><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">6枠</span><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">8番</span></td><td><b>メイショウタイピン</b></td><td>差し</td><td style="white-space:nowrap"><b>39.6</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差50</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">3位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>池添謙一</td></tr><tr><td>9</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">7枠</span><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">9番</span></td><td><b>レイザリオ</b></td><td>差し</td><td style="white-space:nowrap"><b>28.3</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差42</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">8位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#e67e22;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">D 有利</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>岩田康誠</td></tr><tr><td>10</td><td style="white-space:nowrap"><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">6枠</span><span style="display:inline-block;background:#22BB22;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">7番</span></td><td><b>タイヨウフレア</b></td><td>差し</td><td style="white-space:nowrap"><b>21.6</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差38</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">11位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#7f8c8d;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">C 中立</span></td><td style="text-align:center;white-space:nowrap">52.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牝</td><td>横山琉人</td></tr><tr><td>11</td><td style="white-space:nowrap"><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">7枠</span><span style="display:inline-block;background:#FF8822;color:#fff;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">10番</span></td><td><b>ラマンシュ</b></td><td>差し</td><td style="white-space:nowrap"><b>18.8</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差36</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">2位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#e67e22;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">D 有利</span></td><td style="text-align:center;white-space:nowrap">56.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>斎藤新</td></tr><tr><td>12</td><td style="white-space:nowrap"><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">5枠</span><span style="display:inline-block;background:#DDDD00;color:#111;font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">6番</span></td><td><b>アールプロスト</b></td><td>追込</td><td style="white-space:nowrap"><b>18.1</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差35</span></td><td>-倍 (-人気)</td><td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">9位</b></td><td style="text-align:center;white-space:nowrap"><span style="background:#2ecc71;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;">B 不利</span></td><td style="text-align:center;white-space:nowrap">55.0kg</td><td style="text-align:center;white-space:nowrap">4歳 牡</td><td>小沢大仁</td></tr></tbody>
     </table>
     </div>
   </div>
@@ -459,7 +459,7 @@
   <div class="section">
     <h2>🏃 展開予想 / 脚質構成</h2>
     <div class="pace-box">
-      <div class="pace-title">スローペース想定</div>
+      <div class="pace-title">スローペース想定（テン速度競合3頭）</div>
       <div>逃げ・先行馬が <b>2頭</b> 揃い、展開面での有利・不利が生じます。</div>
     </div>
     <div class="leg-grid"><div class="leg-item"><div class="leg-color" style="background:#e74c3c"></div><b>逃げ</b><span class="leg-count">1頭</span><div class="leg-bar"><div class="leg-fill" style="width:8%;background:#e74c3c"></div></div></div><div class="leg-item"><div class="leg-color" style="background:#f39c12"></div><b>先行</b><span class="leg-count">1頭</span><div class="leg-bar"><div class="leg-fill" style="width:8%;background:#f39c12"></div></div></div><div class="leg-item"><div class="leg-color" style="background:#3498db"></div><b>差し</b><span class="leg-count">9頭</span><div class="leg-bar"><div class="leg-fill" style="width:75%;background:#3498db"></div></div></div><div class="leg-item"><div class="leg-color" style="background:#9b59b6"></div><b>追込</b><span class="leg-count">1頭</span><div class="leg-bar"><div class="leg-fill" style="width:8%;background:#9b59b6"></div></div></div></div>
@@ -483,17 +483,17 @@
     <span style="color:#7f8c8d;font-size:11px;margin-left:6px">（SmartRC速度データ未取得時は脚質のみで推定）</span>
   </div>
   <div style="font-size:11px;color:#bdc3c7;margin-bottom:6px;line-height:1.8">
-    <span style="color:#3498db;font-weight:700">⚡テン速度 TOP3：</span><span style="color:#7f8c8d;font-size:11px">データなし</span>
+    <span style="color:#3498db;font-weight:700">⚡テン速度 TOP3：</span><span style="background:#e74c3c;color:#fff;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:700;margin:1px">1位 レイザリオ</span><span style="background:#e67e22;color:#fff;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:700;margin:1px">2位 ディアウス</span><span style="background:#f1c40f;color:#fff;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:700;margin:1px">3位 メイショウタイピン</span>
     &nbsp;|&nbsp;
-    <span style="color:#e74c3c;font-weight:700">🏁上がり速度 TOP3：</span><span style="color:#7f8c8d;font-size:11px">データなし</span>
-    &nbsp;|&nbsp; <span style="color:#bdc3c7">速度競合なし</span>
+    <span style="color:#e74c3c;font-weight:700">🏁上がり速度 TOP3：</span><span style="background:#e74c3c;color:#fff;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:700;margin:1px">1位 メイショウタイピン</span><span style="background:#e67e22;color:#fff;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:700;margin:1px">2位 チギリ</span><span style="background:#f1c40f;color:#fff;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:700;margin:1px">3位 ラマンシュ</span>
+    &nbsp;|&nbsp; <span style="color:#e74c3c;font-weight:700">速度競合(3頭)あり</span>
   </div>
   <div id="formation-panels" style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;align-items:stretch"></div>
 </div>
 
 <script>
 (function(){
-  const fHorses = [{"name": "ディアウス", "uma": 4, "waku": 4, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "チギリ", "uma": 3, "waku": 3, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ジュンラトゥール", "uma": 12, "waku": 8, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "リッチブラック", "uma": 1, "waku": 1, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "エアニゲラ", "uma": 5, "waku": 5, "kyaku": "逃げ", "ten_r": null, "aga_r": null}, {"name": "マーウォルス", "uma": 11, "waku": 8, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "フェスタリア", "uma": 2, "waku": 2, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "メイショウタイピン", "uma": 8, "waku": 6, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "レイザリオ", "uma": 9, "waku": 7, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "タイヨウフレア", "uma": 7, "waku": 6, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ラマンシュ", "uma": 10, "waku": 7, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "アールプロスト", "uma": 6, "waku": 5, "kyaku": "追込", "ten_r": null, "aga_r": null}];
+  const fHorses = [{"name": "ディアウス", "uma": 4, "waku": 4, "kyaku": "差し", "ten_r": 2, "aga_r": null}, {"name": "チギリ", "uma": 3, "waku": 3, "kyaku": "差し", "ten_r": 4, "aga_r": 2}, {"name": "ジュンラトゥール", "uma": 12, "waku": 8, "kyaku": "差し", "ten_r": null, "aga_r": 4}, {"name": "エアニゲラ", "uma": 5, "waku": 5, "kyaku": "逃げ", "ten_r": 6, "aga_r": 4}, {"name": "マーウォルス", "uma": 11, "waku": 8, "kyaku": "差し", "ten_r": 5, "aga_r": 6}, {"name": "リッチブラック", "uma": 1, "waku": 1, "kyaku": "先行", "ten_r": null, "aga_r": null}, {"name": "フェスタリア", "uma": 2, "waku": 2, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "メイショウタイピン", "uma": 8, "waku": 6, "kyaku": "差し", "ten_r": 3, "aga_r": 1}, {"name": "レイザリオ", "uma": 9, "waku": 7, "kyaku": "差し", "ten_r": 1, "aga_r": null}, {"name": "タイヨウフレア", "uma": 7, "waku": 6, "kyaku": "差し", "ten_r": null, "aga_r": null}, {"name": "ラマンシュ", "uma": 10, "waku": 7, "kyaku": "差し", "ten_r": 6, "aga_r": 3}, {"name": "アールプロスト", "uma": 6, "waku": 5, "kyaku": "追込", "ten_r": null, "aga_r": null}];
   const pace      = 'low';
   const N         = 12;
   const direction  = '右';  // '左'=反時計 / '右'=時計回り
@@ -977,10 +977,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">60.3</span>
+        <span class="big-num">61.8</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#e74c3c;color:#fff;line-height:1.3">S</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 63</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 64</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1003,8 +1003,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:7%"></div></div>
-          <span class="val">-1/±15</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:7%"></div></div>
+          <span class="val">+1/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1107,10 +1107,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">50.8</span>
+        <span class="big-num">50.0</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#f39c12;color:#fff;line-height:1.3">A</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 57</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 56</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1133,8 +1133,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1220,139 +1220,9 @@
 </div>
   </div>
 </div>
-<div class="horse-card rank-4" data-rank="4" data-leg="先行">
+<div class="horse-card rank-4" data-rank="4" data-leg="逃げ">
   <div class="rank-badge" style="background:#3498db">
     <span class="rank-num">4</span>
-  </div>
-  <div class="horse-main">
-    <div class="horse-header">
-      <span class="waku-badge" style="background:#FFFFFF;color:#111;">1枠</span><span class="bango-badge" style="background:#FFFFFF;color:#111;">1番</span>
-      <h3>リッチブラック</h3>
-      <span class="leg-badge" style="background:#f39c12">先行</span>
-      <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +0.9</span><span class="adj-badge" style="background:#8c564b">休養 +1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.5</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span><span class="adj-badge" style="background:#c0392b">馬場適性 -0.5</span>
-      
-      
-      <span class="meta-info">牡7 / 川又賢治 / 33走</span>
-      <button class="drill-btn" onclick="toggleDrill('h3', this)">📋 過去走</button>
-    </div>
-    <div class="score-row">
-      <div class="total-score">
-        <span class="big-num">49.9</span>
-        <span class="small-label">総合スコア</span>
-        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 56</span>
-        <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
-          単勝 -倍<br>(-人気)
-        </span>
-      </div>
-      <div class="score-bars">
-        <div class="bar-row">
-          <label>最高出力</label>
-          <div class="bar"><div class="fill" style="width:63%;background:#e74c3c"></div></div>
-          <span class="val">22.1/35</span>
-        </div>
-        <div class="bar-row">
-          <label>クラス補正</label>
-          <div class="bar"><div class="fill" style="width:13%;background:#f39c12"></div></div>
-          <span class="val">3.3/25</span>
-        </div>
-        <div class="bar-row">
-          <label>タイム偏差</label>
-          <div class="bar"><div class="fill" style="width:79%;background:#3498db"></div></div>
-          <span class="val">19.8/25</span>
-        </div>
-        <div class="bar-row">
-          <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:13%"></div></div>
-          <span class="val">+2/±15</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>斤量補正</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
-          <span class="val">+0.0/±3</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>距離補正</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:0%"></div></div>
-          <span class="val">+0/−4</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>コース適性</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:18%"></div></div>
-          <span class="val">+0.9/±5</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>臨戦補正</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:14%"></div></div>
-          <span class="val">+1/−7</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>人気補正</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
-          <span class="val">+0.0/+3</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>騎手実績</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:25%"></div></div>
-          <span class="val">-0.5/±2</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>枠順補正</label>
-          <div class="bar bipolar"><div class="fill plus" style="width:25%"></div></div>
-          <span class="val">+0.5/±2</span>
-        </div>
-        <div class="bar-row adj-row">
-          <label>馬場適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:17%"></div></div>
-          <span class="val">-0.5/±3</span>
-        </div>
-      </div>
-    </div>
-    <div class="extra-info">
-      <span>補正最良: <b>90</b></span>
-      <span>上がり平均: <b>35.9</b></span>
-      <span>平均通過: <b>3.6</b></span>
-      <span>コース類似度: <b>0.60</b></span>
-      <span>父: エピファネイア</span>
-      <span>母父: ブライアンズタイム</span>
-      <span>時計データ: 33/33走</span>
-      
-    </div>
-    
-<div class="drilldown-wrap" id="drill-h3" style="display:none;">
-  <div class="drilldown-header">
-    <span>📋 過去走詳細 (33走)</span>
-    <span class="drill-legend">
-      <span class="td-pos">■</span>平均より速い
-      <span class="td-neg">■</span>平均より遅い
-      &nbsp;
-      <span class="sim-hi">■</span>類似コース
-      <span class="sim-mid">■</span>やや類似
-      <span class="sim-lo">■</span>異質コース
-      &nbsp;
-      <span class="pci-hi">■</span>ハイペース
-      <span class="pci-lo">■</span>スローペース
-    </span>
-  </div>
-  <div style="overflow-x:auto">
-  <table class="past-table">
-    <thead>
-      <tr>
-        <th>日付</th><th>場所</th><th>コース</th><th>クラス</th>
-        <th>着順</th><th>走破タイム</th><th>馬場</th>
-        <th>平均差</th><th>コース適性</th><th>PCI</th>
-        <th>上がり3F</th><th>4角</th><th>騎手</th><th>斤量</th>
-      </tr>
-    </thead>
-    <tbody><tr><td>2026-05-09</td><td>京都</td><td><span class="course-tag">京都芝2000m内</span></td><td>2勝</td><td class="center"><b>6/8</b></td><td class="center">1:59.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.40s</span></td><td class="center"><span class="sim-hi">0.87</span></td><td class="center">52.6</td><td class="center">35.2</td><td class="center">7</td><td>吉村誠之</td><td class="center">58.0</td></tr><tr><td>2026-04-26</td><td>京都</td><td><span class="course-tag">京都芝2200m</span></td><td>2勝</td><td class="center"><b>7/11</b></td><td class="center">2:12.40</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.50s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center"><span class="pci-hi">45.3</span></td><td class="center">37.4</td><td class="center">1</td><td>吉村誠之</td><td class="center">53.0</td></tr><tr><td>2026-04-11</td><td>阪神</td><td><span class="course-tag">阪神芝2400m</span></td><td>2勝</td><td class="center"><b>7/8</b></td><td class="center">2:29.00</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.90s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center"><span class="pci-lo">58.6</span></td><td class="center">35.0</td><td class="center">4</td><td>吉村誠之</td><td class="center">58.0</td></tr><tr><td>2026-03-01</td><td>阪神</td><td><span class="course-tag">阪神芝2200m内</span></td><td>2勝</td><td class="center"><b>8/9</b></td><td class="center">2:13.60</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.20s</span></td><td class="center"><span class="sim-mid">0.64</span></td><td class="center">53.2</td><td class="center">35.6</td><td class="center">1</td><td>長岡禎仁</td><td class="center">58.0</td></tr><tr><td>2026-02-07</td><td>京都</td><td><span class="course-tag">京都芝2000m内</span></td><td>2勝</td><td class="center"><b>6/8</b></td><td class="center">2:01.90</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+2.00s</span></td><td class="center"><span class="sim-hi">0.87</span></td><td class="center">53.9</td><td class="center">35.6</td><td class="center">3</td><td>団野大成</td><td class="center">58.0</td></tr><tr><td>2026-01-17</td><td>京都</td><td><span class="course-tag">京都芝2000m内</span></td><td>2勝</td><td class="center"><b>7/10</b></td><td class="center">2:01.90</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+2.00s</span></td><td class="center"><span class="sim-hi">0.87</span></td><td class="center"><span class="pci-lo">57.7</span></td><td class="center">34.7</td><td class="center">7</td><td>ハマーハ</td><td class="center">58.0</td></tr><tr><td>2025-08-24</td><td>札幌</td><td><span class="course-tag">札幌芝1800m</span></td><td>2勝</td><td class="center"><b>11/14</b></td><td class="center">1:49.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+0.70s</span></td><td class="center"><span class="sim-hi">0.81</span></td><td class="center">54.2</td><td class="center">35.5</td><td class="center">11</td><td>横山武史</td><td class="center">58.0</td></tr><tr><td>2025-08-09</td><td>札幌</td><td><span class="course-tag">札幌芝2000m</span></td><td>2勝</td><td class="center"><b>8/11</b></td><td class="center">2:04.30</td><td class="center">稍 <small style="color:#888">+1.40s</small></td><td class="center"><span class="td-neg">+1.20s</span></td><td class="center"><span class="sim-hi">0.87</span></td><td class="center"><span class="pci-lo">59.8</span></td><td class="center">34.9</td><td class="center">7</td><td>藤岡佑介</td><td class="center">58.0</td></tr><tr><td>2025-07-13</td><td>函館</td><td><span class="course-tag">函館芝1800m</span></td><td>2勝</td><td class="center"><b>10/12</b></td><td class="center">1:47.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.90s</span></td><td class="center"><span class="sim-hi">0.92</span></td><td class="center"><span class="pci-hi">47.7</span></td><td class="center">36.4</td><td class="center">3</td><td>藤岡佑介</td><td class="center">56.0</td></tr><tr><td>2025-06-14</td><td>函館</td><td><span class="course-tag">函館芝1800m</span></td><td>2勝</td><td class="center"><b>6/16</b></td><td class="center">1:46.70</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.70s</span></td><td class="center"><span class="sim-hi">0.92</span></td><td class="center"><span class="pci-lo">56.0</span></td><td class="center">34.2</td><td class="center">13</td><td>藤岡佑介</td><td class="center">58.0</td></tr><tr><td>2025-03-22</td><td>阪神</td><td><span class="course-tag">阪神芝2600m</span></td><td>2勝</td><td class="center"><b>6/9</b></td><td class="center">2:39.70</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.10s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">55.0</td><td class="center">35.5</td><td class="center">2</td><td>坂井瑠星</td><td class="center">58.0</td></tr><tr><td>2025-03-02</td><td>阪神</td><td><span class="course-tag">阪神芝2200m内</span></td><td>2勝</td><td class="center"><b>3/9</b></td><td class="center">2:12.30</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.50s</span></td><td class="center"><span class="sim-mid">0.64</span></td><td class="center">52.6</td><td class="center">35.4</td><td class="center">5</td><td>西村淳也</td><td class="center">58.0</td></tr><tr><td>2025-02-01</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>2勝</td><td class="center"><b>5/10</b></td><td class="center">2:26.20</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+0.10s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center"><span class="pci-hi">47.7</span></td><td class="center">37.2</td><td class="center">4</td><td>西村淳也</td><td class="center">56.0</td></tr><tr><td>2024-12-07</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>2勝</td><td class="center"><b>8/10</b></td><td class="center">2:26.60</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+0.50s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center"><span class="pci-hi">48.7</span></td><td class="center">37.0</td><td class="center">2</td><td>坂井瑠星</td><td class="center">58.0</td></tr><tr><td>2024-11-09</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>2勝</td><td class="center"><b>3/6</b></td><td class="center">2:27.30</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.20s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center"><span class="pci-lo">58.6</span></td><td class="center">34.6</td><td class="center">3</td><td>松山弘平</td><td class="center">58.0</td></tr><tr><td>2024-10-05</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>2勝</td><td class="center"><b>2/8</b></td><td class="center">2:25.20</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.90s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center">51.5</td><td class="center">35.9</td><td class="center">2</td><td>西村淳也</td><td class="center">58.0</td></tr><tr><td>2024-09-15</td><td>中京</td><td><span class="course-tag">中京芝2200m</span></td><td>2勝</td><td class="center"><b>5/10</b></td><td class="center">2:13.90</td><td class="center">稍 <small style="color:#888">+1.54s</small></td><td class="center"><span class="td-pos">-1.04s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">50.8</td><td class="center">36.3</td><td class="center">1</td><td>西村淳也</td><td class="center">54.0</td></tr><tr><td>2024-05-18</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>1勝</td><td class="center"><b>1/12</b></td><td class="center">2:24.00</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-2.50s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center">52.3</td><td class="center">35.4</td><td class="center">2</td><td>西村淳也</td><td class="center">58.0</td></tr><tr><td>2024-05-04</td><td>新潟</td><td><span class="course-tag">新潟芝2200m</span></td><td>1勝</td><td class="center"><b>8/13</b></td><td class="center">2:16.00</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.50s</span></td><td class="center"><span class="sim-lo">0.30</span></td><td class="center"><span class="pci-hi">48.5</span></td><td class="center">37.5</td><td class="center">2</td><td>小沢大仁</td><td class="center">58.0</td></tr><tr><td>2024-04-07</td><td>福島</td><td><span class="course-tag">福島芝2600m</span></td><td>1勝</td><td class="center"><b>11/16</b></td><td class="center">2:40.30</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.30s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center"><span class="pci-hi">46.6</span></td><td class="center">38.0</td><td class="center">3</td><td>菅原明良</td><td class="center">58.0</td></tr><tr><td>2024-03-09</td><td>中京</td><td><span class="course-tag">中京芝2200m</span></td><td>1勝</td><td class="center"><b>4/9</b></td><td class="center">2:13.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.40s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center"><span class="pci-hi">46.4</span></td><td class="center">37.4</td><td class="center">1</td><td>三浦皇成</td><td class="center">58.0</td></tr><tr><td>2024-02-10</td><td>小倉</td><td><span class="course-tag">小倉芝2600m</span></td><td>1勝</td><td class="center"><b>4/8</b></td><td class="center">2:41.90</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.40s</span></td><td class="center"><span class="sim-hi">0.83</span></td><td class="center"><span class="pci-lo">55.3</span></td><td class="center">35.9</td><td class="center">1</td><td>幸英明</td><td class="center">58.0</td></tr><tr><td>2024-01-13</td><td>小倉</td><td><span class="course-tag">小倉芝2600m</span></td><td>1勝</td><td class="center"><b>6/16</b></td><td class="center">2:39.80</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.70s</span></td><td class="center"><span class="sim-hi">0.83</span></td><td class="center">52.8</td><td class="center">36.1</td><td class="center">2</td><td>幸英明</td><td class="center">58.0</td></tr><tr><td>2023-11-19</td><td>福島</td><td><span class="course-tag">福島芝2600m</span></td><td>1勝</td><td class="center"><b>14/16</b></td><td class="center">2:46.20</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+4.60s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">54.0</td><td class="center">37.2</td><td class="center">7</td><td>丸山元気</td><td class="center">58.0</td></tr><tr><td>2023-05-14</td><td>新潟</td><td><span class="course-tag">新潟芝2000m外</span></td><td>1勝</td><td class="center"><b>5/12</b></td><td class="center">2:00.70</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+0.40s</span></td><td class="center"><span class="sim-lo">0.30</span></td><td class="center">52.4</td><td class="center">35.6</td><td class="center">2</td><td>荻野極</td><td class="center">58.0</td></tr><tr><td>2023-04-23</td><td>福島</td><td><span class="course-tag">福島芝2600m</span></td><td>1勝</td><td class="center"><b>4/14</b></td><td class="center">2:41.60</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.00s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">54.7</td><td class="center">36.0</td><td class="center">3</td><td>荻野極</td><td class="center">58.0</td></tr><tr><td>2022-12-11</td><td>中京</td><td><span class="course-tag">中京芝2200m</span></td><td>1勝</td><td class="center"><b>7/12</b></td><td class="center">2:13.70</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.20s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">51.8</td><td class="center">36.0</td><td class="center">2</td><td>藤岡康太</td><td class="center">55.0</td></tr><tr><td>2022-11-12</td><td>福島</td><td><span class="course-tag">福島芝2600m</span></td><td>1勝</td><td class="center"><b>2/16</b></td><td class="center">2:43.00</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.40s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">53.6</td><td class="center">36.6</td><td class="center">1</td><td>藤岡佑介</td><td class="center">55.0</td></tr><tr><td>2022-10-16</td><td>東京</td><td><span class="course-tag">東京芝2400m</span></td><td>1勝</td><td class="center"><b>7/12</b></td><td class="center">2:24.90</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.70s</span></td><td class="center"><span class="sim-lo">0.29</span></td><td class="center">52.7</td><td class="center">35.5</td><td class="center">4</td><td>石川裕紀</td><td class="center">54.0</td></tr><tr><td>2022-06-18</td><td>阪神</td><td><span class="course-tag">阪神芝2400m</span></td><td>未勝利</td><td class="center"><b>1/13</b></td><td class="center">2:27.20</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.00s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center"><span class="pci-lo">57.7</span></td><td class="center">34.8</td><td class="center">2</td><td>藤岡康太</td><td class="center">56.0</td></tr><tr><td>2022-05-29</td><td>新潟</td><td><span class="course-tag">新潟芝2200m</span></td><td>未勝利</td><td class="center"><b>2/12</b></td><td class="center">2:16.80</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.90s</span></td><td class="center"><span class="sim-lo">0.30</span></td><td class="center">52.3</td><td class="center">36.7</td><td class="center">1</td><td>今村聖奈</td><td class="center">52.0</td></tr><tr><td>2022-05-14</td><td>中京</td><td><span class="course-tag">中京芝2200m</span></td><td>未勝利</td><td class="center"><b>2/10</b></td><td class="center">2:15.60</td><td class="center">重 <small style="color:#888">+2.20s</small></td><td class="center"><span class="td-pos">-1.30s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">52.6</td><td class="center">36.3</td><td class="center">1</td><td>藤岡康太</td><td class="center">56.0</td></tr><tr><td>2022-04-17</td><td>阪神</td><td><span class="course-tag">阪神芝2200m内</span></td><td>未勝利</td><td class="center"><b>4/18</b></td><td class="center">2:13.80</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.30s</span></td><td class="center"><span class="sim-mid">0.64</span></td><td class="center"><span class="pci-lo">56.7</span></td><td class="center">34.8</td><td class="center">9</td><td>藤岡康太</td><td class="center">56.0</td></tr></tbody>
-  </table>
-  </div>
-</div>
-  </div>
-</div>
-<div class="horse-card rank-4" data-rank="5" data-leg="逃げ">
-  <div class="rank-badge" style="background:#3498db">
-    <span class="rank-num">5</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
@@ -1363,14 +1233,14 @@
       
       
       <span class="meta-info">牝4 / 舟山瑠泉 / 9走</span>
-      <button class="drill-btn" onclick="toggleDrill('h4', this)">📋 過去走</button>
+      <button class="drill-btn" onclick="toggleDrill('h3', this)">📋 過去走</button>
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">47.2</span>
+        <span class="big-num">48.7</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 54</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 56</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1449,7 +1319,7 @@
       
     </div>
     
-<div class="drilldown-wrap" id="drill-h4" style="display:none;">
+<div class="drilldown-wrap" id="drill-h3" style="display:none;">
   <div class="drilldown-header">
     <span>📋 過去走詳細 (9走)</span>
     <span class="drill-legend">
@@ -1480,9 +1350,9 @@
 </div>
   </div>
 </div>
-<div class="horse-card rank-4" data-rank="6" data-leg="差し">
+<div class="horse-card rank-4" data-rank="5" data-leg="差し">
   <div class="rank-badge" style="background:#3498db">
-    <span class="rank-num">6</span>
+    <span class="rank-num">5</span>
   </div>
   <div class="horse-main">
     <div class="horse-header">
@@ -1493,14 +1363,14 @@
       
       
       <span class="meta-info">牡4 / 佐々木大 / 15走</span>
-      <button class="drill-btn" onclick="toggleDrill('h5', this)">📋 過去走</button>
+      <button class="drill-btn" onclick="toggleDrill('h4', this)">📋 過去走</button>
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">43.1</span>
+        <span class="big-num">46.4</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 52</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 54</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1523,8 +1393,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:13%"></div></div>
+          <span class="val">+2/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1579,7 +1449,7 @@
       <span style="color:#aaa">🏋️ ウッド:11.80s</span>
     </div>
     
-<div class="drilldown-wrap" id="drill-h5" style="display:none;">
+<div class="drilldown-wrap" id="drill-h4" style="display:none;">
   <div class="drilldown-header">
     <span>📋 過去走詳細 (15走)</span>
     <span class="drill-legend">
@@ -1610,8 +1480,138 @@
 </div>
   </div>
 </div>
-<div class="horse-card rank-4" data-rank="7" data-leg="差し">
+<div class="horse-card rank-4" data-rank="6" data-leg="先行">
   <div class="rank-badge" style="background:#3498db">
+    <span class="rank-num">6</span>
+  </div>
+  <div class="horse-main">
+    <div class="horse-header">
+      <span class="waku-badge" style="background:#FFFFFF;color:#111;">1枠</span><span class="bango-badge" style="background:#FFFFFF;color:#111;">1番</span>
+      <h3>リッチブラック</h3>
+      <span class="leg-badge" style="background:#f39c12">先行</span>
+      <span class="trust-badge trust-hi">🔒 データ充実</span><span class="adj-badge" style="background:#17becf">コース +0.9</span><span class="adj-badge" style="background:#8c564b">休養 +1.0</span><span class="adj-badge" style="background:#c0392b">騎手 -0.5</span><span class="adj-badge" style="background:#c0392b">着差 -1.0</span><span class="adj-badge" style="background:#9edae5">枠順 +0.5</span><span class="adj-badge" style="background:#c0392b">馬場適性 -0.5</span>
+      
+      
+      <span class="meta-info">牡7 / 川又賢治 / 33走</span>
+      <button class="drill-btn" onclick="toggleDrill('h5', this)">📋 過去走</button>
+    </div>
+    <div class="score-row">
+      <div class="total-score">
+        <span class="big-num">44.2</span>
+        <span class="small-label">総合スコア</span>
+        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 53</span>
+        <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
+          単勝 -倍<br>(-人気)
+        </span>
+      </div>
+      <div class="score-bars">
+        <div class="bar-row">
+          <label>最高出力</label>
+          <div class="bar"><div class="fill" style="width:63%;background:#e74c3c"></div></div>
+          <span class="val">22.1/35</span>
+        </div>
+        <div class="bar-row">
+          <label>クラス補正</label>
+          <div class="bar"><div class="fill" style="width:13%;background:#f39c12"></div></div>
+          <span class="val">3.3/25</span>
+        </div>
+        <div class="bar-row">
+          <label>タイム偏差</label>
+          <div class="bar"><div class="fill" style="width:79%;background:#3498db"></div></div>
+          <span class="val">19.8/25</span>
+        </div>
+        <div class="bar-row">
+          <label>展開適性</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>斤量補正</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/±3</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>距離補正</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:0%"></div></div>
+          <span class="val">+0/−4</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>コース適性</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:18%"></div></div>
+          <span class="val">+0.9/±5</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>臨戦補正</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:14%"></div></div>
+          <span class="val">+1/−7</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>人気補正</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:0%"></div></div>
+          <span class="val">+0.0/+3</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>騎手実績</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:25%"></div></div>
+          <span class="val">-0.5/±2</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>枠順補正</label>
+          <div class="bar bipolar"><div class="fill plus" style="width:25%"></div></div>
+          <span class="val">+0.5/±2</span>
+        </div>
+        <div class="bar-row adj-row">
+          <label>馬場適性</label>
+          <div class="bar bipolar"><div class="fill minus" style="width:17%"></div></div>
+          <span class="val">-0.5/±3</span>
+        </div>
+      </div>
+    </div>
+    <div class="extra-info">
+      <span>補正最良: <b>90</b></span>
+      <span>上がり平均: <b>35.9</b></span>
+      <span>平均通過: <b>3.6</b></span>
+      <span>コース類似度: <b>0.60</b></span>
+      <span>父: エピファネイア</span>
+      <span>母父: ブライアンズタイム</span>
+      <span>時計データ: 33/33走</span>
+      
+    </div>
+    
+<div class="drilldown-wrap" id="drill-h5" style="display:none;">
+  <div class="drilldown-header">
+    <span>📋 過去走詳細 (33走)</span>
+    <span class="drill-legend">
+      <span class="td-pos">■</span>平均より速い
+      <span class="td-neg">■</span>平均より遅い
+      &nbsp;
+      <span class="sim-hi">■</span>類似コース
+      <span class="sim-mid">■</span>やや類似
+      <span class="sim-lo">■</span>異質コース
+      &nbsp;
+      <span class="pci-hi">■</span>ハイペース
+      <span class="pci-lo">■</span>スローペース
+    </span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="past-table">
+    <thead>
+      <tr>
+        <th>日付</th><th>場所</th><th>コース</th><th>クラス</th>
+        <th>着順</th><th>走破タイム</th><th>馬場</th>
+        <th>平均差</th><th>コース適性</th><th>PCI</th>
+        <th>上がり3F</th><th>4角</th><th>騎手</th><th>斤量</th>
+      </tr>
+    </thead>
+    <tbody><tr><td>2026-05-09</td><td>京都</td><td><span class="course-tag">京都芝2000m内</span></td><td>2勝</td><td class="center"><b>6/8</b></td><td class="center">1:59.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.40s</span></td><td class="center"><span class="sim-hi">0.87</span></td><td class="center">52.6</td><td class="center">35.2</td><td class="center">7</td><td>吉村誠之</td><td class="center">58.0</td></tr><tr><td>2026-04-26</td><td>京都</td><td><span class="course-tag">京都芝2200m</span></td><td>2勝</td><td class="center"><b>7/11</b></td><td class="center">2:12.40</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.50s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center"><span class="pci-hi">45.3</span></td><td class="center">37.4</td><td class="center">1</td><td>吉村誠之</td><td class="center">53.0</td></tr><tr><td>2026-04-11</td><td>阪神</td><td><span class="course-tag">阪神芝2400m</span></td><td>2勝</td><td class="center"><b>7/8</b></td><td class="center">2:29.00</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.90s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center"><span class="pci-lo">58.6</span></td><td class="center">35.0</td><td class="center">4</td><td>吉村誠之</td><td class="center">58.0</td></tr><tr><td>2026-03-01</td><td>阪神</td><td><span class="course-tag">阪神芝2200m内</span></td><td>2勝</td><td class="center"><b>8/9</b></td><td class="center">2:13.60</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.20s</span></td><td class="center"><span class="sim-mid">0.64</span></td><td class="center">53.2</td><td class="center">35.6</td><td class="center">1</td><td>長岡禎仁</td><td class="center">58.0</td></tr><tr><td>2026-02-07</td><td>京都</td><td><span class="course-tag">京都芝2000m内</span></td><td>2勝</td><td class="center"><b>6/8</b></td><td class="center">2:01.90</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+2.00s</span></td><td class="center"><span class="sim-hi">0.87</span></td><td class="center">53.9</td><td class="center">35.6</td><td class="center">3</td><td>団野大成</td><td class="center">58.0</td></tr><tr><td>2026-01-17</td><td>京都</td><td><span class="course-tag">京都芝2000m内</span></td><td>2勝</td><td class="center"><b>7/10</b></td><td class="center">2:01.90</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+2.00s</span></td><td class="center"><span class="sim-hi">0.87</span></td><td class="center"><span class="pci-lo">57.7</span></td><td class="center">34.7</td><td class="center">7</td><td>ハマーハ</td><td class="center">58.0</td></tr><tr><td>2025-08-24</td><td>札幌</td><td><span class="course-tag">札幌芝1800m</span></td><td>2勝</td><td class="center"><b>11/14</b></td><td class="center">1:49.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+0.70s</span></td><td class="center"><span class="sim-hi">0.81</span></td><td class="center">54.2</td><td class="center">35.5</td><td class="center">11</td><td>横山武史</td><td class="center">58.0</td></tr><tr><td>2025-08-09</td><td>札幌</td><td><span class="course-tag">札幌芝2000m</span></td><td>2勝</td><td class="center"><b>8/11</b></td><td class="center">2:04.30</td><td class="center">稍 <small style="color:#888">+1.40s</small></td><td class="center"><span class="td-neg">+1.20s</span></td><td class="center"><span class="sim-hi">0.87</span></td><td class="center"><span class="pci-lo">59.8</span></td><td class="center">34.9</td><td class="center">7</td><td>藤岡佑介</td><td class="center">58.0</td></tr><tr><td>2025-07-13</td><td>函館</td><td><span class="course-tag">函館芝1800m</span></td><td>2勝</td><td class="center"><b>10/12</b></td><td class="center">1:47.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.90s</span></td><td class="center"><span class="sim-hi">0.92</span></td><td class="center"><span class="pci-hi">47.7</span></td><td class="center">36.4</td><td class="center">3</td><td>藤岡佑介</td><td class="center">56.0</td></tr><tr><td>2025-06-14</td><td>函館</td><td><span class="course-tag">函館芝1800m</span></td><td>2勝</td><td class="center"><b>6/16</b></td><td class="center">1:46.70</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.70s</span></td><td class="center"><span class="sim-hi">0.92</span></td><td class="center"><span class="pci-lo">56.0</span></td><td class="center">34.2</td><td class="center">13</td><td>藤岡佑介</td><td class="center">58.0</td></tr><tr><td>2025-03-22</td><td>阪神</td><td><span class="course-tag">阪神芝2600m</span></td><td>2勝</td><td class="center"><b>6/9</b></td><td class="center">2:39.70</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.10s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">55.0</td><td class="center">35.5</td><td class="center">2</td><td>坂井瑠星</td><td class="center">58.0</td></tr><tr><td>2025-03-02</td><td>阪神</td><td><span class="course-tag">阪神芝2200m内</span></td><td>2勝</td><td class="center"><b>3/9</b></td><td class="center">2:12.30</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.50s</span></td><td class="center"><span class="sim-mid">0.64</span></td><td class="center">52.6</td><td class="center">35.4</td><td class="center">5</td><td>西村淳也</td><td class="center">58.0</td></tr><tr><td>2025-02-01</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>2勝</td><td class="center"><b>5/10</b></td><td class="center">2:26.20</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+0.10s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center"><span class="pci-hi">47.7</span></td><td class="center">37.2</td><td class="center">4</td><td>西村淳也</td><td class="center">56.0</td></tr><tr><td>2024-12-07</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>2勝</td><td class="center"><b>8/10</b></td><td class="center">2:26.60</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+0.50s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center"><span class="pci-hi">48.7</span></td><td class="center">37.0</td><td class="center">2</td><td>坂井瑠星</td><td class="center">58.0</td></tr><tr><td>2024-11-09</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>2勝</td><td class="center"><b>3/6</b></td><td class="center">2:27.30</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.20s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center"><span class="pci-lo">58.6</span></td><td class="center">34.6</td><td class="center">3</td><td>松山弘平</td><td class="center">58.0</td></tr><tr><td>2024-10-05</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>2勝</td><td class="center"><b>2/8</b></td><td class="center">2:25.20</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.90s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center">51.5</td><td class="center">35.9</td><td class="center">2</td><td>西村淳也</td><td class="center">58.0</td></tr><tr><td>2024-09-15</td><td>中京</td><td><span class="course-tag">中京芝2200m</span></td><td>2勝</td><td class="center"><b>5/10</b></td><td class="center">2:13.90</td><td class="center">稍 <small style="color:#888">+1.54s</small></td><td class="center"><span class="td-pos">-1.04s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">50.8</td><td class="center">36.3</td><td class="center">1</td><td>西村淳也</td><td class="center">54.0</td></tr><tr><td>2024-05-18</td><td>京都</td><td><span class="course-tag">京都芝2400m</span></td><td>1勝</td><td class="center"><b>1/12</b></td><td class="center">2:24.00</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-2.50s</span></td><td class="center"><span class="sim-mid">0.50</span></td><td class="center">52.3</td><td class="center">35.4</td><td class="center">2</td><td>西村淳也</td><td class="center">58.0</td></tr><tr><td>2024-05-04</td><td>新潟</td><td><span class="course-tag">新潟芝2200m</span></td><td>1勝</td><td class="center"><b>8/13</b></td><td class="center">2:16.00</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.50s</span></td><td class="center"><span class="sim-lo">0.30</span></td><td class="center"><span class="pci-hi">48.5</span></td><td class="center">37.5</td><td class="center">2</td><td>小沢大仁</td><td class="center">58.0</td></tr><tr><td>2024-04-07</td><td>福島</td><td><span class="course-tag">福島芝2600m</span></td><td>1勝</td><td class="center"><b>11/16</b></td><td class="center">2:40.30</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.30s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center"><span class="pci-hi">46.6</span></td><td class="center">38.0</td><td class="center">3</td><td>菅原明良</td><td class="center">58.0</td></tr><tr><td>2024-03-09</td><td>中京</td><td><span class="course-tag">中京芝2200m</span></td><td>1勝</td><td class="center"><b>4/9</b></td><td class="center">2:13.50</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.40s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center"><span class="pci-hi">46.4</span></td><td class="center">37.4</td><td class="center">1</td><td>三浦皇成</td><td class="center">58.0</td></tr><tr><td>2024-02-10</td><td>小倉</td><td><span class="course-tag">小倉芝2600m</span></td><td>1勝</td><td class="center"><b>4/8</b></td><td class="center">2:41.90</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.40s</span></td><td class="center"><span class="sim-hi">0.83</span></td><td class="center"><span class="pci-lo">55.3</span></td><td class="center">35.9</td><td class="center">1</td><td>幸英明</td><td class="center">58.0</td></tr><tr><td>2024-01-13</td><td>小倉</td><td><span class="course-tag">小倉芝2600m</span></td><td>1勝</td><td class="center"><b>6/16</b></td><td class="center">2:39.80</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.70s</span></td><td class="center"><span class="sim-hi">0.83</span></td><td class="center">52.8</td><td class="center">36.1</td><td class="center">2</td><td>幸英明</td><td class="center">58.0</td></tr><tr><td>2023-11-19</td><td>福島</td><td><span class="course-tag">福島芝2600m</span></td><td>1勝</td><td class="center"><b>14/16</b></td><td class="center">2:46.20</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+4.60s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">54.0</td><td class="center">37.2</td><td class="center">7</td><td>丸山元気</td><td class="center">58.0</td></tr><tr><td>2023-05-14</td><td>新潟</td><td><span class="course-tag">新潟芝2000m外</span></td><td>1勝</td><td class="center"><b>5/12</b></td><td class="center">2:00.70</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+0.40s</span></td><td class="center"><span class="sim-lo">0.30</span></td><td class="center">52.4</td><td class="center">35.6</td><td class="center">2</td><td>荻野極</td><td class="center">58.0</td></tr><tr><td>2023-04-23</td><td>福島</td><td><span class="course-tag">福島芝2600m</span></td><td>1勝</td><td class="center"><b>4/14</b></td><td class="center">2:41.60</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.00s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">54.7</td><td class="center">36.0</td><td class="center">3</td><td>荻野極</td><td class="center">58.0</td></tr><tr><td>2022-12-11</td><td>中京</td><td><span class="course-tag">中京芝2200m</span></td><td>1勝</td><td class="center"><b>7/12</b></td><td class="center">2:13.70</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.20s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">51.8</td><td class="center">36.0</td><td class="center">2</td><td>藤岡康太</td><td class="center">55.0</td></tr><tr><td>2022-11-12</td><td>福島</td><td><span class="course-tag">福島芝2600m</span></td><td>1勝</td><td class="center"><b>2/16</b></td><td class="center">2:43.00</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.40s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">53.6</td><td class="center">36.6</td><td class="center">1</td><td>藤岡佑介</td><td class="center">55.0</td></tr><tr><td>2022-10-16</td><td>東京</td><td><span class="course-tag">東京芝2400m</span></td><td>1勝</td><td class="center"><b>7/12</b></td><td class="center">2:24.90</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.70s</span></td><td class="center"><span class="sim-lo">0.29</span></td><td class="center">52.7</td><td class="center">35.5</td><td class="center">4</td><td>石川裕紀</td><td class="center">54.0</td></tr><tr><td>2022-06-18</td><td>阪神</td><td><span class="course-tag">阪神芝2400m</span></td><td>未勝利</td><td class="center"><b>1/13</b></td><td class="center">2:27.20</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-1.00s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center"><span class="pci-lo">57.7</span></td><td class="center">34.8</td><td class="center">2</td><td>藤岡康太</td><td class="center">56.0</td></tr><tr><td>2022-05-29</td><td>新潟</td><td><span class="course-tag">新潟芝2200m</span></td><td>未勝利</td><td class="center"><b>2/12</b></td><td class="center">2:16.80</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-neg">+1.90s</span></td><td class="center"><span class="sim-lo">0.30</span></td><td class="center">52.3</td><td class="center">36.7</td><td class="center">1</td><td>今村聖奈</td><td class="center">52.0</td></tr><tr><td>2022-05-14</td><td>中京</td><td><span class="course-tag">中京芝2200m</span></td><td>未勝利</td><td class="center"><b>2/10</b></td><td class="center">2:15.60</td><td class="center">重 <small style="color:#888">+2.20s</small></td><td class="center"><span class="td-pos">-1.30s</span></td><td class="center"><span class="sim-lo">0.45</span></td><td class="center">52.6</td><td class="center">36.3</td><td class="center">1</td><td>藤岡康太</td><td class="center">56.0</td></tr><tr><td>2022-04-17</td><td>阪神</td><td><span class="course-tag">阪神芝2200m内</span></td><td>未勝利</td><td class="center"><b>4/18</b></td><td class="center">2:13.80</td><td class="center">良 <small style="color:#888">(良)</small></td><td class="center"><span class="td-pos">-0.30s</span></td><td class="center"><span class="sim-mid">0.64</span></td><td class="center"><span class="pci-lo">56.7</span></td><td class="center">34.8</td><td class="center">9</td><td>藤岡康太</td><td class="center">56.0</td></tr></tbody>
+  </table>
+  </div>
+</div>
+  </div>
+</div>
+<div class="horse-card rank-4" data-rank="7" data-leg="差し">
+  <div class="rank-badge" style="background:#16a085">
     <span class="rank-num">7</span>
   </div>
   <div class="horse-main">
@@ -1627,9 +1627,9 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">41.1</span>
+        <span class="big-num">39.8</span>
         <span class="small-label">総合スコア</span>
-        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#3498db;color:#fff;line-height:1.3">B</span></div>
+        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#16a085;color:#fff;line-height:1.3">C</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 50</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
@@ -1653,8 +1653,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:7%"></div></div>
-          <span class="val">-1/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -1757,10 +1757,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">39.3</span>
+        <span class="big-num">39.6</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#16a085;color:#fff;line-height:1.3">C</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 49</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 50</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -1871,7 +1871,7 @@
   </div>
 </div>
 <div class="horse-card rank-4" data-rank="9" data-leg="差し">
-  <div class="rank-badge" style="background:#16a085">
+  <div class="rank-badge" style="background:#7f8c8d">
     <span class="rank-num">9</span>
   </div>
   <div class="horse-main">
@@ -1887,10 +1887,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">30.3</span>
+        <span class="big-num">28.3</span>
         <span class="small-label">総合スコア</span>
-        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#16a085;color:#fff;line-height:1.3">C</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 43</span>
+        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 42</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -2017,7 +2017,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">22.2</span>
+        <span class="big-num">21.6</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 38</span>
@@ -2043,8 +2043,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -2147,10 +2147,10 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">18.1</span>
+        <span class="big-num">18.8</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 35</span>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 36</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
           単勝 -倍<br>(-人気)
         </span>
@@ -2173,8 +2173,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill plus" style="width:7%"></div></div>
+          <span class="val">+1/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -2277,7 +2277,7 @@
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">17.2</span>
+        <span class="big-num">18.1</span>
         <span class="small-label">総合スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:#7f8c8d;color:#fff;line-height:1.3">D</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 35</span>
@@ -2303,8 +2303,8 @@
         </div>
         <div class="bar-row">
           <label>展開適性</label>
-          <div class="bar bipolar"><div class="fill minus" style="width:13%"></div></div>
-          <span class="val">-2/±15</span>
+          <div class="bar bipolar"><div class="fill minus" style="width:20%"></div></div>
+          <span class="val">-3/±15</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
@@ -2409,7 +2409,7 @@ function toggleDrill(id, btn) {
 }
 
 // ── 期待値シミュレーター ─────────────────────────────────
-const EV_DATA = [{"馬名": "ディアウス", "馬番": 4, "枠番": 4, "スコア": 65.8, "順位予想": 1, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "チギリ", "馬番": 3, "枠番": 3, "スコア": 60.3, "順位予想": 2, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "ジュンラトゥール", "馬番": 12, "枠番": 8, "スコア": 50.8, "順位予想": 3, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "リッチブラック", "馬番": 1, "枠番": 1, "スコア": 49.9, "順位予想": 4, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "エアニゲラ", "馬番": 5, "枠番": 5, "スコア": 47.2, "順位予想": 5, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "逃げ", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "マーウォルス", "馬番": 11, "枠番": 8, "スコア": 43.1, "順位予想": 6, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "フェスタリア", "馬番": 2, "枠番": 2, "スコア": 41.1, "順位予想": 7, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "メイショウタイピン", "馬番": 8, "枠番": 6, "スコア": 39.3, "順位予想": 8, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "レイザリオ", "馬番": 9, "枠番": 7, "スコア": 30.3, "順位予想": 9, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "タイヨウフレア", "馬番": 7, "枠番": 6, "スコア": 22.2, "順位予想": 10, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "ラマンシュ", "馬番": 10, "枠番": 7, "スコア": 18.1, "順位予想": 11, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}, {"馬名": "アールプロスト", "馬番": 6, "枠番": 5, "スコア": 17.2, "順位予想": 12, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "追込", "SmartRC推定人気順": null, "乖離度": null, "is_memo": false, "is_ana": false}];
+const EV_DATA = [{"馬名": "ディアウス", "馬番": 4, "枠番": 4, "スコア": 65.8, "順位予想": 1, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "1", "乖離度": 0, "is_memo": false, "is_ana": false}, {"馬名": "チギリ", "馬番": 3, "枠番": 3, "スコア": 61.8, "順位予想": 2, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "4", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "ジュンラトゥール", "馬番": 12, "枠番": 8, "スコア": 50.0, "順位予想": 3, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "5", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "エアニゲラ", "馬番": 5, "枠番": 5, "スコア": 48.7, "順位予想": 4, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "逃げ", "SmartRC推定人気順": "6", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "マーウォルス", "馬番": 11, "枠番": 8, "スコア": 46.4, "順位予想": 5, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "7", "乖離度": 2, "is_memo": false, "is_ana": false}, {"馬名": "リッチブラック", "馬番": 1, "枠番": 1, "スコア": 44.2, "順位予想": 6, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "先行", "SmartRC推定人気順": "12", "乖離度": 6, "is_memo": false, "is_ana": false}, {"馬名": "フェスタリア", "馬番": 2, "枠番": 2, "スコア": 39.8, "順位予想": 7, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "10", "乖離度": 3, "is_memo": false, "is_ana": false}, {"馬名": "メイショウタイピン", "馬番": 8, "枠番": 6, "スコア": 39.6, "順位予想": 8, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "3", "乖離度": -5, "is_memo": false, "is_ana": false}, {"馬名": "レイザリオ", "馬番": 9, "枠番": 7, "スコア": 28.3, "順位予想": 9, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "8", "乖離度": -1, "is_memo": false, "is_ana": false}, {"馬名": "タイヨウフレア", "馬番": 7, "枠番": 6, "スコア": 21.6, "順位予想": 10, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "11", "乖離度": 1, "is_memo": false, "is_ana": false}, {"馬名": "ラマンシュ", "馬番": 10, "枠番": 7, "スコア": 18.8, "順位予想": 11, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "差し", "SmartRC推定人気順": "2", "乖離度": -9, "is_memo": false, "is_ana": false}, {"馬名": "アールプロスト", "馬番": 6, "枠番": 5, "スコア": 18.1, "順位予想": 12, "オッズ": null, "複勝下限": null, "複勝上限": null, "人気": null, "脚質": "追込", "SmartRC推定人気順": "9", "乖離度": -3, "is_memo": false, "is_ana": false}];
 // WAKU_BG をメインJSスコープで定義（renderRows内のwakuバッジで参照）
 const WAKU_BG = {1:'#ffffff',2:'#555555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'#22bb22',7:'#ff8822',8:'#ffaacc'};
 const WAKU_FG = {1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111',8:'#111'};
@@ -2619,7 +2619,7 @@ slider.addEventListener('input', () => {
 computeEV(20);
 
 // ── 積み上げチャート ─────────────────────────────
-const STACK_DATA = {"labels": ["1位 ディアウス", "2位 チギリ", "3位 ジュンラトゥール", "4位 リッチブラック", "5位 エアニゲラ", "6位 マーウォルス", "7位 フェスタリア", "8位 メイショウタイピン", "9位 レイザリオ", "10位 タイヨウフレア", "11位 ラマンシュ", "12位 アールプロスト"], "datasets": [{"label": "最高出力", "data": [7.7, 24.4, 26.7, 22.1, 20.9, 13.3, 16.9, 24.5, 8.1, 21.2, 0.0, 0.0], "backgroundColor": "#d62728", "stack": "adj"}, {"label": "クラス", "data": [25.0, 21.4, 12.7, 3.3, 17.7, 16.0, 14.4, 6.8, 5.2, 0.1, 16.6, 5.5], "backgroundColor": "#ff7f0e", "stack": "adj"}, {"label": "タイム", "data": [20.3, 11.1, 6.8, 19.8, 4.9, 11.4, 7.5, 4.0, 12.2, 1.8, 0.0, 13.1], "backgroundColor": "#1f77b4", "stack": "adj"}, {"label": "展開", "data": [2, -1, -2, 2, 2, -2, -1, 2, 2, -2, -2, -2], "backgroundColor": "#9467bd", "stack": "adj"}, {"label": "斤量", "data": [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#2ca02c", "stack": "adj"}, {"label": "距離", "data": [0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#e377c2", "stack": "adj"}, {"label": "コース", "data": [6.1, 1.3, 2.2, 0.9, 2.2, 5.4, 3.5, 3.5, 2.6, 4.8, 4.1, 3.0], "backgroundColor": "#17becf", "stack": "adj"}, {"label": "臨戦", "data": [0.0, 0.0, 1.0, 1.0, -1.0, 1.0, 1.0, 0.0, -1.0, 1.0, -1.0, -1.0], "backgroundColor": "#8c564b", "stack": "adj"}, {"label": "人気補正", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#bcbd22", "stack": "adj"}, {"label": "騎手", "data": [0.8, -0.1, 0.2, -0.5, 0.8, -1.5, 0.1, -0.7, -0.1, -0.1, 0.8, 0.2], "backgroundColor": "#aec7e8", "stack": "adj"}, {"label": "馬体重", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#7f7f7f", "stack": "adj"}, {"label": "継続", "data": [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0], "backgroundColor": "#98df8a", "stack": "adj"}, {"label": "着差", "data": [0.9, 1.6, 0.9, -1.0, 1.6, 0.0, -1.0, 0.9, 1.6, -1.0, 0.0, -1.0], "backgroundColor": "#dbdb8d", "stack": "adj"}, {"label": "枠順", "data": [0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#9edae5", "stack": "adj"}, {"label": "昇級", "data": [0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0], "backgroundColor": "#c5b0d5", "stack": "adj"}, {"label": "クラス適応", "data": [0.8, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0, -2.0, 0.0, -2.0], "backgroundColor": "#1abc9c", "stack": "adj"}, {"label": "SmartRC評価", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#f39c12", "stack": "adj"}, {"label": "馬場適性", "data": [1.5, 0.0, 0.5, -0.5, 0.5, 0.5, 0.0, 0.0, 0.0, -0.5, 1.0, 0.5], "backgroundColor": "#16a085", "stack": "adj"}]};
+const STACK_DATA = {"labels": ["1位 ディアウス", "2位 チギリ", "3位 ジュンラトゥール", "4位 エアニゲラ", "5位 マーウォルス", "6位 リッチブラック", "7位 フェスタリア", "8位 メイショウタイピン", "9位 レイザリオ", "10位 タイヨウフレア", "11位 ラマンシュ", "12位 アールプロスト"], "datasets": [{"label": "最高出力", "data": [7.7, 24.4, 26.7, 20.9, 13.3, 22.1, 16.9, 24.5, 8.1, 21.2, 0.0, 0.0], "backgroundColor": "#d62728", "stack": "adj"}, {"label": "クラス", "data": [25.0, 21.4, 12.7, 17.7, 16.0, 3.3, 14.4, 6.8, 5.2, 0.1, 16.6, 5.5], "backgroundColor": "#ff7f0e", "stack": "adj"}, {"label": "タイム", "data": [20.3, 11.1, 6.8, 4.9, 11.4, 19.8, 7.5, 4.0, 12.2, 1.8, 0.0, 13.1], "backgroundColor": "#1f77b4", "stack": "adj"}, {"label": "展開", "data": [2, 1, -3, 2, 2, -3, -3, 2, 2, -3, 1, -3], "backgroundColor": "#9467bd", "stack": "adj"}, {"label": "斤量", "data": [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#2ca02c", "stack": "adj"}, {"label": "距離", "data": [0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#e377c2", "stack": "adj"}, {"label": "コース", "data": [6.1, 1.3, 2.2, 2.2, 5.4, 0.9, 3.5, 3.5, 2.6, 4.8, 4.1, 3.0], "backgroundColor": "#17becf", "stack": "adj"}, {"label": "臨戦", "data": [0.0, 0.0, 1.0, -1.0, 1.0, 1.0, 1.0, 0.0, -1.0, 1.0, -1.0, -1.0], "backgroundColor": "#8c564b", "stack": "adj"}, {"label": "人気補正", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#bcbd22", "stack": "adj"}, {"label": "騎手", "data": [0.8, -0.1, 0.2, 0.8, -1.5, -0.5, 0.1, -0.7, -0.1, -0.1, 0.8, 0.2], "backgroundColor": "#aec7e8", "stack": "adj"}, {"label": "馬体重", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#7f7f7f", "stack": "adj"}, {"label": "継続", "data": [1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0], "backgroundColor": "#98df8a", "stack": "adj"}, {"label": "着差", "data": [0.9, 1.6, 0.9, 1.6, 0.0, -1.0, -1.0, 0.9, 1.6, -1.0, 0.0, -1.0], "backgroundColor": "#dbdb8d", "stack": "adj"}, {"label": "枠順", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#9edae5", "stack": "adj"}, {"label": "昇級", "data": [0.0, -1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0], "backgroundColor": "#c5b0d5", "stack": "adj"}, {"label": "クラス適応", "data": [0.8, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -1.0, 0.0, -2.0, 0.0, -2.0], "backgroundColor": "#1abc9c", "stack": "adj"}, {"label": "SmartRC評価", "data": [0.0, -0.9, 0.0, 1.5, -0.4, -0.7, 0.0, 0.3, -2.0, 0.6, -1.6, 2.2], "backgroundColor": "#f39c12", "stack": "adj"}, {"label": "馬場適性", "data": [1.5, 0.0, 0.5, 0.5, 0.5, -0.5, 0.0, 0.0, 0.0, -0.5, 1.0, 0.5], "backgroundColor": "#16a085", "stack": "adj"}]};
 const stackCtx = document.getElementById('scoreStackChart');
 if (stackCtx) {
   new Chart(stackCtx.getContext('2d'), {
@@ -2654,7 +2654,7 @@ if (stackCtx) {
 
 // ── 補正項目別ランキング ──────────────────────────────────────────
 (function() {
-  const ITEM_RANKINGS = [{"label": "最高出力", "color": "#d62728", "ranked": [{"umaban": 12, "name": "ジュンラトゥール", "val": 26.7}, {"umaban": 8, "name": "メイショウタイピン", "val": 24.5}, {"umaban": 3, "name": "チギリ", "val": 24.4}, {"umaban": 1, "name": "リッチブラック", "val": 22.1}, {"umaban": 7, "name": "タイヨウフレア", "val": 21.2}, {"umaban": 5, "name": "エアニゲラ", "val": 20.9}, {"umaban": 2, "name": "フェスタリア", "val": 16.9}, {"umaban": 11, "name": "マーウォルス", "val": 13.3}, {"umaban": 9, "name": "レイザリオ", "val": 8.1}, {"umaban": 4, "name": "ディアウス", "val": 7.7}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "クラス", "color": "#ff7f0e", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 25.0}, {"umaban": 3, "name": "チギリ", "val": 21.4}, {"umaban": 5, "name": "エアニゲラ", "val": 17.7}, {"umaban": 10, "name": "ラマンシュ", "val": 16.6}, {"umaban": 11, "name": "マーウォルス", "val": 16.0}, {"umaban": 2, "name": "フェスタリア", "val": 14.4}, {"umaban": 12, "name": "ジュンラトゥール", "val": 12.7}, {"umaban": 8, "name": "メイショウタイピン", "val": 6.8}, {"umaban": 6, "name": "アールプロスト", "val": 5.5}, {"umaban": 9, "name": "レイザリオ", "val": 5.2}, {"umaban": 1, "name": "リッチブラック", "val": 3.3}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.1}]}, {"label": "タイム", "color": "#1f77b4", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 20.3}, {"umaban": 1, "name": "リッチブラック", "val": 19.8}, {"umaban": 6, "name": "アールプロスト", "val": 13.1}, {"umaban": 9, "name": "レイザリオ", "val": 12.2}, {"umaban": 11, "name": "マーウォルス", "val": 11.4}, {"umaban": 3, "name": "チギリ", "val": 11.1}, {"umaban": 2, "name": "フェスタリア", "val": 7.5}, {"umaban": 12, "name": "ジュンラトゥール", "val": 6.8}, {"umaban": 5, "name": "エアニゲラ", "val": 4.9}, {"umaban": 8, "name": "メイショウタイピン", "val": 4.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 1.8}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}]}, {"label": "展開", "color": "#9467bd", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 2.0}, {"umaban": 1, "name": "リッチブラック", "val": 2.0}, {"umaban": 5, "name": "エアニゲラ", "val": 2.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 2.0}, {"umaban": 9, "name": "レイザリオ", "val": 2.0}, {"umaban": 3, "name": "チギリ", "val": -1.0}, {"umaban": 2, "name": "フェスタリア", "val": -1.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": -2.0}, {"umaban": 11, "name": "マーウォルス", "val": -2.0}, {"umaban": 7, "name": "タイヨウフレア", "val": -2.0}, {"umaban": 10, "name": "ラマンシュ", "val": -2.0}, {"umaban": 6, "name": "アールプロスト", "val": -2.0}]}, {"label": "斤量", "color": "#2ca02c", "ranked": [{"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}, {"umaban": 4, "name": "ディアウス", "val": -1.0}]}, {"label": "距離", "color": "#e377c2", "ranked": [{"umaban": 12, "name": "ジュンラトゥール", "val": 2.0}, {"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "コース", "color": "#17becf", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 6.1}, {"umaban": 11, "name": "マーウォルス", "val": 5.4}, {"umaban": 7, "name": "タイヨウフレア", "val": 4.8}, {"umaban": 10, "name": "ラマンシュ", "val": 4.1}, {"umaban": 2, "name": "フェスタリア", "val": 3.5}, {"umaban": 8, "name": "メイショウタイピン", "val": 3.5}, {"umaban": 6, "name": "アールプロスト", "val": 3.0}, {"umaban": 9, "name": "レイザリオ", "val": 2.6}, {"umaban": 12, "name": "ジュンラトゥール", "val": 2.2}, {"umaban": 5, "name": "エアニゲラ", "val": 2.2}, {"umaban": 3, "name": "チギリ", "val": 1.3}, {"umaban": 1, "name": "リッチブラック", "val": 0.9}]}, {"label": "臨戦", "color": "#8c564b", "ranked": [{"umaban": 12, "name": "ジュンラトゥール", "val": 1.0}, {"umaban": 1, "name": "リッチブラック", "val": 1.0}, {"umaban": 11, "name": "マーウォルス", "val": 1.0}, {"umaban": 2, "name": "フェスタリア", "val": 1.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 1.0}, {"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": -1.0}, {"umaban": 9, "name": "レイザリオ", "val": -1.0}, {"umaban": 10, "name": "ラマンシュ", "val": -1.0}, {"umaban": 6, "name": "アールプロスト", "val": -1.0}]}, {"label": "人気補正", "color": "#bcbd22", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "騎手", "color": "#aec7e8", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.8}, {"umaban": 5, "name": "エアニゲラ", "val": 0.8}, {"umaban": 10, "name": "ラマンシュ", "val": 0.8}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.2}, {"umaban": 6, "name": "アールプロスト", "val": 0.2}, {"umaban": 2, "name": "フェスタリア", "val": 0.1}, {"umaban": 3, "name": "チギリ", "val": -0.1}, {"umaban": 9, "name": "レイザリオ", "val": -0.1}, {"umaban": 7, "name": "タイヨウフレア", "val": -0.1}, {"umaban": 1, "name": "リッチブラック", "val": -0.5}, {"umaban": 8, "name": "メイショウタイピン", "val": -0.7}, {"umaban": 11, "name": "マーウォルス", "val": -1.5}]}, {"label": "馬体重", "color": "#7f7f7f", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "継続", "color": "#98df8a", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 1.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 1.0}, {"umaban": 10, "name": "ラマンシュ", "val": 1.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "着差", "color": "#dbdb8d", "ranked": [{"umaban": 3, "name": "チギリ", "val": 1.6}, {"umaban": 5, "name": "エアニゲラ", "val": 1.6}, {"umaban": 9, "name": "レイザリオ", "val": 1.6}, {"umaban": 4, "name": "ディアウス", "val": 0.9}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.9}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.9}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": -1.0}, {"umaban": 2, "name": "フェスタリア", "val": -1.0}, {"umaban": 7, "name": "タイヨウフレア", "val": -1.0}, {"umaban": 6, "name": "アールプロスト", "val": -1.0}]}, {"label": "枠順", "color": "#9edae5", "ranked": [{"umaban": 1, "name": "リッチブラック", "val": 0.5}, {"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "昇級", "color": "#c5b0d5", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": -1.0}, {"umaban": 5, "name": "エアニゲラ", "val": -1.0}, {"umaban": 9, "name": "レイザリオ", "val": -1.0}]}, {"label": "クラス適応", "color": "#1abc9c", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.8}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": -1.0}, {"umaban": 8, "name": "メイショウタイピン", "val": -1.0}, {"umaban": 7, "name": "タイヨウフレア", "val": -2.0}, {"umaban": 6, "name": "アールプロスト", "val": -2.0}]}, {"label": "SmartRC評価", "color": "#f39c12", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "馬場適性", "color": "#16a085", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 1.5}, {"umaban": 10, "name": "ラマンシュ", "val": 1.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.5}, {"umaban": 5, "name": "エアニゲラ", "val": 0.5}, {"umaban": 11, "name": "マーウォルス", "val": 0.5}, {"umaban": 6, "name": "アールプロスト", "val": 0.5}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": -0.5}, {"umaban": 7, "name": "タイヨウフレア", "val": -0.5}]}];
+  const ITEM_RANKINGS = [{"label": "最高出力", "color": "#d62728", "ranked": [{"umaban": 12, "name": "ジュンラトゥール", "val": 26.7}, {"umaban": 8, "name": "メイショウタイピン", "val": 24.5}, {"umaban": 3, "name": "チギリ", "val": 24.4}, {"umaban": 1, "name": "リッチブラック", "val": 22.1}, {"umaban": 7, "name": "タイヨウフレア", "val": 21.2}, {"umaban": 5, "name": "エアニゲラ", "val": 20.9}, {"umaban": 2, "name": "フェスタリア", "val": 16.9}, {"umaban": 11, "name": "マーウォルス", "val": 13.3}, {"umaban": 9, "name": "レイザリオ", "val": 8.1}, {"umaban": 4, "name": "ディアウス", "val": 7.7}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "クラス", "color": "#ff7f0e", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 25.0}, {"umaban": 3, "name": "チギリ", "val": 21.4}, {"umaban": 5, "name": "エアニゲラ", "val": 17.7}, {"umaban": 10, "name": "ラマンシュ", "val": 16.6}, {"umaban": 11, "name": "マーウォルス", "val": 16.0}, {"umaban": 2, "name": "フェスタリア", "val": 14.4}, {"umaban": 12, "name": "ジュンラトゥール", "val": 12.7}, {"umaban": 8, "name": "メイショウタイピン", "val": 6.8}, {"umaban": 6, "name": "アールプロスト", "val": 5.5}, {"umaban": 9, "name": "レイザリオ", "val": 5.2}, {"umaban": 1, "name": "リッチブラック", "val": 3.3}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.1}]}, {"label": "タイム", "color": "#1f77b4", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 20.3}, {"umaban": 1, "name": "リッチブラック", "val": 19.8}, {"umaban": 6, "name": "アールプロスト", "val": 13.1}, {"umaban": 9, "name": "レイザリオ", "val": 12.2}, {"umaban": 11, "name": "マーウォルス", "val": 11.4}, {"umaban": 3, "name": "チギリ", "val": 11.1}, {"umaban": 2, "name": "フェスタリア", "val": 7.5}, {"umaban": 12, "name": "ジュンラトゥール", "val": 6.8}, {"umaban": 5, "name": "エアニゲラ", "val": 4.9}, {"umaban": 8, "name": "メイショウタイピン", "val": 4.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 1.8}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}]}, {"label": "展開", "color": "#9467bd", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 2.0}, {"umaban": 5, "name": "エアニゲラ", "val": 2.0}, {"umaban": 11, "name": "マーウォルス", "val": 2.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 2.0}, {"umaban": 9, "name": "レイザリオ", "val": 2.0}, {"umaban": 3, "name": "チギリ", "val": 1.0}, {"umaban": 10, "name": "ラマンシュ", "val": 1.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": -3.0}, {"umaban": 1, "name": "リッチブラック", "val": -3.0}, {"umaban": 2, "name": "フェスタリア", "val": -3.0}, {"umaban": 7, "name": "タイヨウフレア", "val": -3.0}, {"umaban": 6, "name": "アールプロスト", "val": -3.0}]}, {"label": "斤量", "color": "#2ca02c", "ranked": [{"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}, {"umaban": 4, "name": "ディアウス", "val": -1.0}]}, {"label": "距離", "color": "#e377c2", "ranked": [{"umaban": 12, "name": "ジュンラトゥール", "val": 2.0}, {"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "コース", "color": "#17becf", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 6.1}, {"umaban": 11, "name": "マーウォルス", "val": 5.4}, {"umaban": 7, "name": "タイヨウフレア", "val": 4.8}, {"umaban": 10, "name": "ラマンシュ", "val": 4.1}, {"umaban": 2, "name": "フェスタリア", "val": 3.5}, {"umaban": 8, "name": "メイショウタイピン", "val": 3.5}, {"umaban": 6, "name": "アールプロスト", "val": 3.0}, {"umaban": 9, "name": "レイザリオ", "val": 2.6}, {"umaban": 12, "name": "ジュンラトゥール", "val": 2.2}, {"umaban": 5, "name": "エアニゲラ", "val": 2.2}, {"umaban": 3, "name": "チギリ", "val": 1.3}, {"umaban": 1, "name": "リッチブラック", "val": 0.9}]}, {"label": "臨戦", "color": "#8c564b", "ranked": [{"umaban": 12, "name": "ジュンラトゥール", "val": 1.0}, {"umaban": 11, "name": "マーウォルス", "val": 1.0}, {"umaban": 1, "name": "リッチブラック", "val": 1.0}, {"umaban": 2, "name": "フェスタリア", "val": 1.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 1.0}, {"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": -1.0}, {"umaban": 9, "name": "レイザリオ", "val": -1.0}, {"umaban": 10, "name": "ラマンシュ", "val": -1.0}, {"umaban": 6, "name": "アールプロスト", "val": -1.0}]}, {"label": "人気補正", "color": "#bcbd22", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "騎手", "color": "#aec7e8", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.8}, {"umaban": 5, "name": "エアニゲラ", "val": 0.8}, {"umaban": 10, "name": "ラマンシュ", "val": 0.8}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.2}, {"umaban": 6, "name": "アールプロスト", "val": 0.2}, {"umaban": 2, "name": "フェスタリア", "val": 0.1}, {"umaban": 3, "name": "チギリ", "val": -0.1}, {"umaban": 9, "name": "レイザリオ", "val": -0.1}, {"umaban": 7, "name": "タイヨウフレア", "val": -0.1}, {"umaban": 1, "name": "リッチブラック", "val": -0.5}, {"umaban": 8, "name": "メイショウタイピン", "val": -0.7}, {"umaban": 11, "name": "マーウォルス", "val": -1.5}]}, {"label": "馬体重", "color": "#7f7f7f", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "継続", "color": "#98df8a", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 1.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 1.0}, {"umaban": 10, "name": "ラマンシュ", "val": 1.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "着差", "color": "#dbdb8d", "ranked": [{"umaban": 3, "name": "チギリ", "val": 1.6}, {"umaban": 5, "name": "エアニゲラ", "val": 1.6}, {"umaban": 9, "name": "レイザリオ", "val": 1.6}, {"umaban": 4, "name": "ディアウス", "val": 0.9}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.9}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.9}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": -1.0}, {"umaban": 2, "name": "フェスタリア", "val": -1.0}, {"umaban": 7, "name": "タイヨウフレア", "val": -1.0}, {"umaban": 6, "name": "アールプロスト", "val": -1.0}]}, {"label": "枠順", "color": "#9edae5", "ranked": [{"umaban": 1, "name": "リッチブラック", "val": 0.5}, {"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}]}, {"label": "昇級", "color": "#c5b0d5", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 6, "name": "アールプロスト", "val": 0.0}, {"umaban": 3, "name": "チギリ", "val": -1.0}, {"umaban": 5, "name": "エアニゲラ", "val": -1.0}, {"umaban": 9, "name": "レイザリオ", "val": -1.0}]}, {"label": "クラス適応", "color": "#1abc9c", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 0.8}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 5, "name": "エアニゲラ", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 10, "name": "ラマンシュ", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": -1.0}, {"umaban": 8, "name": "メイショウタイピン", "val": -1.0}, {"umaban": 7, "name": "タイヨウフレア", "val": -2.0}, {"umaban": 6, "name": "アールプロスト", "val": -2.0}]}, {"label": "SmartRC評価", "color": "#f39c12", "ranked": [{"umaban": 6, "name": "アールプロスト", "val": 2.2}, {"umaban": 5, "name": "エアニゲラ", "val": 1.5}, {"umaban": 7, "name": "タイヨウフレア", "val": 0.6}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.3}, {"umaban": 4, "name": "ディアウス", "val": 0.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 11, "name": "マーウォルス", "val": -0.4}, {"umaban": 1, "name": "リッチブラック", "val": -0.7}, {"umaban": 3, "name": "チギリ", "val": -0.9}, {"umaban": 10, "name": "ラマンシュ", "val": -1.6}, {"umaban": 9, "name": "レイザリオ", "val": -2.0}]}, {"label": "馬場適性", "color": "#16a085", "ranked": [{"umaban": 4, "name": "ディアウス", "val": 1.5}, {"umaban": 10, "name": "ラマンシュ", "val": 1.0}, {"umaban": 12, "name": "ジュンラトゥール", "val": 0.5}, {"umaban": 5, "name": "エアニゲラ", "val": 0.5}, {"umaban": 11, "name": "マーウォルス", "val": 0.5}, {"umaban": 6, "name": "アールプロスト", "val": 0.5}, {"umaban": 3, "name": "チギリ", "val": 0.0}, {"umaban": 2, "name": "フェスタリア", "val": 0.0}, {"umaban": 8, "name": "メイショウタイピン", "val": 0.0}, {"umaban": 9, "name": "レイザリオ", "val": 0.0}, {"umaban": 1, "name": "リッチブラック", "val": -0.5}, {"umaban": 7, "name": "タイヨウフレア", "val": -0.5}]}];
   const grid = document.getElementById('itemRankingGrid');
   if (!grid) return;
   const RANK_ICONS = ['🥇','🥈','🥉'];

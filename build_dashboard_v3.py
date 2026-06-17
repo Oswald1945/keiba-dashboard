@@ -744,7 +744,7 @@ _fav_thr = _n_horses // 2   # 中央値より下位なら低評価
 # 99はデータなし（過去走なし等）のデフォルト値なので判定除外
 _fav1_is_low = (_fav1_score_rank != 99) and (_fav1_score_rank > _fav_thr)
 
-# ── 自信あり判定（偏差値≥65 OR スコアリード≥15pt） ─────────────
+# ── 自信あり判定（偏差値≥68のみ ― 2026-06-17修正: OR リード≥15 を廃止し基準厳格化）─────────────
 _sorted_valid = sorted(
     [h for h in horses if not h.get('過去走なし', False)],
     key=lambda h: h.get('順位予想', 99)
@@ -758,7 +758,7 @@ _pred1_smartrc_rank = next(
     (int(h.get('SmartRC推定人気順') or 99)
      for h in horses if h['馬名'] == _pred1_name), 99)
 _pred1_is_fav = _pred1_smartrc_rank == 1  # SmartRC推定1番人気=妙味なし
-_jishin_flag = ((_pred1_dev >= 65) or (_score_lead >= 15)) and not _pred1_is_fav
+_jishin_flag = (_pred1_dev >= 68) and not _pred1_is_fav
 
 # ── 推奨度判定 ───────────────────────────────────────────────
 if _max_kairido >= 4:
@@ -784,10 +784,10 @@ else:
     _rec_bg     = '#3a1a1a'
     _rec_reason = 'スコア上位3頭とSmartRC推定が概ね一致（妙味薄）'
 
-# ── 本命馬自信ありバッジ（偏差値≥65 or リード≥15pt ― 妙味判定とは独立） ────
+# ── 本命馬自信ありバッジ（偏差値≥68のみ ― 妙味判定とは独立） ────
 _jishin_html = ''
 if _jishin_flag:
-    _dev_str = f'偏差値{_pred1_dev}' if _pred1_dev >= 65 else ''
+    _dev_str = f'偏差値{_pred1_dev}'
     _lead_str = f'リード{_score_lead:.1f}pt' if _score_lead >= 15 else ''
     _sub = ' / '.join(filter(None, [_dev_str, _lead_str]))
     _jishin_html = (
@@ -816,15 +816,45 @@ if _best_val and _best_val['乖離'] >= 2:
         f'</span>'
     )
 
-# ── バッジエリア（注目馬 / 本命馬自信あり ― どちらもなければ非表示） ────
+# ── 危険な人気馬バッジ（想定人気上位×予想低評価 ― 2026-06-18 復元）────
+# 06-16のUIリファクタで欠落していたバッジを復元。
+# 検証(123R): 想定人気≤3 かつ 予想7位以下 で複勝率 base51.6%→40.5%(-11pt, 方向性◎)。
+# 補助条件(前走着順悪化 -5pt/p0.14)はデータ拡充後に追加検討。
+_danger_list = []
+for _h in horses:
+    if _h.get('過去走なし'):
+        continue
+    try:
+        _srank = int(_h.get('SmartRC推定人気順') or 99)
+        _prank = int(_h.get('順位予想') or 99)
+    except (TypeError, ValueError):
+        continue
+    if _srank <= 3 and _prank >= 7:
+        _danger_list.append((_srank, _prank, _h['馬名']))
+_danger_list.sort()
+_danger_html = ''
+if _danger_list:
+    _ditems = ' / '.join(
+        f'<b style="color:#f1c40f">{_nm}</b>'
+        f'<span style="color:#aaa;">（想定{_sr}番人気 / 予想{_pr}位）</span>'
+        for _sr, _pr, _nm in _danger_list)
+    _danger_html = (
+        f'<span style="display:inline-flex;align-items:center;gap:6px;'
+        f'padding:5px 14px;border-radius:6px;background:#2c3e50;'
+        f'border:1px solid #e74c3c;font-size:12px;">'
+        f'⚠️ 危険な人気馬: {_ditems}</span>'
+    )
+
+# ── バッジエリア（注目馬 / 本命馬自信あり / 危険な人気馬 ― どれもなければ非表示） ────
 _badge_area_html = ''
-if _jishin_html or _best_html:
+if _jishin_html or _best_html or _danger_html:
     _badge_area_html = (
         f'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;'
         f'padding:10px 16px;margin-bottom:8px;border-radius:8px;'
         f'background:#1e2d3d;border:1px solid #2e4055;">'
         f'{_jishin_html}'
         f'{_best_html}'
+        f'{_danger_html}'
         f'</div>'
     )
 

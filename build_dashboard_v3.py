@@ -1215,7 +1215,7 @@ _formation_html = f'''<div class="section" id="section-formation">
     zones.forEach((zHorses, zi) => {{
       const row = document.createElement('div');
       row.style.cssText = [
-        'display:flex;align-items:flex-start;gap:4px;flex-wrap:wrap;',
+        'display:flex;align-items:center;gap:4px;flex-wrap:wrap;',
         'min-height:54px;padding:4px 4px;margin-bottom:3px;',
         'border-radius:5px;overflow:visible;',
         `background:rgba(${{ZONE_RGBA[zi]}},0.08);`,
@@ -1228,7 +1228,7 @@ _formation_html = f'''<div class="section" id="section-formation">
       row.appendChild(zoneLbl);
 
       const chips = document.createElement('div');
-      chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;flex:1;align-content:flex-start;';
+      chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;flex:1;justify-content:center;align-content:center;';
 
       if (zHorses.length === 0) {{
         const empty = document.createElement('span');
@@ -1253,9 +1253,9 @@ _formation_html = f'''<div class="section" id="section-formation">
           chip.addEventListener('mouseleave', () => _hideTip());
           chip.style.cssText = [
             `background:${{bg}};color:${{fg}};`,
-            'border-radius:50%;width:24px;height:24px;',
+            'border-radius:50%;width:26px;height:26px;',
             'display:flex;align-items:center;justify-content:center;',
-            'font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0;',
+            'font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;',
             'box-shadow:0 0 0 1px rgba(255,255,255,0.25);',
           ].join('');
           chip.textContent = h.uma != null ? h.uma : '?';
@@ -1263,6 +1263,9 @@ _formation_html = f'''<div class="section" id="section-formation">
         }});
       }}
       row.appendChild(chips);
+      const _rsp = document.createElement('span');
+      _rsp.style.cssText = 'min-width:28px;flex-shrink:0';
+      row.appendChild(_rsp);
       board.appendChild(row);
     }});
 

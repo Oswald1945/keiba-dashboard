@@ -2133,6 +2133,86 @@ if (stackCtx) {{
 </html>
 '''
 
+# ── 買い目提案パネル（期待値シミュレーターの直後に挿入）2026-06-18 ──
+_BET_PANEL = """  <!-- 買い目提案パネル -->
+  <div class="section">
+    <h2>🎯 買い目提案 — 軸流し（全券種）</h2>
+    <div id="betAnchorInfo" style="margin-bottom:8px;color:#ccc;font-size:13px"></div>
+    <div class="ev-table-wrap">
+      <table class="ev-table">
+        <thead><tr>
+          <th>券種</th><th>買い目(馬番)</th><th>的中率</th><th>フェアオッズ</th>
+          <th>実オッズ(入力)</th><th>期待値</th><th>判定</th>
+        </tr></thead>
+        <tbody id="betBody"></tbody>
+      </table>
+    </div>
+    <div class="prob-note">
+      ※ 上の「モデル信頼度」スライダーと連動。軸1頭からの流し（軸＝妙味馬優先、無ければモデル本命）。<br>
+      <b>フェアオッズ</b>=1/的中率（控除前の損益分岐）。実オッズ欄に締切前オッズを入力すると 期待値=実オッズ×的中率−1 を判定（◎=プラス）。<br>
+      実オッズがフェアオッズを上回る買い目が「妙味あり（期待値プラス）」候補です。
+    </div>
+  </div>
+"""
+
+_BET_JS = r'''
+// ===== 買い目提案 =====
+var _betOdds = {};
+function _betWinProbs(temp){
+  var scores = EV_DATA.map(function(h){return h['スコア'];});
+  var maxS = Math.max.apply(null, scores);
+  var exps = scores.map(function(s){return Math.exp((s-maxS)/temp);});
+  var sum = exps.reduce(function(a,b){return a+b;},0);
+  var probs = exps.map(function(e){return e/sum;});
+  var MR=3.0;
+  probs = probs.map(function(p,i){ var o=EV_DATA[i]['オッズ']; if(!o||o<=0) return p; return Math.min(p,(1/o)*MR); });
+  var s2 = probs.reduce(function(a,b){return a+b;},0);
+  return probs.map(function(p){return p/s2;});
+}
+function _permK(arr,k){ var r=[]; function go(cur,rest){ if(cur.length===k){r.push(cur.slice());return;} for(var i=0;i<rest.length;i++){ go(cur.concat([rest[i]]), rest.slice(0,i).concat(rest.slice(i+1))); } } go([],arr); return r; }
+function _combK(arr,k){ var r=[]; function go(s,cur){ if(cur.length===k){r.push(cur.slice());return;} for(var i=s;i<arr.length;i++){ cur.push(arr[i]); go(i+1,cur); cur.pop(); } } go(0,[]); return r; }
+function _betOddsInput(el){ var k=el.getAttribute('data-betkey'); var v=parseFloat(el.value); _betOdds[k]=(v>0?v:null); renderBets(); }
+function renderBets(){
+  var sl=document.getElementById('tempSlider'); if(!sl) return;
+  var T=Number(sl.value);
+  var wp=_betWinProbs(T);
+  var arr=EV_DATA.map(function(h,i){return {name:h['馬名'],uma:h['馬番'],p:wp[i],rank:h['順位予想'],src:h['SmartRC推定人気順']};}).filter(function(x){return x.p>0&&x.uma!=null;});
+  arr.sort(function(a,b){return b.p-a.p;}); arr=arr.slice(0,7);
+  var body=document.getElementById('betBody'); if(!body) return;
+  if(arr.length<2){ body.innerHTML='<tr><td colspan="7" style="color:#888">データ不足</td></tr>'; return; }
+  var names=arr.map(function(x){return x.name;}); var s=0; arr.forEach(function(x){s+=x.p;});
+  var pv={}, um={}; arr.forEach(function(x){ pv[x.name]=x.p/s; um[x.name]=x.uma; });
+  var o3={}; _permK(names,3).forEach(function(seq){ var rem=1,pr=1; for(var i=0;i<seq.length;i++){ if(rem<=1e-9){pr=0;break;} pr*=pv[seq[i]]/rem; rem-=pv[seq[i]]; } o3[seq.join('|')]=pr; });
+  var place3={}; names.forEach(function(n){ var t=0; for(var k in o3){ if(k.split('|').indexOf(n)>=0) t+=o3[k]; } place3[n]=t; });
+  var aobj=arr.find(function(x){ return x.rank<=3 && x.src!=null && Number(x.src)>=5; }); var isVal=!!aobj; if(!aobj) aobj=arr[0];
+  var A=aobj.name; var others=names.filter(function(n){return n!==A;});
+  var rows=[];
+  rows.push(['単勝', ''+um[A], pv[A]]);
+  rows.push(['複勝', ''+um[A], place3[A]]);
+  var pp=others.map(function(o){ var at=pv[A]*pv[o]/(1-pv[A]); var ta=pv[o]*pv[A]/(1-pv[o]); var wd=0; for(var k in o3){ var ss=k.split('|'); if(ss.indexOf(A)>=0&&ss.indexOf(o)>=0) wd+=o3[k]; } return {o:o,umaren:at+ta,umatan:at,wide:wd}; });
+  pp.slice().sort(function(a,b){return b.umaren-a.umaren;}).slice(0,4).forEach(function(x){ rows.push(['馬連', [um[A],um[x.o]].sort(function(p,q){return p-q;}).join('-'), x.umaren]); });
+  pp.slice().sort(function(a,b){return b.umatan-a.umatan;}).slice(0,4).forEach(function(x){ rows.push(['馬単', um[A]+'→'+um[x.o], x.umatan]); });
+  pp.slice().sort(function(a,b){return b.wide-a.wide;}).slice(0,4).forEach(function(x){ rows.push(['ワイド', [um[A],um[x.o]].sort(function(p,q){return p-q;}).join('-'), x.wide]); });
+  var tri=_combK(others,2).map(function(c){ var a=c[0],b=c[1],t=0; _permK([A,a,b],3).forEach(function(seq){ t+=o3[seq.join('|')]||0; }); return {a:a,b:b,p:t}; });
+  tri.sort(function(x,y){return y.p-x.p;}); tri.slice(0,4).forEach(function(x){ rows.push(['三連複', [um[A],um[x.a],um[x.b]].sort(function(p,q){return p-q;}).join('-'), x.p]); });
+  var t1=_permK(others,2).map(function(c){ return {a:c[0],b:c[1],p:o3[[A,c[0],c[1]].join('|')]||0}; });
+  t1.sort(function(x,y){return y.p-x.p;}); t1.slice(0,4).forEach(function(x){ rows.push(['三連単', um[A]+'→'+um[x.a]+'→'+um[x.b], x.p]); });
+  var info=document.getElementById('betAnchorInfo');
+  if(info) info.innerHTML='軸: <b style="color:#f1c40f">'+um[A]+'番 '+A+'</b> '+(isVal?'<span style="color:#3498db">(妙味馬: モデル上位×想定人気薄)</span>':'<span style="color:#aaa">(モデル本命)</span>');
+  body.innerHTML=rows.map(function(r){
+    var bt=r[0], label=r[1], prob=r[2], key=bt+'|'+label;
+    var fair= prob>0 ? (1/prob) : 0; var od=_betOdds[key];
+    var ev='-', cls='', judge='';
+    if(od!=null && od>0 && prob>0){ var e=od*prob-1; ev=e.toFixed(2); if(e>0.05){cls='ev-positive';judge='◎ 妙味';} else if(e>=-0.1){cls='ev-neutral';judge='△';} else {cls='ev-negative';judge='✕';} }
+    return '<tr><td style="font-weight:700">'+bt+'</td><td style="white-space:nowrap">'+label+'</td><td>'+(prob*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+(fair>0?fair.toFixed(1):'-')+'倍</td><td><input type="number" min="0" step="0.1" data-betkey="'+key+'" value="'+(od!=null?od:'')+'" style="width:62px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;border-radius:4px;padding:2px 5px;font-size:12px;text-align:right" oninput="_betOddsInput(this)"></td><td class="'+cls+'">'+ev+'</td><td>'+judge+'</td></tr>';
+  }).join('');
+}
+(function(){ var sl=document.getElementById('tempSlider'); if(sl) sl.addEventListener('input', renderBets); renderBets(); })();
+'''
+
+html = html.replace('  <div class="section">\n    <h2>📊 全出走馬一覧</h2>', _BET_PANEL + '  <div class="section">\n    <h2>📊 全出走馬一覧</h2>', 1)
+html = html.replace('computeEV(20);', 'computeEV(20);\n' + _BET_JS, 1)
+
 import argparse as _ap, os as _os2
 if __name__ == '__main__':
     _parser = _ap.ArgumentParser()

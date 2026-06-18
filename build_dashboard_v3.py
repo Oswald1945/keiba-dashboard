@@ -2139,6 +2139,7 @@ _BET_PANEL = """  <!-- 買い目提案パネル -->
     <h2>🎯 買い目提案 — フォーメーション</h2>
     <div id="betAnchorInfo" style="margin-bottom:4px;color:#ccc;font-size:13px"></div>
     <div id="betPartnerInfo" style="margin-bottom:8px;color:#9fb3c8;font-size:12px"></div>
+    <div id="betProbTable" style="margin-bottom:10px"></div>
     <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
       <button class="ev-tab active" id="betTabForm" onclick="setBetMode('form')">フォーメーション</button>
       <button class="ev-tab" id="betTabDetail" onclick="setBetMode('detail')">内訳</button>
@@ -2246,6 +2247,18 @@ function renderBets(){
   if(info) info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(0)+' / 勝率'+(pv[A]*100).toFixed(0)+'%） '+(isVal?'<span style="color:#3498db">妙味馬</span>':'<span style="color:#aaa">本命</span>');
   var pinfo=document.getElementById('betPartnerInfo');
   if(pinfo) pinfo.innerHTML='相手 '+partners.length+'頭（偏差値/勝率/連対率/想定人気で自動選定）: '+pUm.map(_umaChip).join(' ');
+  var pt=document.getElementById('betProbTable');
+  if(pt){
+    var tlist=[A].concat(partners);
+    var trh=tlist.map(function(n){
+      var w=pv[n];
+      var p2=(typeof placeProb!=='undefined')?placeProb(wp,gi[n],2):0;
+      var p3=(typeof placeProb!=='undefined')?placeProb(wp,gi[n],3):0;
+      var tag=(n===A)?'<span style="color:#f1c40f;font-size:10px;margin-left:4px">軸</span>':'';
+      return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td><td>'+(w*100).toFixed(1)+'%</td><td>'+(p2*100).toFixed(1)+'%</td><td>'+(p3*100).toFixed(1)+'%</td></tr>';
+    }).join('');
+    pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内、いずれも期待値シミュと同一基準）</div><table class="ev-table" style="max-width:540px"><thead><tr><th>馬</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
+  }
   var head=document.getElementById('betHead');
   // ── フォーメーション表示 ──
   if(_betMode==='form'){

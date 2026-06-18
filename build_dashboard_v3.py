@@ -1660,14 +1660,14 @@ html = f'''<!DOCTYPE html>
   <div class="section">
     <h2>💰 期待値シミュレーター</h2>
     <!-- 1行目: 市場乖離バナー（妙味判定のみ） -->
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+    <div id="evRecBanner" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
                 padding:10px 16px;margin-bottom:8px;border-radius:8px;
                 background:{_rec_bg};border:1px solid {_rec_color};">
-      <span style="font-size:15px;font-weight:900;color:{_rec_color};
+      <span id="evRecBadge" style="font-size:15px;font-weight:900;color:{_rec_color};
                    padding:3px 14px;border-radius:5px;border:2px solid {_rec_color};">
         {_rec_badge}
       </span>
-      <span style="color:#ccc;font-size:12px;">{_rec_reason}</span>
+      <span id="evRecReason" style="color:#ccc;font-size:12px;">{_rec_reason}</span>
     </div>
     <!-- 2行目: 注目馬 / 本命馬自信あり バッジエリア（該当なければ非表示） -->
     {_badge_area_html}
@@ -2208,8 +2208,8 @@ function renderBets(){
   arr.sort(function(a,b){return b.p-a.p;}); arr=arr.slice(0,8);
   if(arr.length<2){ body.innerHTML='<tr><td colspan="8" style="color:#888">データ不足</td></tr>'; return; }
   var names=arr.map(function(x){return x.name;});
-  var pv={}, um={}, dv={}, sc={}, gi={};
-  arr.forEach(function(x){ pv[x.name]=x.p; um[x.name]=x.uma; dv[x.name]=x.dev; sc[x.name]=x.src; gi[x.name]=x.idx; });
+  var pv={}, um={}, dv={}, sc={}, gi={}, ro={};
+  arr.forEach(function(x){ pv[x.name]=x.p; um[x.name]=x.uma; dv[x.name]=x.dev; sc[x.name]=x.src; gi[x.name]=x.idx; ro[x.name]=x.rank; });
   var o3={}; _permK(names,3).forEach(function(seq){ var rem=1,pr=1; for(var i=0;i<seq.length;i++){ if(rem<=1e-9){pr=0;break;} pr*=pv[seq[i]]/rem; rem-=pv[seq[i]]; } o3[seq.join('|')]=pr; });
   function W(n){return pv[n];}
   function P2(n){return (typeof placeProb!=='undefined')?placeProb(wp,gi[n],2):0;}
@@ -2217,15 +2217,6 @@ function renderBets(){
   // ── 軸 = 偏差値1位（モデル最上位） ──
   var A=arr[0].name; var wA=pv[A]; var srcA=(sc[A]!=null)?Number(sc[A]):99;
   var w2=arr[1]?arr[1].p:0; var gap=wA-w2;
-  var kairi=(srcA>=4); // 軸が市場で4番人気以下＝過小評価＝妙味
-  // ── 買いレース判定（A-4） ──
-  var jb,jc,jr;
-  if(wA>=0.15 && kairi){ jb='🟢 買い推奨（妙味）'; jc='#27ae60'; jr='偏差値1位('+um[A]+'番)の勝率'+(wA*100).toFixed(0)+'%＋市場想定'+srcA+'番人気で過小評価＝妙味ある軸'; }
-  else if(wA>=0.20 || (wA>=0.16 && gap>=0.05)){ jb='🟢 買い推奨'; jc='#27ae60'; jr='偏差値1位('+um[A]+'番)が勝率'+(wA*100).toFixed(0)+'%で抜けた軸'; }
-  else if(wA>=0.14){ jb='🟡 中立（軸やや手薄）'; jc='#f39c12'; jr='偏差値1位の勝率'+(wA*100).toFixed(0)+'%。軸の信頼度は中程度'; }
-  else { jb='🔴 見送り推奨'; jc='#e74c3c'; jr='偏差値1位でも勝率'+(wA*100).toFixed(0)+'%と低く、抜けた軸不在の混戦（軸を穴馬に動かすのは危険）'; }
-  var jdiv=document.getElementById('betRaceJudge');
-  if(jdiv) jdiv.innerHTML='<span style="display:inline-block;font-size:14px;font-weight:900;color:'+jc+';padding:4px 14px;border-radius:6px;border:2px solid '+jc+'">'+jb+'</span> <span style="color:#bbb;font-size:12px">'+jr+'</span>';
   // ── 相手ユニバース（自動選定）──
   var cand=names.filter(function(n){return n!==A;});
   cand.sort(function(a,b){return pv[b]-pv[a];});
@@ -2241,6 +2232,22 @@ function renderBets(){
   }
   if(partners.length<1){ partners=cand.slice(0,2); }
   var contend=[A].concat(partners);
+  // ── 統一「買いレース判定」(EVシミュ妙味判定と共通) ──
+  var axisStrong=(wA>=0.20)||(wA>=0.16&&gap>=0.05);
+  var axisOK=wA>=0.14;
+  var kairiMax=-99;
+  contend.forEach(function(n){ var sj=(sc[n]!=null)?Number(sc[n]):99; var rj=ro[n]; if(sj<99&&rj!=null){ var kk=sj-rj; if(kk>kairiMax)kairiMax=kk; } });
+  var miyomi=(srcA>=4)||(kairiMax>=2);
+  var V;
+  if(!axisOK){ V={b:'\ud83d\udd34 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'偏差値１位でも勝率'+(wA*100).toFixed(0)+'%と低く軸不在の混戦（軸を穴馬に動かすのは危険）'}; }
+  else if(miyomi&&(axisStrong||wA>=0.15)){ V={b:'\ud83d\udfe2 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(勝率'+(wA*100).toFixed(0)+'%)＋市場乖離あり＝妙味のある買いレース'}; }
+  else if(axisStrong){ V={b:'\ud83d\udfe2 買い推奨',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番が勝率'+(wA*100).toFixed(0)+'%で抜けている（堅軸）'}; }
+  else { V={b:'\ud83d\udfe1 中立',c:'#f39c12',bg:'#3a2e10',r:'軸はやや手薄／市場乖離も小さく見送り寄り'}; }
+  var jdiv=document.getElementById('betRaceJudge');
+  if(jdiv) jdiv.innerHTML='<span style="display:inline-block;font-size:14px;font-weight:900;color:'+V.c+';padding:4px 14px;border-radius:6px;border:2px solid '+V.c+'">'+V.b+'</span> <span style="color:#bbb;font-size:12px">'+V.r+'</span>';
+  var eb=document.getElementById('evRecBanner'); if(eb){ eb.style.background=V.bg; eb.style.borderColor=V.c; }
+  var ebd=document.getElementById('evRecBadge'); if(ebd){ ebd.textContent=V.b; ebd.style.color=V.c; ebd.style.borderColor=V.c; }
+  var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }
   // ── 列の取捨: 1着列=勝率 / 2着列=連対率 / 3着列=複勝率 ──
   var col1=contend.filter(function(n){ return n===A || W(n)>=0.6*wA; }).sort(function(a,b){return W(b)-W(a);}).slice(0,3);
   var col2=contend.filter(function(n){ return P2(n)>=0.18; }).sort(function(a,b){return P2(b)-P2(a);});

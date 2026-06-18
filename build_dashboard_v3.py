@@ -2258,7 +2258,7 @@ function renderBets(){
   col3=col3.slice(0,6);
   // info & prob table
   var info=document.getElementById('betAnchorInfo');
-  if(info) info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(0)+'1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(kairi?' <span style="color:#3498db">妙味</span>':'');
+  if(info) info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(0)+'1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':'');
   var pinfo=document.getElementById('betPartnerInfo');
   if(pinfo) pinfo.innerHTML='相手 '+partners.length+'頭（自動選定）。列取捨 → 1着列:'+col1.map(function(n){return um[n];}).join(',')+' / 2着列:'+col2.map(function(n){return um[n];}).join(',')+' / 3着列:'+col3.map(function(n){return um[n];}).join(',');
   var pt=document.getElementById('betProbTable');

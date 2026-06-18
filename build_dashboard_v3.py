@@ -1671,15 +1671,7 @@ html = f'''<!DOCTYPE html>
     </div>
     <!-- 2行目: 注目馬 / 本命馬自信あり バッジエリア（該当なければ非表示） -->
     {_badge_area_html}
-    <!-- 3行目: モデル信頼度スライダー -->
-    <div class="temp-slider" style="margin-bottom:14px;">
-      <label style="font-weight:600">モデル信頼度</label>
-      <span style="color:#7f8c8d;font-size:11px">本命重視</span>
-      <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">
-      <span style="color:#7f8c8d;font-size:11px">混戦想定</span>
-      <span style="margin-left:8px;font-weight:600" id="tempVal">20</span>
-      <span style="color:#7f8c8d;font-size:11px;margin-left:2px">（T値 — 小:上位集中 / 大:全馬分散）</span>
-    </div>
+    <!-- モデル信頼度スライダーは廃止（T=20固定）-->
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="ev-tab active" id="tabTanshо" onclick="switchTab('tansho')">単勝 EV</button>
       <button class="ev-tab" id="tabFukusho" onclick="switchTab('fukusho')">複勝 EV</button>
@@ -1903,7 +1895,7 @@ function switchTab(tab) {{
   document.getElementById('evNote').innerHTML = isFuku
     ? '※ 複勝率はHarville式による上位3着以内確率の推定値（頭数が少ない場合は2着以内）。<br>複勝EV = 複勝率推定 × 複勝オッズ下限 − 1。プラス(緑)は期待値プラスの可能性を示します。'
     : '※ 勝率はスコアのsoftmax変換による推定値。単勝EV = 勝率推定 × 現在オッズ − 1。<br>採算オッズ（損益分岐オッズ）以上の実オッズなら EV プラスの可能性。オッズ欄を入力すると EV が即時更新されます。';
-  computeEV(Number(document.getElementById('tempSlider').value));
+  computeEV(20);
 }}
 
 let _lastRows = [];
@@ -1986,7 +1978,7 @@ function renderRows(rows) {{
            style="width:68px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;
                   border-radius:4px;padding:2px 5px;font-size:12px;text-align:right"
            oninput="const v=parseFloat(this.value); _userOdds[${{h['馬番']}}]=(v>0?v:null);
-                    computeEV(Number(document.getElementById('tempSlider').value))">`;
+                    computeEV(20)">`;
     // SmartRC推定人気表示: 数字のみ
     const srcRank  = h['SmartRC推定人気順'] != null ? h['SmartRC推定人気順'] : null;
     const srcNinkiCell = srcRank != null
@@ -2058,13 +2050,8 @@ function computeEV(temp) {{
   renderRows(rows);
 }}
 
-const slider = document.getElementById('tempSlider')
-const tempLabel = document.getElementById('tempVal');
-slider.addEventListener('input', () => {{
-  tempLabel.textContent = slider.value;
-  computeEV(Number(slider.value));
-}});
 computeEV(20);
+/*__BETJS__*/
 
 // ── 積み上げチャート ─────────────────────────────
 const STACK_DATA = {score_chart_json};
@@ -2133,10 +2120,11 @@ if (stackCtx) {{
 </html>
 '''
 
-# ── 買い目提案パネル（期待値シミュレーター直後）v5: フォーメーション＋合成採算オッズ ──
+# ── 買い目提案パネル（期待値シミュレーター直後）v7 ──
 _BET_PANEL = """  <!-- 買い目提案パネル -->
   <div class="section">
     <h2>🎯 買い目提案 — フォーメーション</h2>
+    <div id="betRaceJudge" style="margin-bottom:8px"></div>
     <div id="betAnchorInfo" style="margin-bottom:4px;color:#ccc;font-size:13px"></div>
     <div id="betPartnerInfo" style="margin-bottom:8px;color:#9fb3c8;font-size:12px"></div>
     <div id="betProbTable" style="margin-bottom:10px"></div>
@@ -2155,16 +2143,16 @@ _BET_PANEL = """  <!-- 買い目提案パネル -->
       </table>
     </div>
     <div class="prob-note">
-      ※ 上の「モデル信頼度」スライダーと連動。勝率・複勝率は期待値シミュレーターと同一基準。<br>
-      軸＝妙味馬優先（無ければ本命）。<b>相手はスコア偏差値・勝率・連対率・想定人気から自動選定</b>（堅いレースは絞り、混戦は広げる）。<br>
-      <b>合成採算オッズ＝1÷フォーメーション全体の的中率</b>（各買い目の採算オッズに反比例配分した均等払い戻しの合成オッズ）。<br>
-      投票画面に表示される<b>フォーメーションの合成オッズ</b>を「実オッズ」に入力 → 期待値=合成オッズ×的中率−1。実オッズ≥合成採算オッズなら<b>期待値プラス（◎）</b>。「内訳」で各組の個別採算も確認可。
+      ※ 勝率・連対率・複勝率は期待値シミュレーターと同一基準（T=20固定）。<br>
+      <b>軸＝偏差値1位（モデル最上位）に固定</b>。穴馬でも偏差値1位でなければ軸にしません。軸が手薄で抜けた軸不在のレースは<b>見送り推奨</b>（買いレース判定）。<br>
+      <b>馬単・三連単は 1着列＝勝率／2着列＝連対率／3着列＝複勝率</b> でフォーメーション化（2・3列目を自動取捨）。馬連は連対率上位、ワイド・三連複は複勝率上位を相手に。<br>
+      <b>合成採算オッズ＝1÷フォーメーション全体の的中率</b>。投票画面の合成オッズがこれを上回れば<b>期待値プラス（◎）</b>。「内訳」で個別組も確認可。
     </div>
   </div>
 """
 
 _BET_JS = r'''
-// ===== 買い目提案 v5（フォーメーション＋合成採算オッズ）=====
+// ===== 買い目提案 v7（軸=偏差値1位/買いレース判定/列フォーメーション）=====
 var _betOdds = {};
 var _betMode = 'form';
 function setBetMode(m){ _betMode=m;
@@ -2194,26 +2182,24 @@ function _umaChip(u){
   var fg=(typeof WAKU_FG!=='undefined'&&WAKU_FG[w])?WAKU_FG[w]:'#fff';
   return '<span style="display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:50%;background:'+bg+';color:'+fg+';font-weight:700;font-size:11px;box-shadow:0 0 0 1px rgba(255,255,255,0.25)">'+u+'</span>';
 }
+function _colHtml(cols, sep){
+  var s=(sep==='→')?'<span style="margin:0 5px;color:#9ab;font-weight:700">→</span>':'<span style="margin:0 5px;color:#9ab;font-weight:700">-</span>';
+  return '<span style="display:inline-flex;align-items:center;white-space:nowrap;flex-wrap:wrap;gap:2px">'+cols.map(function(c){return '<span style="display:inline-flex;gap:2px">'+c.map(_umaChip).join('')+'</span>';}).join(s)+'</span>';
+}
 function _seqHtml(umaArr, sep){
-  var s=(sep==='→')?'<span style="margin:0 3px;color:#889">→</span>':(sep==='−'||sep==='-')?'<span style="margin:0 3px;color:#889">-</span>':'';
+  var s=(sep==='→')?'<span style="margin:0 3px;color:#889">→</span>':(sep==='-')?'<span style="margin:0 3px;color:#889">-</span>':'';
   return '<span style="display:inline-flex;align-items:center;white-space:nowrap">'+umaArr.map(_umaChip).join(s)+'</span>';
 }
-function _formHtml(a, parts, sep){
-  if(!parts||parts.length===0) return _umaChip(a);
-  return '<span style="display:inline-flex;align-items:center;white-space:nowrap">'+_umaChip(a)+'<span style="margin:0 5px;color:#9ab;font-weight:700">'+sep+'</span>'+parts.map(_umaChip).join(' ')+'</span>';
-}
 function _evCell(P, key){
-  var be = P>0 ? (1/P) : 0;
-  var od=_betOdds[key];
+  var be = P>0 ? (1/P) : 0; var od=_betOdds[key];
   var evStr='-', cls='', judge='';
   if(od!=null && od>0 && P>0){ var e=od*P-1; evStr=e.toFixed(2); if(e>0.05){cls='ev-positive';judge='◎ 妙味';} else if(e>=-0.1){cls='ev-neutral';judge='△';} else {cls='ev-negative';judge='✕';} }
   var inp='<input type="number" inputmode="decimal" min="0" step="0.1" data-betkey="'+key+'" value="'+(od!=null?od:'')+'" style="width:66px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;border-radius:4px;padding:2px 5px;font-size:12px;text-align:right" onchange="_betOddsInput(this)">';
   return {be:(be>0?be.toFixed(1)+'倍':'-'), inp:inp, ev:evStr, cls:cls, judge:judge};
 }
 function renderBets(){
-  var sl=document.getElementById('tempSlider'); if(!sl) return;
   var body=document.getElementById('betBody'); if(!body) return;
-  var T=Number(sl.value);
+  var T=20;
   var wp=_betWinProbs(T);
   var allSc=EV_DATA.map(function(h){return h['スコア'];});
   var mean=allSc.reduce(function(a,b){return a+b;},0)/(allSc.length||1);
@@ -2225,89 +2211,108 @@ function renderBets(){
   var pv={}, um={}, dv={}, sc={}, gi={};
   arr.forEach(function(x){ pv[x.name]=x.p; um[x.name]=x.uma; dv[x.name]=x.dev; sc[x.name]=x.src; gi[x.name]=x.idx; });
   var o3={}; _permK(names,3).forEach(function(seq){ var rem=1,pr=1; for(var i=0;i<seq.length;i++){ if(rem<=1e-9){pr=0;break;} pr*=pv[seq[i]]/rem; rem-=pv[seq[i]]; } o3[seq.join('|')]=pr; });
-  function place2(n){ var p=pv[n], t=p; names.forEach(function(j){ if(j!==n) t+=pv[j]*p/(1-pv[j]); }); return t; }
-  var aobj=arr.find(function(x){ return x.rank<=3 && x.src!=null && Number(x.src)>=5; }); var isVal=!!aobj; if(!aobj) aobj=arr[0];
-  var A=aobj.name;
-  var place3A = (typeof placeProb!=='undefined') ? placeProb(wp, gi[A], 3) : 0;
+  function W(n){return pv[n];}
+  function P2(n){return (typeof placeProb!=='undefined')?placeProb(wp,gi[n],2):0;}
+  function P3(n){return (typeof placeProb!=='undefined')?placeProb(wp,gi[n],3):0;}
+  // ── 軸 = 偏差値1位（モデル最上位） ──
+  var A=arr[0].name; var wA=pv[A]; var srcA=(sc[A]!=null)?Number(sc[A]):99;
+  var w2=arr[1]?arr[1].p:0; var gap=wA-w2;
+  var kairi=(srcA>=4); // 軸が市場で4番人気以下＝過小評価＝妙味
+  // ── 買いレース判定（A-4） ──
+  var jb,jc,jr;
+  if(wA>=0.15 && kairi){ jb='🟢 買い推奨（妙味）'; jc='#27ae60'; jr='偏差値1位('+um[A]+'番)の勝率'+(wA*100).toFixed(0)+'%＋市場想定'+srcA+'番人気で過小評価＝妙味ある軸'; }
+  else if(wA>=0.20 || (wA>=0.16 && gap>=0.05)){ jb='🟢 買い推奨'; jc='#27ae60'; jr='偏差値1位('+um[A]+'番)が勝率'+(wA*100).toFixed(0)+'%で抜けた軸'; }
+  else if(wA>=0.14){ jb='🟡 中立（軸やや手薄）'; jc='#f39c12'; jr='偏差値1位の勝率'+(wA*100).toFixed(0)+'%。軸の信頼度は中程度'; }
+  else { jb='🔴 見送り推奨'; jc='#e74c3c'; jr='偏差値1位でも勝率'+(wA*100).toFixed(0)+'%と低く、抜けた軸不在の混戦（軸を穴馬に動かすのは危険）'; }
+  var jdiv=document.getElementById('betRaceJudge');
+  if(jdiv) jdiv.innerHTML='<span style="display:inline-block;font-size:14px;font-weight:900;color:'+jc+';padding:4px 14px;border-radius:6px;border:2px solid '+jc+'">'+jb+'</span> <span style="color:#bbb;font-size:12px">'+jr+'</span>';
+  // ── 相手ユニバース（自動選定）──
   var cand=names.filter(function(n){return n!==A;});
   cand.sort(function(a,b){return pv[b]-pv[a];});
-  var partners=[]; var cum=pv[A];
+  var partners=[]; var cum=wA;
   for(var ci=0; ci<cand.length; ci++){
-    var n=cand[ci]; var src=(sc[n]!=null)?Number(sc[n]):99;
-    var live=(dv[n]>=48)||(src<=4)||(place2(n)>=0.30);
-    var noHope=(dv[n]<42)&&(src>6)&&(place2(n)<0.18);
+    var n=cand[ci]; var s2=(sc[n]!=null)?Number(sc[n]):99;
+    var live=(dv[n]>=48)||(s2<=4)||(P2(n)>=0.30);
+    var noHope=(dv[n]<42)&&(s2>6)&&(P3(n)<0.18);
     if(noHope) continue;
-    if(partners.length>=2 && cum>=0.82 && !(src<=2)) break;
+    if(partners.length>=2 && cum>=0.82 && !(s2<=2)) break;
     if(live || partners.length<2){ partners.push(n); cum+=pv[n]; }
     if(partners.length>=6) break;
   }
   if(partners.length<1){ partners=cand.slice(0,2); }
-  var pUm=partners.map(function(n){return um[n];});
+  var contend=[A].concat(partners);
+  // ── 列の取捨: 1着列=勝率 / 2着列=連対率 / 3着列=複勝率 ──
+  var col1=contend.filter(function(n){ return n===A || W(n)>=0.6*wA; }).sort(function(a,b){return W(b)-W(a);}).slice(0,3);
+  var col2=contend.filter(function(n){ return P2(n)>=0.18; }).sort(function(a,b){return P2(b)-P2(a);});
+  if(col2.length<2) col2=contend.slice().sort(function(a,b){return P2(b)-P2(a);}).slice(0,2);
+  col2=col2.slice(0,5);
+  var col3=contend.filter(function(n){ return P3(n)>=0.18; }).sort(function(a,b){return P3(b)-P3(a);});
+  if(col3.length<3) col3=contend.slice().sort(function(a,b){return P3(b)-P3(a);}).slice(0,3);
+  col3=col3.slice(0,6);
+  // info & prob table
   var info=document.getElementById('betAnchorInfo');
-  if(info) info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(0)+' / 勝率'+(pv[A]*100).toFixed(0)+'%） '+(isVal?'<span style="color:#3498db">妙味馬</span>':'<span style="color:#aaa">本命</span>');
+  if(info) info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(0)+'1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(kairi?' <span style="color:#3498db">妙味</span>':'');
   var pinfo=document.getElementById('betPartnerInfo');
-  if(pinfo) pinfo.innerHTML='相手 '+partners.length+'頭（偏差値/勝率/連対率/想定人気で自動選定）: '+pUm.map(_umaChip).join(' ');
+  if(pinfo) pinfo.innerHTML='相手 '+partners.length+'頭（自動選定）。列取捨 → 1着列:'+col1.map(function(n){return um[n];}).join(',')+' / 2着列:'+col2.map(function(n){return um[n];}).join(',')+' / 3着列:'+col3.map(function(n){return um[n];}).join(',');
   var pt=document.getElementById('betProbTable');
   if(pt){
-    var tlist=[A].concat(partners);
-    var trh=tlist.map(function(n){
-      var w=pv[n];
-      var p2=(typeof placeProb!=='undefined')?placeProb(wp,gi[n],2):0;
-      var p3=(typeof placeProb!=='undefined')?placeProb(wp,gi[n],3):0;
+    var trh=contend.map(function(n){
       var tag=(n===A)?'<span style="color:#f1c40f;font-size:10px;margin-left:4px">軸</span>':'';
-      return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td><td>'+(w*100).toFixed(1)+'%</td><td>'+(p2*100).toFixed(1)+'%</td><td>'+(p3*100).toFixed(1)+'%</td></tr>';
+      return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td><td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
     }).join('');
-    pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内、いずれも期待値シミュと同一基準）</div><table class="ev-table" style="max-width:540px"><thead><tr><th>馬</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
+    pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="max-width:540px"><thead><tr><th>馬</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
   }
   var head=document.getElementById('betHead');
-  // ── フォーメーション表示 ──
   if(_betMode==='form'){
     if(head) head.innerHTML='<th>券種</th><th>買い目</th><th>点数</th><th>的中率</th><th>合成採算オッズ</th><th>実オッズ(入力)</th><th>期待値</th><th>判定</th>';
-    var P_uren=0, P_utan=0, P_wide=0;
-    partners.forEach(function(o){ P_uren += pv[A]*pv[o]/(1-pv[A]) + pv[o]*pv[A]/(1-pv[o]); P_utan += pv[A]*pv[o]/(1-pv[A]); var wd=0; for(var k in o3){var ss=k.split('|'); if(ss.indexOf(A)>=0&&ss.indexOf(o)>=0) wd+=o3[k];} P_wide+=wd; });
-    var trios=_combK(partners,2); var P_3p=0; trios.forEach(function(c){ _permK([A,c[0],c[1]],3).forEach(function(seq){P_3p+=o3[seq.join('|')]||0;}); });
-    var ord=_permK(partners,2); var P_3t=0; ord.forEach(function(c){ P_3t += o3[[A,c[0],c[1]].join('|')]||0; });
+    var uren=col2.filter(function(n){return n!==A;});
+    var wd=col3.filter(function(n){return n!==A;});
+    var P_uren=0; uren.forEach(function(o){ P_uren += pv[A]*pv[o]/(1-pv[A]) + pv[o]*pv[A]/(1-pv[o]); });
+    var P_wide=0; wd.forEach(function(o){ var t=0; for(var k in o3){var ss=k.split('|'); if(ss.indexOf(A)>=0&&ss.indexOf(o)>=0) t+=o3[k];} P_wide+=t; });
+    var trios=_combK(wd,2); var P_3p=0; trios.forEach(function(c){ _permK([A,c[0],c[1]],3).forEach(function(seq){P_3p+=o3[seq.join('|')]||0;}); });
+    // 馬単 col1->col2
+    var utanCnt=0,P_utan=0; col1.forEach(function(i){ col2.forEach(function(j){ if(i!==j){ utanCnt++; P_utan+=pv[i]*pv[j]/(1-pv[i]); } }); });
+    // 三連単 col1->col2->col3
+    var stanCnt=0,P_3t=0; col1.forEach(function(i){ col2.forEach(function(j){ col3.forEach(function(k){ if(i!==j&&j!==k&&i!==k){ stanCnt++; P_3t+=o3[[i,j,k].join('|')]||0; } }); }); });
     var forms=[
-      {bt:'単勝', a:um[A], parts:[], sep:'', M:1, P:pv[A]},
-      {bt:'複勝', a:um[A], parts:[], sep:'', M:1, P:place3A},
-      {bt:'馬連', a:um[A], parts:pUm, sep:'−', M:partners.length, P:P_uren},
-      {bt:'馬単(軸1着流し)', a:um[A], parts:pUm, sep:'→', M:partners.length, P:P_utan},
-      {bt:'ワイド', a:um[A], parts:pUm, sep:'−', M:partners.length, P:P_wide},
-      {bt:'三連複(軸1頭流し)', a:um[A], parts:pUm, sep:'−', M:trios.length, P:P_3p},
-      {bt:'三連単(軸1着流し)', a:um[A], parts:pUm, sep:'→', M:ord.length, P:P_3t}
+      {bt:'単勝', cols:[[um[A]]], sep:'', M:1, P:wA},
+      {bt:'複勝', cols:[[um[A]]], sep:'', M:1, P:P3(A)},
+      {bt:'馬連', cols:[[um[A]],uren.map(function(n){return um[n];})], sep:'-', M:uren.length, P:P_uren},
+      {bt:'ワイド', cols:[[um[A]],wd.map(function(n){return um[n];})], sep:'-', M:wd.length, P:P_wide},
+      {bt:'馬単(1着列→2着列)', cols:[col1.map(function(n){return um[n];}),col2.map(function(n){return um[n];})], sep:'→', M:utanCnt, P:P_utan},
+      {bt:'三連複(軸-複勝上位)', cols:[[um[A]],wd.map(function(n){return um[n];})], sep:'-', M:trios.length, P:P_3p},
+      {bt:'三連単(1→2→3列)', cols:[col1.map(function(n){return um[n];}),col2.map(function(n){return um[n];}),col3.map(function(n){return um[n];})], sep:'→', M:stanCnt, P:P_3t}
     ];
     body.innerHTML=forms.map(function(f){
       if(f.M<1) return '<tr><td style="font-weight:700">'+f.bt+'</td><td colspan="7" style="color:#667">相手不足</td></tr>';
-      var key=f.bt+'|'+f.a+f.sep+f.parts.join(',');
+      var key=f.bt+'|'+f.cols.map(function(c){return c.join(',');}).join(f.sep);
       var c=_evCell(f.P,key);
-      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_formHtml(f.a,f.parts,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(f.P*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
+      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_colHtml(f.cols,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(f.P*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
     }).join('');
-    var mn=document.getElementById('betModeNote'); if(mn) mn.textContent='券種ごとに軸流しフォーメーション1点（合成採算オッズ表示）';
+    var mn=document.getElementById('betModeNote'); if(mn) mn.textContent='券種ごとのフォーメーション（合成採算オッズ）。馬単/三連単は列ごとに取捨';
     return;
   }
-  // ── 内訳（個別組）表示 ──
+  // 内訳
   if(head) head.innerHTML='<th>券種</th><th>買い目</th><th>点数</th><th>的中率</th><th>採算オッズ</th><th>実オッズ(入力)</th><th>期待値</th><th>判定</th>';
-  var rows=[];
-  rows.push(['単勝',[um[A]],'',pv[A]]); rows.push(['複勝',[um[A]],'',place3A]);
-  var pp=partners.map(function(o){ var at=pv[A]*pv[o]/(1-pv[A]); var ta=pv[o]*pv[A]/(1-pv[o]); var wd=0; for(var k in o3){var ss=k.split('|'); if(ss.indexOf(A)>=0&&ss.indexOf(o)>=0) wd+=o3[k];} return {o:o,umaren:at+ta,umatan:at,wide:wd}; });
-  pp.slice().sort(function(a,b){return b.umaren-a.umaren;}).forEach(function(x){ rows.push(['馬連',[um[A],um[x.o]].sort(function(p,q){return p-q;}),'−',x.umaren]); });
-  pp.slice().sort(function(a,b){return b.umatan-a.umatan;}).forEach(function(x){ rows.push(['馬単',[um[A],um[x.o]],'→',x.umatan]); });
-  pp.slice().sort(function(a,b){return b.wide-a.wide;}).forEach(function(x){ rows.push(['ワイド',[um[A],um[x.o]].sort(function(p,q){return p-q;}),'−',x.wide]); });
-  var tri2=_combK(partners,2).map(function(c){ var t=0; _permK([A,c[0],c[1]],3).forEach(function(seq){t+=o3[seq.join('|')]||0;}); return {c:[um[A],um[c[0]],um[c[1]]].sort(function(p,q){return p-q;}),p:t}; });
-  tri2.sort(function(x,y){return y.p-x.p;}); tri2.forEach(function(x){ rows.push(['三連複',x.c,'−',x.p]); });
-  var t12=_permK(partners,2).map(function(c){ return {c:[um[A],um[c[0]],um[c[1]]],p:o3[[A,c[0],c[1]].join('|')]||0}; });
-  t12.sort(function(x,y){return y.p-x.p;}); t12.forEach(function(x){ rows.push(['三連単',x.c,'→',x.p]); });
+  var rows=[]; rows.push(['単勝',[um[A]],'',wA]); rows.push(['複勝',[um[A]],'',P3(A)]);
+  var uren2=col2.filter(function(n){return n!==A;}), wd2=col3.filter(function(n){return n!==A;});
+  uren2.map(function(o){return {o:o,p:pv[A]*pv[o]/(1-pv[A])+pv[o]*pv[A]/(1-pv[o])};}).sort(function(a,b){return b.p-a.p;}).forEach(function(x){ rows.push(['馬連',[um[A],um[x.o]].sort(function(p,q){return p-q;}),'-',x.p]); });
+  col1.forEach(function(i){ col2.forEach(function(j){ if(i!==j) rows.push(['馬単',[um[i],um[j]],'→',pv[i]*pv[j]/(1-pv[i])]); }); });
+  wd2.map(function(o){var t=0;for(var k in o3){var ss=k.split('|');if(ss.indexOf(A)>=0&&ss.indexOf(o)>=0)t+=o3[k];}return {o:o,p:t};}).sort(function(a,b){return b.p-a.p;}).forEach(function(x){ rows.push(['ワイド',[um[A],um[x.o]].sort(function(p,q){return p-q;}),'-',x.p]); });
+  _combK(wd2,2).map(function(c){var t=0;_permK([A,c[0],c[1]],3).forEach(function(seq){t+=o3[seq.join('|')]||0;});return {c:[um[A],um[c[0]],um[c[1]]].sort(function(p,q){return p-q;}),p:t};}).sort(function(a,b){return b.p-a.p;}).forEach(function(x){ rows.push(['三連複',x.c,'-',x.p]); });
+  var st=[]; col1.forEach(function(i){ col2.forEach(function(j){ col3.forEach(function(k){ if(i!==j&&j!==k&&i!==k) st.push({c:[um[i],um[j],um[k]],p:o3[[i,j,k].join('|')]||0}); }); }); });
+  st.sort(function(a,b){return b.p-a.p;}); st.forEach(function(x){ rows.push(['三連単',x.c,'→',x.p]); });
   body.innerHTML=rows.map(function(r){
     var key=r[0]+'|'+r[1].join(r[2]); var c=_evCell(r[3],key);
     return '<tr><td style="font-weight:700">'+r[0]+'</td><td>'+_seqHtml(r[1],r[2])+'</td><td style="text-align:center">1点</td><td>'+(r[3]*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
   }).join('');
-  var mn2=document.getElementById('betModeNote'); if(mn2) mn2.textContent='自動選定した相手での全買い目（個別採算オッズ）';
+  var mn2=document.getElementById('betModeNote'); if(mn2) mn2.textContent='列取捨に基づく全買い目（個別採算オッズ）';
 }
-(function(){ var sl=document.getElementById('tempSlider'); if(sl) sl.addEventListener('input', renderBets); renderBets(); })();
+renderBets();
 '''
 
 html = html.replace('  <div class="section">\n    <h2>📊 全出走馬一覧</h2>', _BET_PANEL + '  <div class="section">\n    <h2>📊 全出走馬一覧</h2>', 1)
-html = html.replace('computeEV(20);', 'computeEV(20);\n' + _BET_JS, 1)
+html = html.replace('/*__BETJS__*/', _BET_JS, 1)
 
 import argparse as _ap, os as _os2
 if __name__ == '__main__':

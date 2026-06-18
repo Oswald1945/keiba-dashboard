@@ -47,6 +47,7 @@ FORCE_SHARE = '--share' in sys.argv  # pred生成済のHTMLも強制公開
 FORCE_PRED   = '--force' in sys.argv  # pred生成済でも強制再生成
 FORCE_REVIEW = '--force' in sys.argv  # review生成済でも強制再生成
 NO_BROWSER   = '--no-browser' in sys.argv  # ブラウザ自動起動を抑制
+REVIEW_MODE  = '--review' in sys.argv   # 回顧のみ生成（予想はスキップ）。無指定は予想のみ生成。
 
 SHARE_URL_LOG = SCRIPT_DIR / 'shared_urls.txt'
 GITHUB_PAGES_BASE = 'https://oswald1945.github.io/keiba-dashboard'
@@ -305,7 +306,10 @@ def process_race(race_id, files) -> pathlib.Path | None:
     if not smartrc_json.exists():
         smartrc_json = None
 
-    if already_pred and not FORCE_PRED:
+    if REVIEW_MODE:
+        # 回顧モードでは予想を生成しない（既存の horses_data を使用）
+        pass
+    elif already_pred and not FORCE_PRED:
         print(f'  [pred] 生成済 -> スキップ (--force で強制再生成可能)')
         # --share 指定時は生成済の HTML も一括push対象に追加
         if FORCE_SHARE and not DRY_RUN:
@@ -392,7 +396,10 @@ def process_race(race_id, files) -> pathlib.Path | None:
         already_review = False
         print(f'  [review] --force 指定: 回顧を強制再生成')
 
-    if already_review:
+    if not REVIEW_MODE:
+        # 予想モードでは回顧を生成しない（回顧は --review で実行）
+        pass
+    elif already_review:
         print(f'  [review] 生成済 -> スキップ (--force で強制再生成可能)')
     elif result is None:
         print(f'  [review] 結果ファイルなし -> 結果待ち')

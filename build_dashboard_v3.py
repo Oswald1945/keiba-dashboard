@@ -2233,16 +2233,16 @@ function renderBets(){
   if(partners.length<1){ partners=cand.slice(0,2); }
   var contend=[A].concat(partners);
   // ── 統一「買いレース判定」(EVシミュ妙味判定と共通) ──
-  var axisStrong=(wA>=0.20)||(wA>=0.16&&gap>=0.05);
-  var axisOK=wA>=0.14;
+  var axisStrong=(wA>=0.22)||(wA>=0.18&&gap>=0.06);
+  var axisOK=wA>=0.18;  // 123R検証: 0.18で買いROI最良(77%), 0.20+は過剰除外
   var kairiMax=-99;
   contend.forEach(function(n){ var sj=(sc[n]!=null)?Number(sc[n]):99; var rj=ro[n]; if(sj<99&&rj!=null){ var kk=sj-rj; if(kk>kairiMax)kairiMax=kk; } });
-  var miyomi=(srcA>=4)||(kairiMax>=2);
+  var miyomi=(srcA>=3)||(kairiMax>=3);
   var V;
   if(!axisOK){ V={b:'\ud83d\udd34 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'偏差値１位でも勝率'+(wA*100).toFixed(0)+'%と低く軸不在の混戦（軸を穴馬に動かすのは危険）'}; }
   else if(miyomi&&(axisStrong||wA>=0.15)){ V={b:'\ud83d\udfe2 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(勝率'+(wA*100).toFixed(0)+'%)＋市場乖離あり＝妙味のある買いレース'}; }
   else if(axisStrong){ V={b:'\ud83d\udfe2 買い推奨',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番が勝率'+(wA*100).toFixed(0)+'%で抜けている（堅軸）'}; }
-  else { V={b:'\ud83d\udfe1 中立',c:'#f39c12',bg:'#3a2e10',r:'軸はやや手薄／市場乖離も小さく見送り寄り'}; }
+  else { V={b:'\ud83d\udfe1 中立',c:'#f39c12',bg:'#3a2e10',r:'軸'+um[A]+'番(勝率'+(wA*100).toFixed(0)+'%)は基準を満たすが抜けた軸でも妙味でもない中位（見送り寄り）'}; }
   var jdiv=document.getElementById('betRaceJudge');
   if(jdiv) jdiv.innerHTML='<span style="display:inline-block;font-size:14px;font-weight:900;color:'+V.c+';padding:4px 14px;border-radius:6px;border:2px solid '+V.c+'">'+V.b+'</span> <span style="color:#bbb;font-size:12px">'+V.r+'</span>';
   var eb=document.getElementById('evRecBanner'); if(eb){ eb.style.background=V.bg; eb.style.borderColor=V.c; }

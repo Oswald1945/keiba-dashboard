@@ -24,7 +24,7 @@ SCRIPT_DIR = pathlib.Path(__file__).parent
 INPUT_DIR  = SCRIPT_DIR / 'input'
 DONE_DIR   = INPUT_DIR / 'done'
 
-FILENAME_RE = re.compile(r'^(.+?)_(\d{8}_.+?)\.(csv|xlsx)$')
+FILENAME_RE = re.compile(r'^(.+?)_(\d{8}_.+?)\.(csv|xlsx|html?)$')
 
 ALL_KINDS = ['過去走', '出馬表', '坂路', 'ウッド', 'レース結果', 'レースデータ']
 

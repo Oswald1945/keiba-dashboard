@@ -64,15 +64,21 @@ def _read_df(path, **kwargs):
     else:
         return pd.read_excel(path, **kwargs)
 
-if args.racedata:
-    # 従来形式: レース結果とレースデータが別ファイル
-    res  = _read_df(args.result)
-    meta = _read_df(args.racedata).iloc[0]
-else:
-    # 統合形式: 行0=レースデータヘッダー / 行1=レースデータ値 / 行2=結果ヘッダー / 行3〜=結果データ
-    _raw = _read_df(args.result, header=None)
-    meta = pd.Series(_raw.iloc[1].values, index=_raw.iloc[0].values)
-    res  = _read_df(args.result, header=2)
+# レース結果を CSV/Excel/HTML から統一ロード（HTML は回顧データ＋全券種配当を含む）
+from result_loader import load_result
+res, meta, _payouts = load_result(args.result, racedata=args.racedata)
+# 払戻（配当）が取れた場合は haraimodoshi_{rid}.json に保存（将来の券種別回収率バックテスト用）
+if _payouts:
+    import json as _json3, os as _os3
+    _rid3 = _os3.path.splitext(_os3.path.basename(args.result))[0].replace('レース結果_', '').replace('レース結果', '')
+    _pdir3 = args.outdir or _os3.path.dirname(_os3.path.abspath(args.result))
+    try:
+        _os3.makedirs(_pdir3, exist_ok=True)
+        with open(_os3.path.join(_pdir3, 'haraimodoshi_' + _rid3 + '.json'), 'w', encoding='utf-8') as _pf3:
+            _json3.dump({k: [[c, a] for c, a in v] for k, v in _payouts.items()}, _pf3, ensure_ascii=False, indent=2)
+        print('  [payout] haraimodoshi_' + _rid3 + '.json を保存しました')
+    except Exception as _pe3:
+        print('  [payout] 保存スキップ:', _pe3)
 with open(args.horses, encoding='utf-8') as f:
     pred = json.load(f)
 
@@ -725,7 +731,7 @@ tr:hover td{{background:#1f2f42}}
       <div class="lap-seg" style="width:{lap_h1:.0f}px;background:#e74c3c">{race['前半3F']}秒</div></div>
     <div class="lap-row"><span style="width:60px;color:#7f8c8d;font-size:12px">後半3F</span>
       <div class="lap-seg" style="width:{lap_h2:.0f}px;background:#3498db">{race['後半3F']}秒</div></div>
-    <div style="font-size:11px;color:#7f8c8d;margin-top:4px">前後差 +{sa:.1f}秒 ／最速上がり {race['最速上3F']}秒</div>
+    <div style="font-size:11px;color:#7f8c8d;margin-top:4px">前後差 +{sa:.1f}秒 ／最速上がり {race['最速上3F']:.1f}秒</div>
   </div>
   <div style="font-size:12px;color:#7f8c8d">通過ラップ: {race['通過ラップ']} → 上りラップ: {race['上りラップ']}</div>
 </div>
@@ -742,7 +748,7 @@ tr:hover td{{background:#1f2f42}}
 </div>
 <div class="section"><h2>&#9889; 上がり3F比較（速い順）</h2>
   <div id="agariViz" style="padding:4px 0"></div>
-  <div class="note">バーが長いほど末脚が速い（最速: {race['最速上3F']}秒）。色は枠番カラー、右の数字は実際の着順。</div>
+  <div class="note">バーが長いほど末脚が速い（最速: {race['最速上3F']:.1f}秒）。色は枠番カラー、右の数字は実際の着順。</div>
 </div>
 <div class="section"><h2>&#128176; 期待値分析（予測勝率 vs 市場オッズ）</h2>
   <div class="ev-summary" id="evSummary"></div>
@@ -826,7 +832,7 @@ document.getElementById('agariViz').innerHTML=agS.map((h,i)=>{
   const barFg=wFg(w);
   // バーが短い(40%未満)場合はテキストをバー外(右側)に白で表示して視認性を確保
   const shortBar=Number(pct)<40;
-  const timeLabel=`${h['上り3F']}秒${i===0?' ★最速':''}`;
+  const timeLabel=`${h['上り3F'].toFixed(1)}秒${i===0?' ★最速':''}`;
   const innerSpan=shortBar?''
     :`<span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:${barFg};font-weight:700;text-shadow:0 0 3px rgba(0,0,0,0.5)">${timeLabel}</span>`;
   const outerSpan=shortBar
@@ -942,8 +948,8 @@ document.getElementById('detailBody').innerHTML=
                   :isRef?'<span style="font-size:10px;color:#7f8c8d">参考'+h['予想順位']+'位</span>'
                   :h['予想順位']?h['予想順位']+'位':'—';
     const scoreCell=!isTarget?'<span style="font-size:10px;color:#7f8c8d">—</span>'
-                   :isRef?'<span style="font-size:10px;color:#7f8c8d">'+h['スコア']+'(参考)</span>'
-                   :h['スコア'];
+                   :isRef?'<span style="font-size:10px;color:#7f8c8d">'+h['スコア'].toFixed(1)+'(参考)</span>'
+                   :h['スコア'].toFixed(1);
     const rowBg=h['入線順位']===1?'background:rgba(241,196,15,0.12)':h['入線順位']<=3?'background:rgba(46,204,113,0.08)':h['入線順位']<=5?'background:rgba(243,156,18,0.06)':'';
     const rankTxt=h['入線順位']<=5?`color:${rColor(h['入線順位'])}`:'color:inherit';
     // 走破タイム + 着差
@@ -963,20 +969,16 @@ document.getElementById('detailBody').innerHTML=
       <td><b>${h['馬名']}</b></td><td>${h['人気']}人気 / ${h['単勝オッズ']}倍</td>
       <td style="color:${lColor(h['決め手'])}">${h['決め手']}</td>
       <td style="white-space:nowrap">${timeCell}</td><td style="font-size:12px;color:#ccc;letter-spacing:0.5px">${passCell}</td>
-      <td>${h['上り3F']}秒</td><td>${predCell}</td><td>${scoreCell}</td>
+      <td>${h['上り3F'].toFixed(1)}秒</td><td>${predCell}</td><td>${scoreCell}</td>
       <td ${dc}>${ds}</td><td>${ev2}</td></tr>`;
   }).join('');
 </script></body></html>"""
 
 html = head + js
 
-# 案3形式命名: YYYYMMDD_[VenueCode][N]R_[Class]_[RaceNameRomaji]_review.html
+# 命名: {race_id}_[Class]_[RaceNameRomaji]_review.html (race_id=YYYYMMDD_[venue_code_lower][N])
 import unicodedata as _uc, pykakasi as _pkk
 
-_VENUE_CODE = {
-    '東京':'TK','阪神':'HN','京都':'KY','中山':'NK',
-    '中京':'CK','新潟':'NG','小倉':'KK','札幌':'SP','函館':'HK','福島':'FK',
-}
 _CLASS_CODE = {
     '未勝利':'Maiden','1勝':'C1','2勝':'C2','3勝':'C3',
     'オープン':'Open','ｵｰﾌﾟﾝ':'Open',
@@ -1001,14 +1003,14 @@ def _rname_to_romaji(s):
     return re.sub(r'[^A-Za-z0-9]','',''.join(parts)) or None
 
 _rname_raw = str(race_name).strip()
-_date_p  = f"{race['年']}{str(race['月']).zfill(2)}{str(race['日']).zfill(2)}"
-_place   = str(race.get('場所','')).strip()
-_venue_p = f"{_VENUE_CODE.get(_place, _place)}{str(race.get('R','')).strip()}R"
+_horses_stem = pathlib.Path(args.horses).stem  # horses_data_20260614_hd11
+_race_id_m = re.search(r'(\d{8}_[a-zA-Z]+\d+)$', _horses_stem)
+_race_id_p = _race_id_m.group(1) if _race_id_m else _horses_stem.replace('horses_data_', '')
 _cls_raw = str(race.get('クラス名', '')).strip()
 _cls_n   = _uc.normalize('NFKC', _cls_raw)
 _cls_p   = _CLASS_CODE.get(_cls_n, _CLASS_CODE.get(_cls_raw, re.sub(r'[^A-Za-z0-9]','',_cls_n)))
 _rname_p = _rname_to_romaji(_rname_raw)
-_stem_parts = [p for p in [_date_p, _venue_p, _cls_p, _rname_p] if p]
+_stem_parts = [p for p in [_race_id_p, _cls_p, _rname_p] if p]
 _stem    = '_'.join(_stem_parts)
 _auto_name = f'{_stem}_review.html' if _stem else 'review.html'
 

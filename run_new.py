@@ -41,7 +41,7 @@ KIND_RESULT   = 'レース結果'
 KIND_RACEDATA = 'レースデータ'
 ALL_KINDS = [KIND_KAKO, KIND_SHUTUBA, KIND_SAKURO, KIND_WOOD, KIND_RESULT, KIND_RACEDATA]
 
-FILENAME_RE = re.compile(r'^(.+?)_(\d{8}_.+?)\.(csv|xlsx)$')
+FILENAME_RE = re.compile(r'^(.+?)_(\d{8}_.+?)\.(csv|xlsx|html?)$')
 DRY_RUN     = '--dry' in sys.argv or '--dry-run' in sys.argv
 FORCE_SHARE = '--share' in sys.argv  # pred生成済のHTMLも強制公開
 FORCE_PRED   = '--force' in sys.argv  # pred生成済でも強制再生成
@@ -56,15 +56,15 @@ FETCH_BABA_PY = SCRIPT_DIR / 'fetch_baba.py'
 # 会場コード → 場所名マッピング（大文字化してから参照）
 _VENUE_CODE_MAP = {
     # JRA
-    'TK': '東京', 'TO': '東京',
+    'TK': '東京', 'TO': '東京', 'T': '東京',
     'CB': '中山', 'NA': '中山', 'NS': '中山',
     'HN': '阪神', 'HS': '阪神',
     'KT': '京都', 'KY': '京都',
     'CK': '中京', 'CC': '中京',
     'NK': '新潟', 'NG': '新潟', 'NI': '新潟',
-    'HK': '函館',
+    'HK': '函館', 'HD': '函館',
     'SM': '札幌', 'SP': '札幌',
-    'FK': '福島',
+    'FK': '福島', 'FS': '福島',
     'KO': '小倉', 'KK': '小倉',
     # 地方競馬（NAR）
     'OI': '大井', 'KW': '川崎', 'SK': '船橋', 'FB': '船橋',
@@ -309,9 +309,9 @@ def process_race(race_id, files) -> pathlib.Path | None:
         print(f'  [pred] 生成済 -> スキップ (--force で強制再生成可能)')
         # --share 指定時は生成済の HTML も一括push対象に追加
         if FORCE_SHARE and not DRY_RUN:
-            html_p = OUT_DIR / f'pred_{race_id}.html'
-            if html_p.exists():
-                new_pred_html = html_p
+            _cands = sorted(OUT_DIR.glob(f'{race_id}_*_pred.html'))
+            if _cands:
+                new_pred_html = _cands[0]
     elif kako is None or shutuba is None:
         print(f'  [pred] 過去走 or 出馬表がない -> スキップ')
         if FORCE_PRED:
@@ -383,9 +383,9 @@ def process_race(race_id, files) -> pathlib.Path | None:
         run_cmd(dash_cmd, 'pred')
         generated_pred = True
         if not DRY_RUN:
-            html_p = OUT_DIR / f'pred_{race_id}.html'
-            if html_p.exists():
-                new_pred_html = html_p  # 一括push用に記録（main側で処理）
+            _cands = sorted(OUT_DIR.glob(f'{race_id}_*_pred.html'))
+            if _cands:
+                new_pred_html = _cands[0]  # 一括push用に記録（main側で処理）
 
     # --force 時はdoneマーカーを解除して再生成を許可
     if already_review and FORCE_REVIEW:
@@ -412,21 +412,8 @@ def process_race(race_id, files) -> pathlib.Path | None:
             _new = set(OUT_DIR.glob('*_review.html')) - _before
             # --force 再生成時は既存HTMLも対象（差分が空になるため）
             if not _new and FORCE_REVIEW:
-                # race_id例: 20260530_kt12 → 日付+会場コード+レース番号でマッチ
-                _date_part = race_id.split('_')[0]                      # 20260530
-                _rnum_part = re.sub(r'\D', '', race_id.split('_')[-1])  # 12
-                _code_part = re.sub(r'\d', '', race_id.split('_')[-1]).upper()  # KT
-                # KT→KY など会場HTMLコードへの変換マップ
-                _HTML_CODE = {
-                    'TK': 'TK', 'CB': 'CB', 'HN': 'HN', 'KT': 'KY', 'KY': 'KY',
-                    'CK': 'CK', 'NK': 'NG', 'NG': 'NG', 'HK': 'HK', 'SM': 'SM',
-                    'FK': 'FK', 'KO': 'KO', 'KK': 'KO',
-                }
-                _venue_part = _HTML_CODE.get(_code_part, _code_part)    # KY
-                _new = {p for p in OUT_DIR.glob('*_review.html')
-                        if _date_part in p.stem
-                        and f'{_rnum_part}R' in p.stem
-                        and f'_{_venue_part}' in p.stem}
+                # race_id例: 20260530_kt12 → 新形式では review ファイル名が race_id で始まる
+                _new = {p for p in OUT_DIR.glob(f'{race_id}_*_review.html')}
             if _new:
                 review_html_p = next(iter(_new))
                 # 次走注目馬を memo_horses.json に自動登録
@@ -508,7 +495,8 @@ def main():
                     if len(parts) == 2:
                         existing_entries[parts[0]] = parts[1]
             for html, url in zip(new_htmls, urls):
-                race_id = html.stem.replace('pred_', '')
+                _m = re.match(r'(\d{8}_[a-zA-Z]+\d+)', html.stem)
+                race_id = _m.group(1) if _m else html.stem.replace('_pred', '')
                 existing_entries[race_id] = url
             with open(SHARE_URL_LOG, 'w', encoding='utf-8') as lg:
                 for rid, url in sorted(existing_entries.items()):

@@ -2203,12 +2203,18 @@ function renderBets(){
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }
   // ── 列の取捨: 1着列=勝率 / 2着列=連対率 / 3着列=複勝率 ──
   var col1=contend.filter(function(n){ return n===A || W(n)>=0.6*wA; }).sort(function(a,b){return W(b)-W(a);}).slice(0,3);
-  var col2=contend.filter(function(n){ return n!==A && P2(n)>=0.18; }).sort(function(a,b){return P2(b)-P2(a);});
-  if(col2.length<2) col2=contend.filter(function(n){return n!==A;}).sort(function(a,b){return P2(b)-P2(a);}).slice(0,2);
+  // 頭固定(軸のみが1着列)のときだけ軸を2/3着列から除外。1着候補が複数(流し)なら軸も2/3着に来うる
+  var _headFix=(col1.length===1);
+  function _ex(n){ return _headFix ? (n!==A) : true; }
+  var col2=contend.filter(function(n){ return _ex(n) && P2(n)>=0.18; }).sort(function(a,b){return P2(b)-P2(a);});
+  if(col2.length<2) col2=contend.filter(_ex).sort(function(a,b){return P2(b)-P2(a);}).slice(0,2);
   col2=col2.slice(0,5);
-  var col3=contend.filter(function(n){ return n!==A && P3(n)>=0.18; }).sort(function(a,b){return P3(b)-P3(a);});
-  if(col3.length<3) col3=contend.filter(function(n){return n!==A;}).sort(function(a,b){return P3(b)-P3(a);}).slice(0,3);
+  var col3=contend.filter(function(n){ return _ex(n) && P3(n)>=0.18; }).sort(function(a,b){return P3(b)-P3(a);});
+  if(col3.length<3) col3=contend.filter(_ex).sort(function(a,b){return P3(b)-P3(a);}).slice(0,3);
   col3=col3.slice(0,6);
+  // 表示は各列とも馬番(若い順)に並べる
+  function _byUma(a,b){ return um[a]-um[b]; }
+  col1=col1.slice().sort(_byUma); col2=col2.slice().sort(_byUma); col3=col3.slice().sort(_byUma);
   // info & prob table
   var info=document.getElementById('betAnchorInfo');
   if(info){ if(boxMode){ var _bx=names.slice(0,Math.min(4,names.length)); info.innerHTML='<b style="color:#f1c40f">軸不在の混戦</b> — 頭固定せず上位'+_bx.length+'頭 '+_bx.map(function(n){return _umaChip(um[n]);}).join(' ')+' をBOX'; } else { info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(1)+'・モデル1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':''); } }
@@ -2221,7 +2227,7 @@ function renderBets(){
     pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="max-width:540px"><thead><tr><th>馬</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
   }
   if(boxMode){
-    var bx=names.slice(0,Math.min(4,names.length)); var bxu=bx.map(function(n){return um[n];});
+    var bx=names.slice(0,Math.min(4,names.length)).sort(function(a,b){return um[a]-um[b];}); var bxu=bx.map(function(n){return um[n];});
     var pr=_combK(bx,2);
     var P_mb=0; pr.forEach(function(c){ P_mb+=pv[c[0]]*pv[c[1]]/(1-pv[c[0]])+pv[c[1]]*pv[c[0]]/(1-pv[c[1]]); });
     var P_wb=0; pr.forEach(function(c){ var t=0; for(var k in o3){var ss=k.split('|'); if(ss.indexOf(c[0])>=0&&ss.indexOf(c[1])>=0) t+=o3[k];} P_wb+=t; });

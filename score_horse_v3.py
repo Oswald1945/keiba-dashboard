@@ -694,42 +694,6 @@ def pace_bias_from_course(course_key: str, dist: int) -> float:
         bias -= 2.0
     return bias
 
-def course_bonus_modifier(course_key: str) -> dict:
-    """
-    コース特性（直線長・坂・コーナー区分）に基づく脚質ボーナス修正量。
-    展開ptのベースボーナスに加算する。
-    """
-    f = COURSE_FEATURES.get(course_key, {})
-    mod = {'逃げ': 0, '先行': 0, '差し': 0, '追込': 0}
-    # 直線長: 長いほど差し有利、短いほど先行有利
-    straight = f.get('直線', 350)
-    if straight >= 500:          # 東京・新潟外
-        mod['差し'] += 2; mod['追込'] += 2
-        mod['逃げ'] -= 2; mod['先行'] -= 1
-    elif straight >= 400:        # 阪神外・中京・京都外
-        mod['差し'] += 1; mod['追込'] += 1
-        mod['逃げ'] -= 1
-    elif straight <= 280:        # 函館・福島・小倉
-        mod['逃げ'] += 2; mod['先行'] += 1
-        mod['差し'] -= 1; mod['追込'] -= 2
-    # 坂: 急坂は逃げ先行がバテやすい→差し相対有利
-    slope = f.get('坂', 0)
-    if slope == 2:
-        mod['逃げ'] -= 1; mod['先行'] -= 1
-        mod['差し'] += 1
-    # コーナー区分: 小回りは先行有利、大回りは差し有利
-    corner = f.get('コーナー', 1)
-    if corner == 2:              # 小回り
-        mod['逃げ'] += 1; mod['先行'] += 2
-        mod['差し'] -= 1; mod['追込'] -= 2
-    elif corner == 0:            # 大回り
-        mod['差し'] += 1; mod['追込'] += 1
-        mod['逃げ'] -= 1
-    # ダートは芝より前が残りやすい（砂は差しが伸びにくい）
-    if 'ダート' in course_key:
-        mod['逃げ'] += 2; mod['先行'] += 2
-        mod['差し'] -= 1; mod['追込'] -= 2
-    return mod
 
 def calc_wakuban_pts(umaban, kyakushitsu: str, target_course: str, num_horses: int, waku=None) -> float:
     """
@@ -1071,12 +1035,6 @@ def calc_kinryo_pts(sub: pd.DataFrame, today_weight: float = None) -> float:
 # A-3  距離適性補正
 # ─────────────────────────────────────────────────────────────────────────────
 
-def dist_range(d: int) -> str:
-    """距離帯を返す。短距離/マイル/中距離/長距離"""
-    if d <= 1400:   return '短距離'
-    if d <= 1700:   return 'マイル'
-    if d <= 2200:   return '中距離'
-    return '長距離'
 
 
 def calc_kyori_pts(sub: pd.DataFrame, target_dist: int = TARGET_DIST,
@@ -1218,14 +1176,6 @@ def calc_rinsen_pts(sub: pd.DataFrame, race_date: date = RACE_DATE) -> float:
 # A-6  PCI 活用
 # ─────────────────────────────────────────────────────────────────────────────
 
-def calc_pci_pts(sub: pd.DataFrame, today_pace: str = 'high') -> float:
-    """
-    A-6 PCI補正 → 廃止（常に0を返す）
-    分析の結果、相関が逆転していたため廃止。
-    today_pace: 'high' (ハイペース想定) or 'low' (スロー想定) or 'mid'
-    PCI<50 = ハイペース(前傾), PCI>=50 = スローペース(後傾)
-    """
-    return 0.0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1498,7 +1448,6 @@ def calc_tenkai_pts_all(
        コース替わり初週/開催前半 → 前残りバイアス（先行+, 差し-）
        開催後半 → 差し向きバイアス（先行-, 差し+）
     """
-    import numpy as np
 
     if res.empty:
         return pd.Series(dtype=float, index=res.index)
@@ -2231,7 +2180,6 @@ def compute_scores(
     # ── 展開予想（ペース判定・メタ情報用）─────────────────
     leg_count = res['脚質'].value_counts().to_dict()
     nige_cnt  = leg_count.get('逃げ', 0)
-    front     = nige_cnt + leg_count.get('先行', 0)
     avg_agari_all = res['平均上がり3F'].mean()
 
     # SmartRCテン速度競合情報（表示用）
@@ -2504,7 +2452,7 @@ def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None
 # ─────────────────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    import sys, argparse
+    import argparse
 
     COLS = ['年','月','日','回次','場所','日次','レース番号','レース名',
             'クラス名','芝・ダ','トラックコード','距離','コーナー回数',

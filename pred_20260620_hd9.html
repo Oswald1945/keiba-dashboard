@@ -2708,7 +2708,7 @@ function renderBets(){
   if(partners.length<1){ partners=cand.slice(0,2); }
   var contend=[A].concat(partners);
   // ── 統一「買いレース判定」: 市場(想定人気)に対するモデル勝率のエッジで判定（期待値シミュレーターに表示） ──
-  // 122R検証(軸=偏差値1位): 買い妙味23R 軸単勝110% / 堅軸37R 88% / 中穴軸15R 41%(要検討) /
+  // 122R検証(軸=偏差値1位): 買い=妙味のみ(23R 軸単勝110%, 前99%/後126%で頑健)。中穴軸15R(要検討) /
   //   混戦10R は軸単勝36%でも上位3頭複勝BOXなら93% / 見送り37R 58%。
   function _mktWin(ep){ return ({1:0.31,2:0.18,3:0.15,4:0.12,5:0.08,6:0.05})[Math.min(ep,7)] || 0.03; }
   var _srcA=(srcA!=null&&srcA<99)?Number(srcA):99;
@@ -2716,9 +2716,8 @@ function renderBets(){
   var miyomi=false, boxMode=false, V;
   if(_srcA>=4){ V={b:'🟡 要検討（中穴軸）',c:'#f1c40f',bg:'#3a2e10',r:'モデル最上位が想定'+_srcA+'番人気の中穴。的中時の妙味は大きいが軸成績は低くハイリスク（買うなら少点数の三連複・ワイドで）'}; }
   else if(_srcA>=2&&edge>=0){ miyomi=true; V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'市場想定'+_srcA+'番手の軸'+um[A]+'番をモデルが最上位評価（勝率'+(wA*100).toFixed(0)+'%＞市場想定'+(_mktWin(_srcA)*100).toFixed(0)+'%）＝市場乖離のある妙味の買いレース'}; }
-  else if(_srcA<=1&&edge>=0){ V={b:'🟢 買い推奨（堅軸）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番は想定1番人気をモデルも上回って支持（勝率'+(wA*100).toFixed(0)+'%）＝堅い軸。連系・複系向き'}; }
   else if(wA<0.18){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'抜けた軸が不在の混戦。頭固定は危険なので上位拮抗馬をBOX（検証: 上位3頭の複勝BOXで回収率93%）'}; }
-  else { V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番は想定'+(_srcA<99?_srcA+'番人気':'-')+'でモデル評価も市場想定を超えず＝人気どおりで妙味が薄い'}; }
+  else { V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番は想定'+(_srcA<99?_srcA+'番人気':'-')+'＝市場の中心で単勝オッズに妙味が乏しい（堅いが複勝頼みで本線の旨みは薄い）'}; }
   var eb=document.getElementById('evRecBanner'); if(eb){ eb.style.background=V.bg; eb.style.borderColor=V.c; }
   var ebd=document.getElementById('evRecBadge'); if(ebd){ ebd.textContent=V.b; ebd.style.color=V.c; ebd.style.borderColor=V.c; }
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }

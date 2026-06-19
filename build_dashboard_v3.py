@@ -2123,9 +2123,7 @@ if (stackCtx) {{
 _BET_PANEL = """  <!-- 買い目提案パネル -->
   <div class="section">
     <h2>🎯 買い目提案 — フォーメーション</h2>
-    <div id="betRaceJudge" style="margin-bottom:8px"></div>
     <div id="betAnchorInfo" style="margin-bottom:4px;color:#ccc;font-size:13px"></div>
-    <div id="betPartnerInfo" style="margin-bottom:8px;color:#9fb3c8;font-size:12px"></div>
     <div id="betProbTable" style="margin-bottom:10px"></div>
     <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
       <button class="ev-tab active" id="betTabForm" onclick="setBetMode('form')">フォーメーション</button>
@@ -2143,7 +2141,7 @@ _BET_PANEL = """  <!-- 買い目提案パネル -->
     </div>
     <div class="prob-note">
       ※ 勝率・連対率・複勝率は期待値シミュレーターと同一基準（T=20固定）。<br>
-      <b>軸＝偏差値1位（モデル最上位）に固定</b>。穴馬でも偏差値1位でなければ軸にしません。軸が手薄で抜けた軸不在のレースは<b>見送り推奨</b>（買いレース判定）。<br>
+      <b>軸＝偏差値1位（モデル最上位）</b>。買い/見送りの判定は期待値シミュレーターパネルに表示。軸が想定4番人気以下の中穴は<b>要検討（黄）</b>、抜けた軸が不在の混戦は頭固定せず上位拮抗を<b>BOX推奨（黄）</b>。<br>
       <b>馬単・三連単は 1着列＝勝率／2着列＝連対率／3着列＝複勝率</b> でフォーメーション化（2・3列目を自動取捨）。馬連は連対率上位、ワイド・三連複は複勝率上位を相手に。<br>
       <b>合成採算オッズ＝1÷フォーメーション全体の的中率</b>。投票画面の合成オッズがこれを上回れば<b>期待値プラス（◎）</b>。「内訳」で個別組も確認可。
     </div>
@@ -2231,20 +2229,18 @@ function renderBets(){
   }
   if(partners.length<1){ partners=cand.slice(0,2); }
   var contend=[A].concat(partners);
-  // ── 統一「買いレース判定」: 市場(想定人気)に対するモデル勝率のエッジで判定 ──
-  // 122R検証: 軸=偏差値1位。買い60R 軸単勝ROI96%(妙味23R=110%/堅軸37R=88%) vs 見送り62R=50%。
-  // 想定4番人気以下を軸にする"妙味"は実証ROI44%の罠→見送り。1番人気でも市場想定を超えない軸は妙味薄→見送り。
+  // ── 統一「買いレース判定」: 市場(想定人気)に対するモデル勝率のエッジで判定（期待値シミュレーターに表示） ──
+  // 122R検証(軸=偏差値1位): 買い妙味23R 軸単勝110% / 堅軸37R 88% / 中穴軸15R 41%(要検討) /
+  //   混戦10R は軸単勝36%でも上位3頭複勝BOXなら93% / 見送り37R 58%。
   function _mktWin(ep){ return ({1:0.31,2:0.18,3:0.15,4:0.12,5:0.08,6:0.05})[Math.min(ep,7)] || 0.03; }
   var _srcA=(srcA!=null&&srcA<99)?Number(srcA):99;
   var edge = wA - _mktWin(_srcA<=12?_srcA:12);
-  var miyomi=false, V;
-  if(wA<0.10){ V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'偏差値１位でも勝率'+(wA*100).toFixed(0)+'%と低く軸不在の混戦（軸を動かすのは危険）'}; }
-  else if(_srcA>=4){ V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'モデル最上位が想定'+_srcA+'番人気の中穴。検証上この型は回収率が低く罠になりやすい（軸不適）'}; }
-  else if(edge<0){ V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番は想定'+(_srcA<99?_srcA+'番人気':'-')+'でモデル評価も市場想定を超えず＝人気どおりで妙味が薄い'}; }
-  else if(_srcA>=2){ miyomi=true; V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'市場想定'+_srcA+'番手の軸'+um[A]+'番をモデルが最上位評価（勝率'+(wA*100).toFixed(0)+'%＞市場想定'+(_mktWin(_srcA)*100).toFixed(0)+'%）＝市場乖離のある妙味の買いレース'}; }
-  else { V={b:'🟢 買い推奨（堅軸）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番は想定1番人気をモデルも上回って支持（勝率'+(wA*100).toFixed(0)+'%）＝堅い軸。連系・複系向き'}; }
-  var jdiv=document.getElementById('betRaceJudge');
-  if(jdiv) jdiv.innerHTML='<span style="display:inline-block;font-size:14px;font-weight:900;color:'+V.c+';padding:4px 14px;border-radius:6px;border:2px solid '+V.c+'">'+V.b+'</span> <span style="color:#bbb;font-size:12px">'+V.r+'</span>';
+  var miyomi=false, boxMode=false, V;
+  if(_srcA>=4){ V={b:'🟡 要検討（中穴軸）',c:'#f1c40f',bg:'#3a2e10',r:'モデル最上位が想定'+_srcA+'番人気の中穴。的中時の妙味は大きいが軸成績は低くハイリスク（買うなら少点数の三連複・ワイドで）'}; }
+  else if(_srcA>=2&&edge>=0){ miyomi=true; V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'市場想定'+_srcA+'番手の軸'+um[A]+'番をモデルが最上位評価（勝率'+(wA*100).toFixed(0)+'%＞市場想定'+(_mktWin(_srcA)*100).toFixed(0)+'%）＝市場乖離のある妙味の買いレース'}; }
+  else if(_srcA<=1&&edge>=0){ V={b:'🟢 買い推奨（堅軸）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番は想定1番人気をモデルも上回って支持（勝率'+(wA*100).toFixed(0)+'%）＝堅い軸。連系・複系向き'}; }
+  else if(wA<0.18){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'抜けた軸が不在の混戦。頭固定は危険なので上位拮抗馬をBOX（検証: 上位3頭の複勝BOXで回収率93%）'}; }
+  else { V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番は想定'+(_srcA<99?_srcA+'番人気':'-')+'でモデル評価も市場想定を超えず＝人気どおりで妙味が薄い'}; }
   var eb=document.getElementById('evRecBanner'); if(eb){ eb.style.background=V.bg; eb.style.borderColor=V.c; }
   var ebd=document.getElementById('evRecBadge'); if(ebd){ ebd.textContent=V.b; ebd.style.color=V.c; ebd.style.borderColor=V.c; }
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }
@@ -2258,9 +2254,7 @@ function renderBets(){
   col3=col3.slice(0,6);
   // info & prob table
   var info=document.getElementById('betAnchorInfo');
-  if(info) info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(1)+'・モデル1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':'');
-  var pinfo=document.getElementById('betPartnerInfo');
-  if(pinfo) pinfo.innerHTML='相手 '+partners.length+'頭（自動選定）。列取捨 → 1着列:'+col1.map(function(n){return um[n];}).join(',')+' / 2着列:'+col2.map(function(n){return um[n];}).join(',')+' / 3着列:'+col3.map(function(n){return um[n];}).join(',');
+  if(info){ if(boxMode){ var _bx=names.slice(0,Math.min(4,names.length)); info.innerHTML='<b style="color:#f1c40f">軸不在の混戦</b> — 頭固定せず上位'+_bx.length+'頭 '+_bx.map(function(n){return _umaChip(um[n]);}).join(' ')+' をBOX'; } else { info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(1)+'・モデル1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':''); } }
   var pt=document.getElementById('betProbTable');
   if(pt){
     var trh=contend.map(function(n){
@@ -2268,6 +2262,20 @@ function renderBets(){
       return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td><td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
     }).join('');
     pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="max-width:540px"><thead><tr><th>馬</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
+  }
+  if(boxMode){
+    var bx=names.slice(0,Math.min(4,names.length)); var bxu=bx.map(function(n){return um[n];});
+    var pr=_combK(bx,2);
+    var P_mb=0; pr.forEach(function(c){ P_mb+=pv[c[0]]*pv[c[1]]/(1-pv[c[0]])+pv[c[1]]*pv[c[0]]/(1-pv[c[1]]); });
+    var P_wb=0; pr.forEach(function(c){ var t=0; for(var k in o3){var ss=k.split('|'); if(ss.indexOf(c[0])>=0&&ss.indexOf(c[1])>=0) t+=o3[k];} P_wb+=t; });
+    var tri=_combK(bx,3); var P_tb=0; tri.forEach(function(c){ _permK(c,3).forEach(function(seq){P_tb+=o3[seq.join('|')]||0;}); });
+    var P_fk=0; bx.forEach(function(n){ P_fk+=P3(n); });
+    var bh=document.getElementById('betHead'); if(bh) bh.innerHTML='<th>券種</th><th>買い目(BOX)</th><th>点数</th><th>的中率</th><th>合成採算オッズ</th><th>実オッズ(入力)</th><th>期待値</th><th>判定</th>';
+    var bf=[ {bt:'複勝BOX(各1点)', M:bx.length, P:P_fk/bx.length}, {bt:'ワイドBOX', M:pr.length, P:P_wb}, {bt:'馬連BOX', M:pr.length, P:P_mb}, {bt:'三連複BOX', M:tri.length, P:P_tb} ];
+    body.innerHTML=bf.map(function(f){ if(f.M<1) return ''; var key=f.bt+'|'+bxu.join(','); var c=_evCell(f.P,key);
+      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_seqHtml(bxu,'')+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(f.P*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>'; }).join('');
+    var bmn=document.getElementById('betModeNote'); if(bmn) bmn.textContent='軸不在の混戦のためBOX推奨。複勝BOXの的中率は1点あたり平均（検証ROI93%）';
+    return;
   }
   var head=document.getElementById('betHead');
   if(_betMode==='form'){

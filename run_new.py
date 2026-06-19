@@ -313,7 +313,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
         print(f'  [pred] 生成済 -> スキップ (--force で強制再生成可能)')
         # --share 指定時は生成済の HTML も一括push対象に追加
         if FORCE_SHARE and not DRY_RUN:
-            _cands = sorted(OUT_DIR.glob(f'{race_id}_*_pred.html'))
+            _cands = sorted(OUT_DIR.glob(f'pred_{race_id}.html'))
             if _cands:
                 new_pred_html = _cands[0]
     elif kako is None or shutuba is None:
@@ -387,7 +387,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
         run_cmd(dash_cmd, 'pred')
         generated_pred = True
         if not DRY_RUN:
-            _cands = sorted(OUT_DIR.glob(f'{race_id}_*_pred.html'))
+            _cands = sorted(OUT_DIR.glob(f'pred_{race_id}.html'))
             if _cands:
                 new_pred_html = _cands[0]  # 一括push用に記録（main側で処理）
 
@@ -502,8 +502,8 @@ def main():
                     if len(parts) == 2:
                         existing_entries[parts[0]] = parts[1]
             for html, url in zip(new_htmls, urls):
-                _m = re.match(r'(\d{8}_[a-zA-Z]+\d+)', html.stem)
-                race_id = _m.group(1) if _m else html.stem.replace('_pred', '')
+                _m = re.search(r'(\d{8}_[a-zA-Z]+\d+)', html.stem)
+                race_id = _m.group(1) if _m else html.stem.replace('pred_', '')
                 existing_entries[race_id] = url
             with open(SHARE_URL_LOG, 'w', encoding='utf-8') as lg:
                 for rid, url in sorted(existing_entries.items()):

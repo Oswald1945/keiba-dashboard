@@ -16,55 +16,6 @@ ap.add_argument('--outdir',   default=None)
 args = ap.parse_args()
 
 # ── CSV / Excel 自動判定ヘルパー ─────────────────────────────
-def _read_df(path, **kwargs):
-    """拡張子が .csv/.tsv なら pd.read_csv(encoding=cp932)、それ以外は pd.read_excel。
-    ラギッドCSV（行ごとカラム数不揃い）もPythonのcsvモジュールで処理。
-    """
-    import csv as _csv_mod
-    ext = _os.path.splitext(path)[1].lower()
-    if ext in ('.csv', '.tsv'):
-        sep = '\t' if ext == '.tsv' else ','
-        enc = kwargs.pop('encoding', 'cp932')
-        kwargs.pop('sheet_name', None)
-        try:
-            return pd.read_csv(path, sep=sep, encoding=enc, **kwargs)
-        except UnicodeDecodeError:
-            try:
-                return pd.read_csv(path, sep=sep, encoding='utf-8-sig', **kwargs)
-            except pd.errors.ParserError:
-                pass
-        except pd.errors.ParserError:
-            pass
-        # フォールバック: ラギッドCSV対応
-        header_arg = kwargs.get('header', 0)
-        rows = []
-        for enc2 in [enc, 'utf-8-sig', 'utf-8']:
-            try:
-                with open(path, encoding=enc2, newline='', errors='replace') as _f:
-                    rows = list(_csv_mod.reader(_f, delimiter=sep))
-                break
-            except Exception:
-                continue
-        if not rows:
-            return pd.DataFrame()
-        max_cols = max(len(r) for r in rows)
-        padded = [r + [''] * (max_cols - len(r)) for r in rows]
-        if header_arg is None:
-            df = pd.DataFrame(padded)
-        elif isinstance(header_arg, int) and header_arg < len(padded):
-            cols = padded[header_arg]
-            df = pd.DataFrame(padded[header_arg + 1:], columns=cols)
-        else:
-            df = pd.DataFrame(padded)
-        df = df.replace('', float('nan'))
-        for col in df.columns:
-            try:
-                df[col] = pd.to_numeric(df[col])
-            except (ValueError, TypeError):
-                pass
-        return df
-    else:
-        return pd.read_excel(path, **kwargs)
 
 # レース結果を CSV/Excel/HTML から統一ロード（HTML は回顧データ＋全券種配当を含む）
 from result_loader import load_result

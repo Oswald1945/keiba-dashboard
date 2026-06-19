@@ -285,7 +285,6 @@ def build_past_races_table(past_races: list, horse_id: str) -> str:
 </div>'''
 
 def _trust_badge(h):
-    n_runs  = h.get('出走数', 0) or 0
     n_times = h.get('タイム偏差利用走数', 0) or 0
     if n_times >= 5:
         return '<span class="trust-badge trust-hi">🔒 データ充実</span>'

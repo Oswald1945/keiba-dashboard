@@ -424,7 +424,7 @@
 
   <!-- 買い目提案パネル -->
   <div class="section">
-    <h2>🎯 買い目提案 — フォーメーション</h2>
+    <h2>🎯 買い目提案</h2>
     <div id="betAnchorInfo" style="margin-bottom:4px;color:#ccc;font-size:13px"></div>
     <div id="betProbTable" style="margin-bottom:10px"></div>
     <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
@@ -2984,11 +2984,11 @@ function renderBets(){
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }
   // ── 列の取捨: 1着列=勝率 / 2着列=連対率 / 3着列=複勝率 ──
   var col1=contend.filter(function(n){ return n===A || W(n)>=0.6*wA; }).sort(function(a,b){return W(b)-W(a);}).slice(0,3);
-  var col2=contend.filter(function(n){ return P2(n)>=0.18; }).sort(function(a,b){return P2(b)-P2(a);});
-  if(col2.length<2) col2=contend.slice().sort(function(a,b){return P2(b)-P2(a);}).slice(0,2);
+  var col2=contend.filter(function(n){ return n!==A && P2(n)>=0.18; }).sort(function(a,b){return P2(b)-P2(a);});
+  if(col2.length<2) col2=contend.filter(function(n){return n!==A;}).sort(function(a,b){return P2(b)-P2(a);}).slice(0,2);
   col2=col2.slice(0,5);
-  var col3=contend.filter(function(n){ return P3(n)>=0.18; }).sort(function(a,b){return P3(b)-P3(a);});
-  if(col3.length<3) col3=contend.slice().sort(function(a,b){return P3(b)-P3(a);}).slice(0,3);
+  var col3=contend.filter(function(n){ return n!==A && P3(n)>=0.18; }).sort(function(a,b){return P3(b)-P3(a);});
+  if(col3.length<3) col3=contend.filter(function(n){return n!==A;}).sort(function(a,b){return P3(b)-P3(a);}).slice(0,3);
   col3=col3.slice(0,6);
   // info & prob table
   var info=document.getElementById('betAnchorInfo');

@@ -1,7 +1,9 @@
 import pandas as pd, json, pathlib, math, argparse, re, os as _os
 
-UPLOADS = '/sessions/jolly-vibrant-goldberg/mnt/uploads'
-OUTPUTS = '/sessions/jolly-vibrant-goldberg/mnt/outputs'
+# 既定パスはスクリプト基準（run_new.py からは --result/--horses/--scores/--outdir で明示指定される）
+_BASE   = _os.path.dirname(_os.path.abspath(__file__))
+UPLOADS = _os.path.join(_BASE, 'input')
+OUTPUTS = _BASE
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--result',   default=f'{UPLOADS}/レース結果.xlsx')

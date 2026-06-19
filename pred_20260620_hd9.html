@@ -2729,9 +2729,8 @@ function renderBets(){
   var col2=contend.filter(function(n){ return _ex(n) && P2(n)>=0.18; }).sort(function(a,b){return P2(b)-P2(a);});
   if(col2.length<2) col2=contend.filter(_ex).sort(function(a,b){return P2(b)-P2(a);}).slice(0,2);
   col2=col2.slice(0,5);
-  var col3=contend.filter(function(n){ return _ex(n) && P3(n)>=0.18; }).sort(function(a,b){return P3(b)-P3(a);});
-  if(col3.length<3) col3=contend.filter(_ex).sort(function(a,b){return P3(b)-P3(a);}).slice(0,3);
-  col3=col3.slice(0,6);
+  // 3着列=相手全部(複勝率順)。プローブ表に挙げた相手は必ずフォーメーションに含める(取りこぼし防止)
+  var col3=contend.filter(_ex).sort(function(a,b){return P3(b)-P3(a);});
   // 表示は各列とも馬番(若い順)に並べる
   function _byUma(a,b){ return um[a]-um[b]; }
   col1=col1.slice().sort(_byUma); col2=col2.slice().sort(_byUma); col3=col3.slice().sort(_byUma);

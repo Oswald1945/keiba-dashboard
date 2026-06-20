@@ -107,58 +107,61 @@ def _norm_going(g: str) -> str:
     return s
 
 
-def parse_baba_jotai(html: str) -> tuple[str | None, str | None]:
+BABA_PAT = '良|稍重|重|不良'
+# 凡例（馬場状態の説明: 良→稍重→重→不良 が連続して並ぶ）検出用。
+# データ値ではなく凡例にマッチして常に「良」になる誤検出を防ぐ。
+_LEGEND_RE = re.compile(r'良[^<]{0,6}稍重[^<]{0,6}重[^<]{0,6}不良')
+
+
+def _looks_like_legend(segment: str) -> bool:
+    return bool(_LEGEND_RE.search(segment))
+
+
+def _find_state(html: str, label: str) -> tuple[str | None, str | None]:
+    """
+    見出し(芝/ダート)の直後から馬場状態を取得する。
+    戻り値: (馬場状態, 信頼度)  信頼度: 'high'(単独セル) / 'low'(緩いマッチ) / None
+    凡例の並びにマッチした箇所はスキップする。
+    """
+    # 高信頼: 見出し直後 250 字以内の「単独セル」 >良< 形式
+    for m in re.finditer(re.escape(label), html):
+        seg = html[m.end():m.end() + 250]
+        if _looks_like_legend(seg):
+            continue
+        cell = re.search(r'>\s*(' + BABA_PAT + r')\s*<', seg)
+        if cell:
+            return _norm_going(cell.group(1)), 'high'
+    # 低信頼: 見出し直後の緩いマッチ（凡例は除外）
+    for m in re.finditer(re.escape(label), html):
+        seg = html[m.end():m.end() + 150]
+        if _looks_like_legend(seg):
+            continue
+        loose = re.search(r'(' + BABA_PAT + r')', seg)
+        if loose:
+            return _norm_going(loose.group(1)), 'low'
+    return None, None
+
+
+def parse_baba_jotai(html: str):
     """
     HTML から馬場状態（芝・ダート）を解析。
-    戻り値: (芝馬場, ダート馬場)
+    戻り値: (芝馬場, 芝信頼度, ダート馬場, ダート信頼度)
+    凡例（良 稍重 重 不良 の説明書き）への誤マッチを排除する。
     """
-    baba_pat = '良|稍重|重|不良'
+    shiba, shiba_conf = _find_state(html, '芝')
+    dart,  dart_conf  = _find_state(html, 'ダート')
+    return shiba, shiba_conf, dart, dart_conf
 
-    shiba = None
-    dart = None
 
-    # パターン1: <h4>芝</h4> または <dt>芝</dt> の後に来る馬場状態テキスト
-    m_shiba = re.search(
-        r'<(?:h4|dt)[^>]*>\s*芝\s*</(?:h4|dt)>(.{0,300}?)(' + baba_pat + r')',
-        html, re.DOTALL
-    )
-    if m_shiba:
-        shiba = m_shiba.group(2)
-
-    m_dart = re.search(
-        r'<(?:h4|dt)[^>]*>\s*ダート\s*</(?:h4|dt)>(.{0,300}?)(' + baba_pat + r')',
-        html, re.DOTALL
-    )
-    if m_dart:
-        dart = m_dart.group(2)
-
-    # パターン2: 芝/ダートの近くにある馬場状態（より緩いマッチ）
-    if not shiba:
-        m = re.search(r'>芝<.{0,200}?(' + baba_pat + r')', html, re.DOTALL)
-        if m:
-            shiba = m.group(1)
-
-    if not dart:
-        m = re.search(r'>ダート<.{0,200}?(' + baba_pat + r')', html, re.DOTALL)
-        if m:
-            dart = m.group(1)
-
-    # パターン3: テキスト検索（最終手段）
-    if not shiba or not dart:
-        # 馬場状態セクションを切り出す
-        m_sec = re.search(r'馬場状態.{0,3000}?週間', html, re.DOTALL)
-        if m_sec:
-            sec = m_sec.group(0)
-            if not shiba:
-                m = re.search(r'芝.{0,100}?(' + baba_pat + r')', sec, re.DOTALL)
-                if m:
-                    shiba = m.group(1)
-            if not dart:
-                m = re.search(r'ダート.{0,100}?(' + baba_pat + r')', sec, re.DOTALL)
-                if m:
-                    dart = m.group(1)
-
-    return shiba, dart
+def parse_kansui(html: str) -> float | None:
+    """含水率(%) を解析（馬場状態の裏付けデータ）。取れなければ None。"""
+    m = re.search(r'含水率.{0,300}?(\d{1,2}\.\d)\s*[%％]', html, re.DOTALL)
+    if m:
+        try:
+            return float(m.group(1))
+        except ValueError:
+            pass
+    return None
 
 
 def parse_course(html: str) -> tuple[str | None, bool]:
@@ -361,25 +364,48 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
 
         print(f'  [parse] {suffix}: {venue_name} を確認 → パース中...')
 
-        shiba_baba, dart_baba  = parse_baba_jotai(parse_html)
+        shiba_baba, shiba_conf, dart_baba, dart_conf = parse_baba_jotai(parse_html)
         cushion                = parse_cushion_value(parse_html)
+        kansui                 = parse_kansui(parse_html)
         rain_mm                = parse_weekly_rain(html, date_str)  # 降水量は全体から
         course, is_course_change = parse_course(parse_html)
 
-        print(f'  [parse]   芝:{shiba_baba}  ダート:{dart_baba}  クッション:{cushion}  降水量:{rain_mm}mm  使用コース:{course}  コース替わり初週:{is_course_change}')
+        print(f'  [parse]   芝:{shiba_baba}({shiba_conf})  ダート:{dart_baba}({dart_conf})  '
+              f'クッション:{cushion}  含水率:{kansui}  降水量:{rain_mm}mm  使用コース:{course}')
 
-        est_shiba, shiba_reason = estimate_race_baba(shiba_baba, rain_mm)
-        est_dart,  _            = estimate_race_baba(dart_baba,  rain_mm)
+        # 取得状態の判定（「良」の詐称を防ぐ恒久対策）。高信頼の単独セル取得、または
+        # 裏付けデータ(クッション/含水率/降水)があれば確定。緩いマッチのみで裏付け皆無なら
+        # 凡例誤検出の疑い→要確認。馬場状態自体が取れなければ失敗。
+        high_conf    = (shiba_conf == 'high') or (dart_conf == 'high')
+        corroborated = (cushion is not None) or (kansui is not None) or (rain_mm is not None)
+        if not (shiba_baba or dart_baba):
+            status = '失敗'
+        elif high_conf or corroborated:
+            status = '確定'
+        else:
+            status = '要確認'
+
+        if status == '確定':
+            est_shiba, shiba_reason = estimate_race_baba(shiba_baba, rain_mm)
+            est_dart,  _            = estimate_race_baba(dart_baba,  rain_mm)
+        else:
+            est_shiba = est_dart = None
+            shiba_reason = ('馬場状態の裏付けデータが取れず要確認（凡例誤検出の疑い）'
+                            if status == '要確認' else '馬場状態を取得できず失敗')
+
+        print(f'  [parse]   → 取得状態: {status}')
 
         return {
             '場所':              venue_name,
             '取得日時':          datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            '取得状態':          status,
             '芝馬場':            shiba_baba,
             'ダート馬場':        dart_baba,
             'クッション値':      cushion,
+            '含水率':            kansui,
             '降水量_mm':         rain_mm,
-            '使用コース':        course,           # 'A'/'B'/'C'/'D' or None
-            'コース替わり初週':  is_course_change,  # True = 今週がコース替わり初週
+            '使用コース':        course,
+            'コース替わり初週':  is_course_change,
             '推定馬場_芝':       est_shiba,
             '推定馬場_ダート':   est_dart,
             '推定根拠':          shiba_reason,
@@ -390,19 +416,17 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
     return {
         '場所':          venue_name,
         '取得日時':      datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        '取得状態':      '失敗',
         '芝馬場':        None,
         'ダート馬場':    None,
         'クッション値':  None,
+        '含水率':        None,
         '降水量_mm':     None,
-        '推定馬場_芝':      '良',
-        '推定馬場_ダート':  '良',
         '使用コース':       None,
         'コース替わり初週': False,
-        '推定馬場_芝':      '良',
-        '推定馬場_ダート':  '良',
-        '使用コース':       None,
-        'コース替わり初週': False,
-        '推定根拠':         '情報取得失敗のためデフォルト(良)',
+        '推定馬場_芝':      None,
+        '推定馬場_ダート':  None,
+        '推定根拠':         '該当会場の馬場ページが見つからず失敗（要手動確認）',
     }
 
 

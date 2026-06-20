@@ -54,6 +54,23 @@ GITHUB_PAGES_BASE = 'https://oswald1945.github.io/keiba-dashboard'
 
 FETCH_BABA_PY = SCRIPT_DIR / 'fetch_baba.py'
 
+_BABA_ALERTS = []          # 馬場を確定できなかったレース (race_id, venue, status)
+_BABA_MANUAL_CACHE = None
+
+
+def _load_baba_manual():
+    """baba_manual.json（競馬場名→{芝,ダート,...}）を読む。無ければ空。"""
+    global _BABA_MANUAL_CACHE
+    if _BABA_MANUAL_CACHE is None:
+        import json as _jm
+        _p = SCRIPT_DIR / 'baba_manual.json'
+        try:
+            _BABA_MANUAL_CACHE = _jm.loads(_p.read_text(encoding='utf-8')) if _p.exists() else {}
+        except Exception as _e:
+            print(f'  [baba] baba_manual.json 読込失敗: {_e}')
+            _BABA_MANUAL_CACHE = {}
+    return _BABA_MANUAL_CACHE
+
 # 会場コード → 場所名マッピング（大文字化してから参照）
 _VENUE_CODE_MAP = {
     # JRA
@@ -340,18 +357,39 @@ def process_race(race_id, files) -> pathlib.Path | None:
                     if baba_json.exists():
                         import json as _j
                         _bi = _j.loads(baba_json.read_text(encoding='utf-8'))
-                        # 芝/ダートを判定して適切な推定馬場を選択
-                        # shutuba から芝ダの情報を取得（簡易判定: race_id に 'ダ' がなければ芝）
+                        _status  = _bi.get('取得状態', '失敗')
                         _surface = 'dart' if 'ダ' in race_id else 'turf'
-                        if _surface == 'dart':
-                            estimated_baba = _bi.get('推定馬場_ダート') or '良'
-                        else:
-                            estimated_baba = _bi.get('推定馬場_芝') or '良'
-                        print(f'  [baba] 推定馬場: {estimated_baba}（{_bi.get("推定根拠","")}）')
+                        _mk      = 'ダート' if _surface == 'dart' else '芝'
+                        _man     = _load_baba_manual().get(_venue)
+                        if _man:  # baba_manual.json による手動上書き（最優先）
+                            estimated_baba = _man.get(_mk) or _man.get('芝') or _man.get('ダート') or '良'
+                            print(f'  [baba] 手動指定(baba_manual.json)を使用: {_venue} {_mk}={estimated_baba}')
+                            _bi['推定馬場_芝']     = _man.get('芝', estimated_baba)
+                            _bi['推定馬場_ダート'] = _man.get('ダート', estimated_baba)
+                            _bi['取得状態'] = '手動'
+                            baba_json.write_text(_j.dumps(_bi, ensure_ascii=False, indent=2), encoding='utf-8')
+                        elif _status == '確定':
+                            estimated_baba = (_bi.get('推定馬場_ダート') if _surface == 'dart' else _bi.get('推定馬場_芝')) or '良'
+                            print(f'  [baba] 推定馬場: {estimated_baba}（{_bi.get("推定根拠","")}）')
+                        else:  # 確定できず＝「良」と詐称しない。大きく警告して記録
+                            estimated_baba = '良'  # スコア計算用の暫定値
+                            print(f'  [baba] 【警告】馬場の自動取得に失敗（{_status}）: {_venue} {_mk}')
+                            print(f'  [baba] 【警告】暫定で「良」を使用。正しい馬場は baba_manual.json に記入し再生成してください。')
+                            _BABA_ALERTS.append((race_id, _venue, _status))
+                            _bi['推定馬場_芝'] = _bi['推定馬場_ダート'] = '良'  # コースバイアスは維持しつつ暫定良
+                            baba_json.write_text(_j.dumps(_bi, ensure_ascii=False, indent=2), encoding='utf-8')
                     else:
                         _out = (_proc.stdout or b'').decode('utf-8', errors='replace')
                         _err = (_proc.stderr or b'').decode('utf-8', errors='replace')
-                        print(f'  [baba] 取得失敗: {(_out + _err).strip()[:80]}')
+                        print(f'  [baba] 【警告】取得失敗（ネットワーク/ページ無し）: {(_out + _err).strip()[:80]}')
+                        _man = _load_baba_manual().get(_venue)
+                        if _man:
+                            _mk2 = 'ダート' if 'ダ' in race_id else '芝'
+                            estimated_baba = _man.get(_mk2) or _man.get('芝') or '良'
+                            print(f'  [baba] 手動指定を使用: {_venue} {_mk2}={estimated_baba}')
+                        else:
+                            _BABA_ALERTS.append((race_id, _venue, 'ネットワーク失敗'))
+                            print(f'  [baba] 【警告】暫定「良」で継続。baba_manual.json で指定し再生成できます。')
                         baba_json = None
                 except subprocess.TimeoutExpired:
                     print(f'  [baba] タイムアウト → デフォルト(良)で継続')
@@ -514,6 +552,16 @@ def main():
                 print(f'  {url}')
         else:
             print('[share] push 失敗 → ローカルHTMLで確認してください')
+
+    if _BABA_ALERTS:
+        print('\n' + '=' * 64)
+        print('【警告】馬場を自動取得できず暫定「良」で生成したレースがあります:')
+        for _rid, _ven, _st in _BABA_ALERTS:
+            print(f'     - {_rid}  ({_ven})  状態:{_st}')
+        print('  正しい馬場で再生成するには baba_manual.json に競馬場ごとの馬場を記入し、')
+        print('  対象の入力を input/ に戻して再実行してください。書式例:')
+        print('     {"函館": {"芝": "稍重", "ダート": "重"}, "東京": {"芝": "良"}}')
+        print('=' * 64)
 
     print('\n=== 完了 ===')
     if errors:

@@ -108,37 +108,34 @@ def _norm_going(g: str) -> str:
 
 
 BABA_PAT = '良|稍重|重|不良'
-# 凡例（馬場状態の説明: 良→稍重→重→不良 が連続して並ぶ）検出用。
-# データ値ではなく凡例にマッチして常に「良」になる誤検出を防ぐ。
-_LEGEND_RE = re.compile(r'良[^<]{0,6}稍重[^<]{0,6}重[^<]{0,6}不良')
 
 
-def _looks_like_legend(segment: str) -> bool:
-    return bool(_LEGEND_RE.search(segment))
-
-
-def _find_state(html: str, label: str) -> tuple[str | None, str | None]:
+def _baba_section(html: str) -> str | None:
     """
-    見出し(芝/ダート)の直後から馬場状態を取得する。
-    戻り値: (馬場状態, 信頼度)  信頼度: 'high'(単独セル) / 'low'(緩いマッチ) / None
-    凡例の並びにマッチした箇所はスキップする。
+    JRA馬場ページの「馬場状態（◯月◯日…現在）」セクションだけを切り出す。
+    含水率/クッション値の表には凡例「良 稍重 重 不良」が含まれ誤検出の元になるため、
+    馬場状態の見出し直後〜次の主要見出し(クッション値/含水率/週間/使用コース)の手前までに限定する。
     """
-    # 高信頼: 見出し直後 250 字以内の「単独セル」 >良< 形式
-    for m in re.finditer(re.escape(label), html):
-        seg = html[m.end():m.end() + 250]
-        if _looks_like_legend(seg):
-            continue
-        cell = re.search(r'>\s*(' + BABA_PAT + r')\s*<', seg)
-        if cell:
-            return _norm_going(cell.group(1)), 'high'
-    # 低信頼: 見出し直後の緩いマッチ（凡例は除外）
-    for m in re.finditer(re.escape(label), html):
-        seg = html[m.end():m.end() + 150]
-        if _looks_like_legend(seg):
-            continue
-        loose = re.search(r'(' + BABA_PAT + r')', seg)
-        if loose:
-            return _norm_going(loose.group(1)), 'low'
+    m = re.search(r'馬場状態\s*[（(].{0,40}?現在', html, re.DOTALL)
+    if not m:
+        m = re.search(r'馬場状態', html)  # 予備
+        if not m:
+            return None
+    start = m.end()
+    e = re.search(r'(クッション値|含水率|週間|使用コース)', html[start:])
+    end = start + (e.start() if e else 2000)
+    return html[start:end]
+
+
+def _state_for(section: str, label: str) -> tuple[str | None, str | None]:
+    """馬場状態セクション内で、ラベル(芝/ダート)直後の馬場状態語を返す。"""
+    i = section.find(label)
+    if i < 0:
+        return None, None
+    after = section[i + len(label): i + len(label) + 200]
+    m = re.search(r'(' + BABA_PAT + r')', after)
+    if m:
+        return _norm_going(m.group(1)), 'high'
     return None, None
 
 
@@ -146,10 +143,13 @@ def parse_baba_jotai(html: str):
     """
     HTML から馬場状態（芝・ダート）を解析。
     戻り値: (芝馬場, 芝信頼度, ダート馬場, ダート信頼度)
-    凡例（良 稍重 重 不良 の説明書き）への誤マッチを排除する。
+    馬場状態セクションに限定して解析し、含水率/クッション値の凡例への誤マッチを排除する。
     """
-    shiba, shiba_conf = _find_state(html, '芝')
-    dart,  dart_conf  = _find_state(html, 'ダート')
+    sec = _baba_section(html)
+    if sec is None:
+        return None, None, None, None
+    shiba, shiba_conf = _state_for(sec, '芝')
+    dart,  dart_conf  = _state_for(sec, 'ダート')
     return shiba, shiba_conf, dart, dart_conf
 
 
@@ -225,7 +225,7 @@ def parse_weekly_rain(html: str, target_date_str: str) -> float | None:
 
     # 週間天気セクションを切り出す
     week_section = html
-    m_sec = re.search(r'週間(?:天気|降水量|予報)', html)
+    m_sec = re.search(r'週間(?:天気|降水量|予報|情報)', html)
     if m_sec:
         week_section = html[m_sec.start():]
 

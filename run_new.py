@@ -72,6 +72,12 @@ def _load_baba_manual():
     return _BABA_MANUAL_CACHE
 
 
+def _baba_manual_for(venue, date):
+    """その日付(YYYYMMDD)の競馬場の手動馬場を返す。無ければ None（=自動取得を使用）。
+    baba_manual.json は {"YYYYMMDD": {"東京": {...}}} の日付キー形式。別日付の値は使われない。"""
+    return (_load_baba_manual().get(date) or {}).get(venue)
+
+
 def _read_surface(shutuba_path):
     """出馬表メタ行の「芝・ダート」列から surface を判定。'dart'/'turf' or None。"""
     if not shutuba_path:
@@ -379,7 +385,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
                         _bi = _j.loads(baba_json.read_text(encoding='utf-8'))
                         _status  = _bi.get('取得状態', '失敗')
                         _mk      = 'ダート' if _surface == 'dart' else '芝'
-                        _man     = _load_baba_manual().get(_venue)
+                        _man     = _baba_manual_for(_venue, _date)
                         if _man:  # baba_manual.json による手動上書き（最優先）
                             estimated_baba = _man.get(_mk) or _man.get('芝') or _man.get('ダート') or '良'
                             print(f'  [baba] 手動指定(baba_manual.json)を使用: {_venue} {_mk}={estimated_baba}')
@@ -401,7 +407,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
                         _out = (_proc.stdout or b'').decode('utf-8', errors='replace')
                         _err = (_proc.stderr or b'').decode('utf-8', errors='replace')
                         print(f'  [baba] 【警告】取得失敗（ネットワーク/ページ無し）: {(_out + _err).strip()[:80]}')
-                        _man = _load_baba_manual().get(_venue)
+                        _man = _baba_manual_for(_venue, _date)
                         if _man:
                             _mk2 = 'ダート' if _surface == 'dart' else '芝'
                             estimated_baba = _man.get(_mk2) or _man.get('芝') or '良'

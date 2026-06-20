@@ -71,6 +71,25 @@ def _load_baba_manual():
             _BABA_MANUAL_CACHE = {}
     return _BABA_MANUAL_CACHE
 
+
+def _read_surface(shutuba_path):
+    """出馬表メタ行の「芝・ダート」列から surface を判定。'dart'/'turf' or None。"""
+    if not shutuba_path:
+        return None
+    try:
+        import csv as _csv
+        with open(shutuba_path, encoding='cp932', errors='replace') as _f:
+            _rows = list(_csv.reader(_f))
+        if len(_rows) >= 2:
+            _hdr, _vals = _rows[0], _rows[1]
+            for _i, _h in enumerate(_hdr):
+                if '芝' in _h and 'ダ' in _h:  # 「芝・ダート」列
+                    if _i < len(_vals):
+                        return 'dart' if 'ダ' in _vals[_i] else 'turf'
+    except Exception:
+        pass
+    return None
+
 # 会場コード → 場所名マッピング（大文字化してから参照）
 _VENUE_CODE_MAP = {
     # JRA
@@ -344,6 +363,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
         if FETCH_BABA_PY.exists() and not DRY_RUN:
             _venue = extract_venue_from_race_id(race_id)
             _date  = race_id[:8]  # YYYYMMDD 部分
+            _surface = _read_surface(shutuba) or ('dart' if 'ダ' in race_id else 'turf')
             if _venue:
                 baba_json = OUT_DIR / f'baba_{race_id}.json'
                 print(f'  [baba] {_venue} の馬場情報を取得中...')
@@ -358,7 +378,6 @@ def process_race(race_id, files) -> pathlib.Path | None:
                         import json as _j
                         _bi = _j.loads(baba_json.read_text(encoding='utf-8'))
                         _status  = _bi.get('取得状態', '失敗')
-                        _surface = 'dart' if 'ダ' in race_id else 'turf'
                         _mk      = 'ダート' if _surface == 'dart' else '芝'
                         _man     = _load_baba_manual().get(_venue)
                         if _man:  # baba_manual.json による手動上書き（最優先）
@@ -384,7 +403,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
                         print(f'  [baba] 【警告】取得失敗（ネットワーク/ページ無し）: {(_out + _err).strip()[:80]}')
                         _man = _load_baba_manual().get(_venue)
                         if _man:
-                            _mk2 = 'ダート' if 'ダ' in race_id else '芝'
+                            _mk2 = 'ダート' if _surface == 'dart' else '芝'
                             estimated_baba = _man.get(_mk2) or _man.get('芝') or '良'
                             print(f'  [baba] 手動指定を使用: {_venue} {_mk2}={estimated_baba}')
                         else:

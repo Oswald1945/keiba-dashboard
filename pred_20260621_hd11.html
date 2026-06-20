@@ -347,13 +347,7 @@
   <div class="shutuba-banner">
       ✅ 出馬表データ反映済み（枠番・馬番・騎手・斤量・オッズが最新です）
     </div>
-  <div class="shutuba-banner" style="background:linear-gradient(135deg,#1a3a6b 0%,#2c5282 100%);color:#fff;border-left:4px solid #f1c40f;margin-bottom:8px">
-      🌤 <b>推定馬場状態</b>（函館）：
-      芝 <b style="color:#27ae60;font-size:15px">良</b>
-      ／ダート <b style="color:#27ae60;font-size:15px">良</b>
-      
-      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（現在馬場:良 + 降水なし）</span>
-    </div>
+  
 
   <div class="section">
     <h2>🏆 上位3頭 予想</h2>
@@ -3110,10 +3104,19 @@ function renderBets(){
   var _srcA=(srcA!=null&&srcA<99)?Number(srcA):99;
   var edge = wA - _mktWin(_srcA<=12?_srcA:12);
   var miyomi=false, boxMode=false, V;
-  if(_srcA>=4){ V={b:'🟡 要検討（中穴軸）',c:'#f1c40f',bg:'#3a2e10',r:'モデル最上位が想定'+_srcA+'番人気の中穴。的中時の妙味は大きいが軸成績は低くハイリスク（買うなら少点数の三連複・ワイドで）'}; }
-  else if(_srcA>=2&&edge>=0){ miyomi=true; V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'市場想定'+_srcA+'番手の軸'+um[A]+'番をモデルが最上位評価（勝率'+(wA*100).toFixed(0)+'%＞市場想定'+(_mktWin(_srcA)*100).toFixed(0)+'%）＝市場乖離のある妙味の買いレース'}; }
+  // 妙味の複合条件: 軸=推定2-3番人気 かつ「推定1番人気をモデルが低評価(順位≥4)」または「穴(推定5番人気以下)がモデル上位3」
+  // 検証(122R): 複合条件あり31R 単勝ROI73%(穴ありは83%) vs 市場通り(条件なし)16R 46%。堅調なだけは妙味でない。
+  var _fav1Rank=99, _anaH=null;
+  EV_DATA.forEach(function(h){ var ep=Number(h['SmartRC推定人気順']); var pr=Number(h['順位予想']);
+    if(ep===1) _fav1Rank=pr; if(ep>=5&&pr<=3&&!_anaH) _anaH={uma:h['馬番'],ep:ep}; });
+  var _ana=!!_anaH;
+  if(_srcA>=4){ V={b:'🟡 要検討（中穴軸）',c:'#f1c40f',bg:'#3a2e10',r:'モデル最上位が推定'+_srcA+'番人気の中穴。的中時の妙味は大きいが軸成績は低くハイリスク（買うなら少点数の三連複・ワイドで）'}; }
+  else if((_srcA===2||_srcA===3)&&(_fav1Rank>=4||_ana)){ miyomi=true;
+    var _why=_ana?('推定'+_anaH.ep+'番人気の穴('+_anaH.uma+'番)をモデルが上位評価'):('推定1番人気をモデルが'+_fav1Rank+'位に低評価');
+    V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(推定'+_srcA+'番人気)が最上位＋'+_why+'＝市場乖離のある妙味の買いレース'}; }
   else if(wA<0.18){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'抜けた軸が不在の混戦。頭固定は危険なので上位拮抗馬をBOX（検証: 上位3頭の複勝BOXで回収率93%）'}; }
-  else { V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番は想定'+(_srcA<99?_srcA+'番人気':'-')+'＝市場の中心で単勝オッズに妙味が乏しい（堅いが複勝頼みで本線の旨みは薄い）'}; }
+  else { var _rs=(_srcA<=1)?('軸'+um[A]+'番は推定1番人気＝市場の中心で単勝に妙味が乏しい'):('軸'+um[A]+'番(推定'+_srcA+'番人気)は堅調だが、推定1番人気もモデル上位かつ穴不在＝市場通りで妙味なし');
+    V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:_rs}; }
   var eb=document.getElementById('evRecBanner'); if(eb){ eb.style.background=V.bg; eb.style.borderColor=V.c; }
   var ebd=document.getElementById('evRecBadge'); if(ebd){ ebd.textContent=V.b; ebd.style.color=V.c; ebd.style.borderColor=V.c; }
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }

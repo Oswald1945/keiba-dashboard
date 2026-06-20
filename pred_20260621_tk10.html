@@ -3389,13 +3389,4 @@ if (stackCtx) {
       const rank   = i < 3 ? RANK_ICONS[i] : (i + 1) + '位';
       inner += '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:12px">' +
                '<span>' + rank + ' ' + r.name + '</span>' +
-               '<span style="font-weight:700;color:' + valCol + '">' + valStr + '</span>' +
-               '</div>';
-    });
-    card.innerHTML = inner;
-    grid.appendChild(card);
-  });
-})();
-</script>
-</body>
-</html>
+               '<span style="font-weight:700;color:' + valCol + '">' + valStr

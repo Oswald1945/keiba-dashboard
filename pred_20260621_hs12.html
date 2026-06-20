@@ -2995,20 +2995,4 @@ if (stackCtx) {
     let inner = '<div style="font-weight:700;font-size:13px;color:' + item.color +
                 ';margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #2c3e50">' +
                 item.label + '</div>';
-    item.ranked.forEach((r, i) => {
-      const val    = r.val;
-      const valStr = val > 0 ? '+' + val.toFixed(1) : val.toFixed(1);
-      const valCol = val > 1 ? '#2ecc71' : val < -0.5 ? '#e74c3c' : '#7f8c8d';
-      const rank   = i < 3 ? RANK_ICONS[i] : (i + 1) + '位';
-      inner += '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:12px">' +
-               '<span>' + rank + ' ' + r.name + '</span>' +
-               '<span style="font-weight:700;color:' + valCol + '">' + valStr + '</span>' +
-               '</div>';
-    });
-    card.innerHTML = inner;
-    grid.appendChild(card);
-  });
-})();
-</script>
-</body>
-</html>
+    item.ranked.forEach((r, i) => 

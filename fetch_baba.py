@@ -59,11 +59,15 @@ def normalize_venue(v: str) -> str:
 
 
 def fetch_page(url: str) -> str | None:
-    """requests で CP932 フェッチ。失敗時は None。"""
+    """requests で CP932 フェッチ。失敗時は None。
+    JRAの馬場ページは古いキャッシュが返ることがある（ブラウザは最新だが requests は数時間前の
+    状態を受け取る）ため、クエリにタイムスタンプを付与し no-cache ヘッダで最新取得を強制する。"""
     try:
-        import requests
-        r = requests.get(url, timeout=15, headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        import requests, time
+        r = requests.get(url, timeout=15, params={'_': int(time.time() * 1000)}, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Cache-Control': 'no-cache, no-store, max-age=0',
+            'Pragma': 'no-cache',
         })
         r.encoding = 'cp932'
         return r.text

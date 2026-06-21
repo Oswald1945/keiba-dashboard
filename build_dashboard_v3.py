@@ -64,7 +64,7 @@ _day   = _toint(_ri.get('日', '') or '')
 race_date_str = f"{_year}年{_month}月{_day}日" if _year else ''
 
 # 出力ファイル名: --out 未指定時は案3形式で自動生成
-# YYYYMMDD_[VenueCode][N]R_[Class]_[RaceNameRomaji]_pred.html
+# 出力名(run_new経由): {YYYYMMDD}_{venue_code_lower}{N}_pred.html  例 20260621_tk10_pred.html
 import re as _re, unicodedata as _uc
 import pykakasi as _pkk
 
@@ -2368,7 +2368,7 @@ if __name__ == '__main__':
     _outdir2 = _args.outdir or _os2.path.dirname(_os2.path.abspath(_args.json))
     _stem = _os2.path.splitext(_os2.path.basename(_args.json))[0]
     _race_id = _stem.replace('horses_data_', '')
-    _out_html = _os2.path.join(_outdir2, f'pred_{_race_id}.html')
+    _out_html = _os2.path.join(_outdir2, f'{_race_id}_pred.html')
     with open(_out_html, 'w', encoding='utf-8') as _fh:
         _fh.write(html)
     print(f'  -> {_out_html}')

@@ -152,13 +152,13 @@ def update_memo_from_review(html_path: pathlib.Path) -> int:
             date_str = m_title.group(4)
         else:
             stem = html_path.stem
-            m_fn = re.match(r'(\d{4})(\d{2})(\d{2})_([A-Z]+)(\d+)R_(.+?)(?:_review)?$', stem)
+            m_fn = re.match(r'(\d{4})(\d{2})(\d{2})_([A-Za-z]+?)(\d+)(?:_(.+?))?_review$', stem)
             if not m_fn:
                 return 0
             y, mo, d = m_fn.group(1), m_fn.group(2), m_fn.group(3)
-            place    = PLACE_MAP.get(m_fn.group(4), m_fn.group(4))
+            place    = PLACE_MAP.get(m_fn.group(4).upper(), m_fn.group(4))
             rnum     = int(m_fn.group(5))
-            rname    = m_fn.group(6)
+            rname    = m_fn.group(6) or ''
             date_str = f'{y}/{mo}/{d}'
         # 既存データ読み込み
         existing = []
@@ -356,7 +356,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
         print(f'  [pred] 生成済 -> スキップ (--force で強制再生成可能)')
         # --share 指定時は生成済の HTML も一括push対象に追加
         if FORCE_SHARE and not DRY_RUN:
-            _cands = sorted(OUT_DIR.glob(f'pred_{race_id}.html'))
+            _cands = sorted(OUT_DIR.glob(f'{race_id}_pred.html'))
             if _cands:
                 new_pred_html = _cands[0]
     elif kako is None or shutuba is None:
@@ -451,7 +451,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
         run_cmd(dash_cmd, 'pred')
         generated_pred = True
         if not DRY_RUN:
-            _cands = sorted(OUT_DIR.glob(f'pred_{race_id}.html'))
+            _cands = sorted(OUT_DIR.glob(f'{race_id}_pred.html'))
             if _cands:
                 new_pred_html = _cands[0]  # 一括push用に記録（main側で処理）
 
@@ -484,7 +484,7 @@ def process_race(race_id, files) -> pathlib.Path | None:
             # --force 再生成時は既存HTMLも対象（差分が空になるため）
             if not _new and FORCE_REVIEW:
                 # race_id例: 20260530_kt12 → 新形式では review ファイル名が race_id で始まる
-                _new = {p for p in OUT_DIR.glob(f'{race_id}_*_review.html')}
+                _new = {p for p in OUT_DIR.glob(f'{race_id}_review.html')}
             if _new:
                 review_html_p = next(iter(_new))
                 # 次走注目馬を memo_horses.json に自動登録
@@ -571,7 +571,7 @@ def main():
                         existing_entries[parts[0]] = parts[1]
             for html, url in zip(new_htmls, urls):
                 _m = re.search(r'(\d{8}_[a-zA-Z]+\d+)', html.stem)
-                race_id = _m.group(1) if _m else html.stem.replace('pred_', '')
+                race_id = _m.group(1) if _m else html.stem.replace('_pred', '')
                 existing_entries[race_id] = url
             with open(SHARE_URL_LOG, 'w', encoding='utf-8') as lg:
                 for rid, url in sorted(existing_entries.items()):

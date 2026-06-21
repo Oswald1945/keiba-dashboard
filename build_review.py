@@ -929,7 +929,7 @@ document.getElementById('detailBody').innerHTML=
 
 html = head + js
 
-# 命名: {race_id}_[Class]_[RaceNameRomaji]_review.html (race_id=YYYYMMDD_[venue_code_lower][N])
+# 命名: {race_id}_review.html  (race_id=YYYYMMDD_{venue_code_lower}{N}) 例 20260621_tk10_review.html
 import unicodedata as _uc, pykakasi as _pkk
 
 _CLASS_CODE = {
@@ -965,7 +965,7 @@ _cls_p   = _CLASS_CODE.get(_cls_n, _CLASS_CODE.get(_cls_raw, re.sub(r'[^A-Za-z0-
 _rname_p = _rname_to_romaji(_rname_raw)
 _stem_parts = [p for p in [_race_id_p, _cls_p, _rname_p] if p]
 _stem    = '_'.join(_stem_parts)
-_auto_name = f'{_stem}_review.html' if _stem else 'review.html'
+_auto_name = f'{_race_id_p}_review.html' if _race_id_p else 'review.html'
 
 if args.out:
     out_path = pathlib.Path(args.out)

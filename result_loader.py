@@ -44,6 +44,61 @@ def _num(s, cast=float, default=None):
 # ──────────────────────────────────────────────────────────────
 # HTML パーサ
 # ──────────────────────────────────────────────────────────────
+def _read_html_tables(html_str):
+    """HTMLの<table>群をDataFrameのリストで返す。lxml/bs4 等が無くても動くよう
+    pandas(lxml/bs4/html5lib)を優先し、失敗時は標準ライブラリのみでパースする。"""
+    import io as _io
+    try:
+        return pd.read_html(_io.StringIO(html_str))
+    except Exception:
+        pass
+    from html.parser import HTMLParser
+
+    class _T(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.tables = []; self.cur = None; self.row = None; self.cell = None; self.buf = None
+
+        def handle_starttag(self, t, a):
+            if t == 'table':
+                self.cur = []
+            elif t == 'tr' and self.cur is not None:
+                self.row = []
+            elif t in ('td', 'th') and self.row is not None:
+                self.cell = []; self.buf = self.cell
+
+        def handle_endtag(self, t):
+            if t == 'table' and self.cur is not None:
+                self.tables.append(self.cur); self.cur = None
+            elif t == 'tr' and self.row is not None:
+                self.cur.append(self.row); self.row = None
+            elif t in ('td', 'th') and self.cell is not None:
+                self.row.append(''.join(self.cell).strip()); self.cell = None; self.buf = None
+
+        def handle_data(self, d):
+            if self.buf is not None:
+                self.buf.append(d)
+
+    p = _T(); p.feed(html_str)
+    dfs = []
+    for tb in p.tables:
+        if not tb:
+            continue
+        w = max(len(r) for r in tb)
+        rows = [r + [''] * (w - len(r)) for r in tb]
+        hdr = rows[0]; body = rows[1:] if len(rows) > 1 else []
+        seen = {}; cols = []
+        for i, c in enumerate(hdr):
+            c = c or f'col{i}'
+            if c in seen:
+                seen[c] += 1; c = f'{c}.{seen[c]}'
+            else:
+                seen[c] = 0
+            cols.append(c)
+        dfs.append(pd.DataFrame(body, columns=cols))
+    return dfs
+
+
 def _load_html(path, encoding='cp932'):
     raw = open(path, 'rb').read()
     try:
@@ -52,7 +107,7 @@ def _load_html(path, encoding='cp932'):
         html = raw.decode('utf-8', errors='replace')
 
     # --- 1) 結果テーブル ---
-    tabs = pd.read_html(path, encoding=encoding)
+    tabs = _read_html_tables(html)
     tbl = max(tabs, key=lambda t: t.shape[0] * t.shape[1])
     tbl.columns = [str(c) for c in tbl.columns]
 

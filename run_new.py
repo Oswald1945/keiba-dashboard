@@ -55,6 +55,7 @@ GITHUB_PAGES_BASE = 'https://oswald1945.github.io/keiba-dashboard'
 FETCH_BABA_PY = SCRIPT_DIR / 'fetch_baba.py'
 
 _BABA_ALERTS = []          # 馬場を確定できなかったレース (race_id, venue, status)
+_REVIEW_PENDING = []       # 予想済・結果ありだが回顧未生成(=--review待ち)のレース
 _BABA_MANUAL_CACHE = None
 
 
@@ -519,7 +520,11 @@ def process_race(race_id, files) -> pathlib.Path | None:
         move_to_done(list(files.values()))
         print(f'  [OK] {race_id} 完了 -> done/ へ移動')
     elif pred_ok:
-        print(f'  [wait] {race_id} 予想のみ完了 -> 結果を input/ に追加して再実行')
+        if result is not None and not REVIEW_MODE and not already_review:
+            _REVIEW_PENDING.append(race_id)
+            print(f'  [wait] {race_id} 予想済・結果あり -> 回顧は `python run_new.py --review` で生成してください')
+        else:
+            print(f'  [wait] {race_id} 予想のみ完了 -> 結果を input/ に追加して再実行')
     else:
         print(f'  [NG] {race_id} 未完了')
 
@@ -586,6 +591,14 @@ def main():
         print('  正しい馬場で再生成するには baba_manual.json に競馬場ごとの馬場を記入し、')
         print('  対象の入力を input/ に戻して再実行してください。書式例:')
         print('     {"函館": {"芝": "稍重", "ダート": "重"}, "東京": {"芝": "良"}}')
+        print('=' * 64)
+
+    if _REVIEW_PENDING and not REVIEW_MODE:
+        print('\n' + '=' * 64)
+        print(f'【回顧待ち】結果が揃って回顧を作れるレースが {len(_REVIEW_PENDING)} 件あります。')
+        print('  予想と回顧は2段階運用です。回顧（レース結果の振り返り）を生成するには:')
+        print('      python run_new.py --review')
+        print('  を実行してください（予想のみ run_new.py / 回顧のみ --review）。')
         print('=' * 64)
 
     print('\n=== 完了 ===')

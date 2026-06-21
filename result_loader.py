@@ -171,13 +171,15 @@ def _load_html(path, encoding='cp932'):
     m = re.search(r'(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日', head)
     if m:
         meta['年'], meta['月'], meta['日'] = int(m.group(1)), int(m.group(2)), int(m.group(3))
-    meta['場所'] = next((v for v in _VENUES if v in head), '')
+    # 場所は「N回◯◯M日」開催表記から取得（headには1着馬の前走場所等も混じるため、その先頭一致を使うと誤判定する）
+    _mv = re.search(r'\d+回\s*(' + '|'.join(_VENUES) + r')\s*\d+日', head)
+    meta['場所'] = _mv.group(1) if _mv else next((v for v in _VENUES if v in head), '')
     mr = re.search(r'【\s*(\d{1,2})\s*R', head) or re.search(r'/\s*(\d{1,2})R', head)
     meta['R'] = int(mr.group(1)) if mr else None
     meta['天候'] = (re.search(r'天候\s*[:：]\s*([^\s　]+)', head) or [None, ''])[1] if '天候' in head else ''
     mw = re.search(r'天候\s*[:：]\s*(\S+)', head); meta['天候'] = mw.group(1) if mw else ''
     mb = re.search(r'馬場状態\s*[:：]\s*(\S+)', head); meta['馬場状態'] = mb.group(1) if mb else ''
-    md = re.search(r'(芝|ダート|障)\s*(\d{3,4})\s*m', head)
+    md = re.search(r'(芝|ダート|障)[^\d]{0,5}(\d{3,4})\s*m', head)  # 阪神等の『芝・外 2400m』表記に対応
     meta['芝・ダート'] = md.group(1) if md else ''
     meta['距離'] = int(md.group(2)) if md else None
     mh = re.search(r'(\d{1,2})\s*頭', head); meta['頭数'] = int(mh.group(1)) if mh else int(res.shape[0])

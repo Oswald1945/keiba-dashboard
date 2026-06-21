@@ -165,7 +165,10 @@ def _load_html(path, encoding='cp932'):
     txt = re.sub(r'<[^>]+>', ' ', html)
     txt = re.sub(r'[ \t]+', ' ', txt)
     lines = [_nfkc(l).strip() for l in txt.splitlines() if l.strip()]
-    head = '\n'.join(lines[:6])
+    # 列ヘッダ行('着 … 馬名 …')の手前までをレース情報ヘッダとする。
+    # 以降は出走馬データ行で、1着馬の前走場所/前走レース名/前走距離が混じり 場所/レース名/距離 を誤判定するため除外。
+    _hdr_i = next((i for i, l in enumerate(lines) if l.startswith('着') and ('馬名' in l or '騎手' in l)), 6)
+    head = '\n'.join(lines[:_hdr_i])
 
     meta = {}
     m = re.search(r'(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日', head)
@@ -184,13 +187,15 @@ def _load_html(path, encoding='cp932'):
     meta['距離'] = int(md.group(2)) if md else None
     mh = re.search(r'(\d{1,2})\s*頭', head); meta['頭数'] = int(mh.group(1)) if mh else int(res.shape[0])
     # クラス名（条件表記行）
-    cls_line = next((l for l in lines[:6] if ('クラス' in l or '万下' in l or 'オープン' in l or 'Ｇ' in l or 'Ｌ' in l or 'リステッド' in l)), '')
+    cls_line = next((l for l in lines[:_hdr_i] if ('クラス' in l or '万下' in l or 'オープン' in l or 'Ｇ' in l or 'Ｌ' in l or 'リステッド' in l)), '')
     mc = re.search(r'([123]勝クラス|新馬|未勝利|オープン|Ｇ\s*[ⅠⅡⅢ123]|G[123]|\(L\)|リステッド|OP)', cls_line)
     meta['クラス名'] = re.sub(r'\s+', '', mc.group(1)) if mc else cls_line.split('(')[0].strip()[:12]
     # レース名（特別・重賞名があれば抽出。条件戦は空でOK→build_review側で 場所R+クラス にフォールバック）
-    rn = next((l for l in lines[:6] if re.search(r'(Ｓ|ステークス|賞|杯|記念|カップ|オープン特別|ハンデキャップ)', l) and '頭立' not in l and 'クラス' not in l), '')
-    mn = re.search(r'([一-龥ァ-ヶA-Za-zＡ-Ｚ０-９0-9・ー]+(?:Ｓ|ステークス|賞|杯|記念|カップ))', rn)
-    meta['レース名'] = mn.group(1) if mn else ''
+    rn = next((l for l in lines[:_hdr_i] if re.search(r'(S|Ｓ|ステークス|賞|杯|記念|カップ|オープン特別|ハンデキャップ)', l) and '頭立' not in l and 'クラス' not in l), '')
+    mn = re.search(r'([ぁ-んァ-ヶ一-龥A-Za-zＡ-Ｚ０-９0-9・ー]+(?:S|Ｓ|ステークス|賞|杯|記念|カップ))', rn)
+    _rname = mn.group(1) if mn else ''
+    _rname = re.sub(r'^第?\d+回', '', _rname)  # 「第2回」等の開催回プレフィックスを除去
+    meta['レース名'] = _rname
 
     # ラップ/ペース行
     lap_l = next((l for l in lines if l.startswith('LAP')), '')

@@ -2795,11 +2795,11 @@ function _umaChip(u){
 }
 function _colHtml(cols, sep){
   var s=(sep==='→')?'<span style="margin:0 5px;color:#9ab;font-weight:700">→</span>':'<span style="margin:0 5px;color:#9ab;font-weight:700">-</span>';
-  return '<span style="display:inline-flex;align-items:center;white-space:nowrap;flex-wrap:wrap;gap:2px">'+cols.map(function(c){return '<span style="display:inline-flex;gap:2px">'+c.map(_umaChip).join('')+'</span>';}).join(s)+'</span>';
+  return '<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap;gap:2px">'+cols.map(function(c){return '<span style="display:inline-flex;gap:2px">'+c.map(_umaChip).join('')+'</span>';}).join(s)+'</span>';
 }
 function _seqHtml(umaArr, sep){
   var s=(sep==='→')?'<span style="margin:0 3px;color:#889">→</span>':(sep==='-')?'<span style="margin:0 3px;color:#889">-</span>':'';
-  return '<span style="display:inline-flex;align-items:center;white-space:nowrap">'+umaArr.map(_umaChip).join(s)+'</span>';
+  return '<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap">'+umaArr.map(_umaChip).join(s)+'</span>';
 }
 function _evCell(P, key){
   var be = P>0 ? (1/P) : 0; var od=_betOdds[key];
@@ -2905,10 +2905,10 @@ function renderBets(){
       var hd=EV_DATA[gi[n]]||{};
       var kya=hd['脚質']?hd['脚質']:'-';
       var sco=(hd['スコア']!=null)?Number(hd['スコア']).toFixed(1):'-';
-      var srk=(sc[n]!=null)?sc[n]+'番':'-';
+      var srk=(sc[n]!=null)?sc[n]+'位':'-';
       return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+kya+'</td>'+'<td style="text-align:right;color:#bdc3c7">'+sco+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+srk+'</td>'+'<td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
     }).join('');
-    pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（脚質／スコア／推定＝SmartRC推定人気 ・ 勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="width:100%;max-width:720px"><thead><tr><th>馬</th><th style="text-align:center">脚質</th><th style="text-align:right">スコア</th><th style="text-align:center">推定</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
+    pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（脚質／スコア／推定人気＝SmartRC ・ 勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="width:100%;max-width:720px"><thead><tr><th>馬</th><th style="text-align:center">脚質</th><th style="text-align:right">スコア</th><th style="text-align:center">推定人気</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
   }
   if(boxMode){
     var bx=names.slice(0,Math.min(4,names.length)).sort(function(a,b){return um[a]-um[b];}); var bxu=bx.map(function(n){return um[n];});

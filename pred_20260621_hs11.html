@@ -347,7 +347,13 @@
   <div class="shutuba-banner">
       ✅ 出馬表データ反映済み（枠番・馬番・騎手・斤量・オッズが最新です）
     </div>
-  
+  <div class="shutuba-banner" style="background:linear-gradient(135deg,#1a3a6b 0%,#2c5282 100%);color:#fff;border-left:4px solid #f1c40f;margin-bottom:8px">
+      🌤 <b>推定馬場状態</b>（阪神）：
+      芝 <b style="color:#c0392b;font-size:15px">重</b>
+      ／ダート <b style="color:#c0392b;font-size:15px">重</b>
+      
+      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（現在馬場:良 + 降水なし）</span>
+    </div>
 
   <div class="section">
     <h2>🏆 上位3頭 予想</h2>
@@ -3546,9 +3552,13 @@ function renderBets(){
   if(pt){
     var trh=contend.map(function(n){
       var tag=(n===A)?'<span style="color:#f1c40f;font-size:10px;margin-left:4px">軸</span>':'';
-      return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td><td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
+      var hd=EV_DATA[gi[n]]||{};
+      var kya=hd['脚質']?hd['脚質']:'-';
+      var sco=(hd['スコア']!=null)?Number(hd['スコア']).toFixed(1):'-';
+      var srk=(sc[n]!=null)?sc[n]+'番':'-';
+      return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+kya+'</td>'+'<td style="text-align:right;color:#bdc3c7">'+sco+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+srk+'</td>'+'<td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
     }).join('');
-    pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="max-width:540px"><thead><tr><th>馬</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
+    pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（脚質／スコア／推定＝SmartRC推定人気 ・ 勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="width:100%;max-width:720px"><thead><tr><th>馬</th><th style="text-align:center">脚質</th><th style="text-align:right">スコア</th><th style="text-align:center">推定</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
   }
   if(boxMode){
     var bx=names.slice(0,Math.min(4,names.length)).sort(function(a,b){return um[a]-um[b];}); var bxu=bx.map(function(n){return um[n];});

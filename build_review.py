@@ -704,7 +704,6 @@ tr:hover td{{background:#1f2f42}}
     <tbody id="detailBody"></tbody>
   </table></div>
 </div>
-{bettype_panel_html}
 <div class="section"><h2>&#128205; コーナー通過順の変化</h2>
   <div class="chart-wrap-lg"><canvas id="cornerChart"></canvas></div>
   <div class="corner-legend" id="cornerLegend"></div>
@@ -714,6 +713,7 @@ tr:hover td{{background:#1f2f42}}
   <div id="agariViz" style="padding:4px 0"></div>
   <div class="note">バーが長いほど末脚が速い（最速: {race['最速上3F']:.1f}秒）。色は枠番カラー、右の数字は実際の着順。</div>
 </div>
+{bettype_panel_html}
 <div class="section"><h2>&#128176; 期待値分析（予測勝率 vs 市場オッズ）</h2>
   <div class="ev-summary" id="evSummary"></div>
   <div style="overflow-x:auto" id="evTableWrap"></div>

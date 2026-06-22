@@ -3,6 +3,7 @@
 bet_recon.py — pred HTMLのEV_DATAからダッシュボードbet-panelの買い目(軸/相手/列/判定)を
 Pythonで再構築し、確定配当(payouts)と突き合わせて券種別の的中/回収を返す。
 build_review から回顧の「券種別 結果照合」パネル生成に使う。
+採算オッズは内訳(その買い目1点ごとの的中率の逆数)で算定し、的中馬券ごとに期待値を判定する。
 """
 import re, json, math, os, itertools
 
@@ -71,64 +72,6 @@ def _placeProb(probs, idx, k):
                 continue
             p3 += probs[j] * (probs[mm] / max(1e-9, 1 - probs[j])) * (pi / d)
     return min(1, pi + p2 + p3)
-
-
-def _formation_probs(names, pv, wp, gi, A, col1, col2, col3, boxMode):
-    """予想ダッシュボードと同一ロジックで各券種フォーメーションの的中率Pを返す。"""
-    o3 = {}
-    for seq in itertools.permutations(names, 3):
-        rem = 1.0; pr = 1.0
-        for nm in seq:
-            if rem <= 1e-9:
-                pr = 0; break
-            pr *= pv[nm] / rem; rem -= pv[nm]
-        o3['|'.join(seq)] = pr
-    P3 = lambda n: _placeProb(wp, gi[n], 3)
-    if boxMode:
-        bx = names[:min(4, len(names))]
-        probs = {}
-        probs['複勝BOX'] = (sum(P3(n) for n in bx) / len(bx)) if bx else 0
-        pairs = list(itertools.combinations(bx, 2))
-        pw = 0
-        for c in pairs:
-            for k, v in o3.items():
-                ss = k.split('|')
-                if c[0] in ss and c[1] in ss:
-                    pw += v
-        probs['ワイドBOX'] = pw
-        probs['馬連BOX'] = sum(pv[c[0]] * pv[c[1]] / (1 - pv[c[0]]) + pv[c[1]] * pv[c[0]] / (1 - pv[c[1]]) for c in pairs)
-        pt = 0
-        for c in itertools.combinations(bx, 3):
-            for seq in itertools.permutations(c, 3):
-                pt += o3.get('|'.join(seq), 0)
-        probs['三連複BOX'] = pt
-        return probs
-    uren = [n for n in col2 if n != A]
-    wd = [n for n in col3 if n != A]
-    p_uren = sum(pv[A] * pv[o] / (1 - pv[A]) + pv[o] * pv[A] / (1 - pv[o]) for o in uren)
-    p_wide = 0
-    for o in wd:
-        for k, v in o3.items():
-            ss = k.split('|')
-            if A in ss and o in ss:
-                p_wide += v
-    p_3p = 0
-    for c in itertools.combinations(wd, 2):
-        for seq in itertools.permutations([A, c[0], c[1]], 3):
-            p_3p += o3.get('|'.join(seq), 0)
-    p_utan = 0
-    for i in col1:
-        for j in col2:
-            if i != j:
-                p_utan += pv[i] * pv[j] / (1 - pv[i])
-    p_3t = 0
-    for i in col1:
-        for j in col2:
-            for k in col3:
-                if i != j and j != k and i != k:
-                    p_3t += o3.get('|'.join([i, j, k]), 0)
-    return {'単勝': pv[A], '複勝': P3(A), '馬連': p_uren, 'ワイド': p_wide,
-            '馬単': p_utan, '三連複': p_3p, '三連単': p_3t}
 
 
 def reconstruct(ev):
@@ -227,10 +170,51 @@ def reconstruct(ev):
     col1 = sorted(col1, key=lambda n: um[n])
     col2 = sorted(col2, key=lambda n: um[n])
     col3 = sorted(col3, key=lambda n: um[n])
-    probs = _formation_probs(names, pv, wp, gi, A, col1, col2, col3, boxMode)
+    # 内訳採算オッズ算定用: 馬番キーの単勝確率・複勝確率・3着順列確率(Harville)
+    o3 = {}
+    for seq in itertools.permutations(names, 3):
+        rem = 1.0; pr = 1.0
+        for nm in seq:
+            if rem <= 1e-9:
+                pr = 0; break
+            pr *= pv[nm] / rem; rem -= pv[nm]
+        o3[seq] = pr
+    pv_uma = {um[n]: pv[n] for n in names}
+    p3_uma = {um[n]: _placeProb(wp, gi[n], 3) for n in names}
+    o3_uma = {tuple(um[n] for n in seq): v for seq, v in o3.items()}
     return dict(A=A, umA=um[A], wA=wA, srcA=srcA, verdict=verdict, miyomi=miyomi,
                 boxMode=boxMode, col1=col1, col2=col2, col3=col3, um=um,
-                names=names, waku=waku, probs=probs)
+                names=names, waku=waku, pv_uma=pv_uma, p3_uma=p3_uma, o3_uma=o3_uma)
+
+
+def _combo_prob(bt, combo, pv_uma, o3_uma, p3_uma):
+    """その買い目1点(combo=馬番リスト)の的中率を内訳ロジックで返す。"""
+    base = bt[:-3] if bt.endswith('BOX') else bt
+    if base == '単勝':
+        return pv_uma.get(combo[0], 0)
+    if base == '複勝':
+        return p3_uma.get(combo[0], 0)
+    if base == '馬連':
+        x, y = combo[0], combo[1]
+        return pv_uma[x] * pv_uma[y] / max(1e-9, 1 - pv_uma[x]) + pv_uma[y] * pv_uma[x] / max(1e-9, 1 - pv_uma[y])
+    if base == 'ワイド':
+        x, y = combo[0], combo[1]
+        s = 0
+        for key, v in o3_uma.items():
+            if x in key and y in key:
+                s += v
+        return s
+    if base == '馬単':
+        i, j = combo[0], combo[1]
+        return pv_uma[i] * pv_uma[j] / max(1e-9, 1 - pv_uma[i])
+    if base == '三連複':
+        s = 0
+        for seq in itertools.permutations(combo, 3):
+            s += o3_uma.get(seq, 0)
+        return s
+    if base == '三連単':
+        return o3_uma.get(tuple(combo), 0)
+    return 0
 
 
 def _to_int(x):
@@ -245,6 +229,7 @@ def _parse_combo(s):
 
 
 def eval_race(rec, res_df, payouts):
+    """各券種について (点数, 払戻合計, [(的中組番, 配当), ...]) を返す。"""
     um = rec['um']
     df = res_df[[c for c in ['入線順位', '馬番'] if c in res_df.columns]].dropna().copy()
     df['_o'] = df['入線順位'].apply(_to_int)
@@ -267,27 +252,27 @@ def eval_race(rec, res_df, payouts):
     if rec['boxMode']:
         bx = rec['names'][:min(4, len(rec['names']))]
         bxu = sorted(um[n] for n in bx)
-        hits = [[u] for u in bxu if u in fuku]
-        bets['複勝BOX'] = (len(bxu), sum(fuku.get(u, 0) for u in bxu), hits)
+        hits = [([u], fuku[u]) for u in bxu if u in fuku]
+        bets['複勝BOX'] = (len(bxu), sum(p for _, p in hits), hits)
         pairs = list(itertools.combinations(bxu, 2))
-        ret = 0; hits = []
+        hits = []; ret = 0
         for c in pairs:
             for cs, a in wide:
                 if cs == set(c):
-                    ret += a; hits.append(sorted(c))
+                    hits.append((sorted(c), a)); ret += a
         bets['ワイドBOX'] = (len(pairs), ret, hits)
-        ret = 0; hits = []
+        hits = []; ret = 0
         for c in pairs:
             for cs, a in umaren:
                 if cs == set(c):
-                    ret += a; hits.append(sorted(c))
+                    hits.append((sorted(c), a)); ret += a
         bets['馬連BOX'] = (len(pairs), ret, hits)
         tri = list(itertools.combinations(bxu, 3))
-        ret = 0; hits = []
+        hits = []; ret = 0
         for c in tri:
             for cs, a in s3p:
                 if cs == set(c):
-                    ret += a; hits.append(sorted(c))
+                    hits.append((sorted(c), a)); ret += a
         bets['三連複BOX'] = (len(tri), ret, hits)
         return dict(order=order, bets=bets, box=True, axis_uma=umA,
                     axis_fin=order.index(umA) + 1 if umA in order else None)
@@ -297,22 +282,31 @@ def eval_race(rec, res_df, payouts):
     col3u = [um[n] for n in rec['col3']]
     uren = [um[n] for n in rec['col2'] if n != A]
     wd = [um[n] for n in rec['col3'] if n != A]
-    h = umA == top1
-    bets['単勝'] = (1, tansho.get(umA, 0) if h else 0, [[umA]] if h else [])
-    h = umA in fuku
-    bets['複勝'] = (1, fuku.get(umA, 0), [[umA]] if h else [])
-    ret = 0; hits = []
+    # 単勝
+    if umA == top1:
+        bets['単勝'] = (1, tansho.get(umA, 0), [([umA], tansho.get(umA, 0))])
+    else:
+        bets['単勝'] = (1, 0, [])
+    # 複勝
+    if umA in fuku:
+        bets['複勝'] = (1, fuku[umA], [([umA], fuku[umA])])
+    else:
+        bets['複勝'] = (1, 0, [])
+    # 馬連
+    hits = []; ret = 0
     for o in uren:
         for cs, a in umaren:
             if cs == {umA, o}:
-                ret += a; hits.append(sorted([umA, o]))
+                hits.append((sorted([umA, o]), a)); ret += a
     bets['馬連'] = (len(uren), ret, hits)
-    ret = 0; hits = []
+    # ワイド
+    hits = []; ret = 0
     for o in wd:
         for cs, a in wide:
             if cs == {umA, o}:
-                ret += a; hits.append(sorted([umA, o]))
+                hits.append((sorted([umA, o]), a)); ret += a
     bets['ワイド'] = (len(wd), ret, hits)
+    # 馬単 col1->col2
     pts = 0; ret = 0; hits = []
     for i in col1u:
         for j in col2u:
@@ -320,14 +314,16 @@ def eval_race(rec, res_df, payouts):
                 pts += 1
                 for combo, a in umatan:
                     if combo == [i, j]:
-                        ret += a; hits.append([i, j])
+                        hits.append(([i, j], a)); ret += a
     bets['馬単'] = (pts, ret, hits)
-    ret = 0; hits = []
+    # 三連複 軸-相手2頭
+    hits = []; ret = 0
     for c in itertools.combinations(wd, 2):
         for cs, a in s3p:
             if cs == {umA, c[0], c[1]}:
-                ret += a; hits.append(sorted([umA, c[0], c[1]]))
+                hits.append((sorted([umA, c[0], c[1]]), a)); ret += a
     bets['三連複'] = (len(list(itertools.combinations(wd, 2))), ret, hits)
+    # 三連単 col1->col2->col3
     pts = 0; ret = 0; hits = []
     for i in col1u:
         for j in col2u:
@@ -336,7 +332,7 @@ def eval_race(rec, res_df, payouts):
                     pts += 1
                     for combo, a in s3t:
                         if combo == [i, j, k]:
-                            ret += a; hits.append([i, j, k])
+                            hits.append(([i, j, k], a)); ret += a
     bets['三連単'] = (pts, ret, hits)
     return dict(order=order, bets=bets, box=False, axis_uma=umA,
                 axis_fin=order.index(umA) + 1 if umA in order else None)
@@ -376,19 +372,21 @@ def _cols_html(cols, sep, waku):
     for col in cols:
         parts.append('<span style="display:inline-flex;flex-wrap:wrap;align-items:center">'
                      + ''.join(_chip(u, waku) for u in col) + '</span>')
-    return ('<span style="display:inline-flex;flex-wrap:wrap;align-items:center">'
+    return ('<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap">'
             + _sep_html(sep).join(parts) + '</span>')
 
 
-def _hits_html(hits, sep, waku):
-    if not hits:
-        return '<span style="color:#7a8694">&mdash;</span>'
-    lines = []
-    for combo in hits:
-        lines.append('<span style="display:inline-flex;align-items:center">'
-                     + _sep_html(sep).join(_chip(u, waku) for u in combo) + '</span>')
-    return ('<span style="display:inline-flex;flex-direction:column;gap:2px;align-items:flex-start">'
-            + ''.join(lines) + '</span>')
+def _combo_chips(combo, sep, waku):
+    return _sep_html(sep).join(_chip(u, waku) for u in combo)
+
+
+def _stack(entries, justify):
+    """的中馬券ごとのサブ行を縦に積む(各行 高さ揃え)。"""
+    if not entries:
+        entries = ['<span style="color:#7a8694">&mdash;</span>']
+    return ''.join(
+        f'<div style="min-height:26px;display:flex;align-items:center;justify-content:{justify}">{e}</div>'
+        for e in entries)
 
 
 def _forms(rec):
@@ -417,41 +415,48 @@ def _forms(rec):
 def render_panel(rec, ev_eval):
     bc, bg, tx = _VERDICT_STYLE.get(rec['verdict'], ('#7f8c8d', '#222', '#bbb'))
     waku = rec.get('waku', {})
+    pv_uma = rec.get('pv_uma', {})
+    o3_uma = rec.get('o3_uma', {})
+    p3_uma = rec.get('p3_uma', {})
     fin = ev_eval['axis_fin']
     fin_str = f'{fin}着' if fin else '—'
     order = ev_eval['order']
     rows = ''
+    vmid = 'vertical-align:middle;'
     for bt, cols, sep in _forms(rec):
         if bt not in ev_eval['bets']:
             continue
-        pts, r, hits = ev_eval['bets'][bt]
+        pts, total_ret, hitlist = ev_eval['bets'][bt]
         if pts < 1:
             continue
         cost = pts * 100
-        hit = r > 0
-        br = (r / cost * 100) if cost else 0
+        hit = total_ret > 0
+        roi = (total_ret / cost * 100) if cost else 0
         mark = '<span style="color:#5DCAA5">&#9711;</span>' if hit else '<span style="color:#7a8694">&times;</span>'
-        pay_s = f'&yen;{r:,}' if hit else '<span style="color:#7a8694">&mdash;</span>'
-        roi_c = '#5DCAA5' if br >= 100 else ('#bdc3c7' if br > 0 else '#7a8694')
-        P = (rec.get('probs') or {}).get(bt)
-        be = (1.0 / P) if (P and P > 0) else None
-        be_s = f'{be:.1f}倍' if be else '<span style="color:#7a8694">&mdash;</span>'
-        if hit and be:
-            if br >= be * 100:
-                ev_s = '<span style="color:#5DCAA5;font-weight:700">&#9678; 期待値プラス</span>'
+        roi_c = '#5DCAA5' if roi >= 100 else ('#bdc3c7' if roi > 0 else '#7a8694')
+        # 的中馬券ごとのサブ行
+        fm_e, pay_e, be_e, ev_e = [], [], [], []
+        for combo, payout in hitlist:
+            fm_e.append(_combo_chips(combo, sep, waku))
+            pay_e.append(f'&yen;{payout:,}')
+            Pc = _combo_prob(bt, combo, pv_uma, o3_uma, p3_uma)
+            be = (1.0 / Pc) if Pc and Pc > 0 else None
+            be_e.append(f'<span style="color:#f1c40f">{be:.1f}倍</span>' if be else '<span style="color:#7a8694">&mdash;</span>')
+            if be and (payout / 100.0) >= be:
+                ev_e.append('<span style="color:#5DCAA5;font-weight:700">&#9678; 期待値プラス</span>')
             else:
-                ev_s = '<span style="color:#e67e22;font-weight:700">&#9651; 期待値マイナス</span>'
-        else:
-            ev_s = '<span style="color:#7a8694">&mdash;</span>'
-        rows += (f'<tr><td style="font-weight:700;white-space:nowrap">{bt}</td>'
-                 f'<td>{_cols_html(cols, sep, waku)}</td>'
-                 f'<td style="text-align:right">{pts}</td>'
-                 f'<td style="text-align:center">{mark}</td>'
-                 f'<td>{_hits_html(hits, sep, waku)}</td>'
-                 f'<td style="text-align:right;white-space:nowrap">{pay_s}</td>'
-                 f'<td style="text-align:right;color:{roi_c};font-weight:700">{br:.0f}%</td>'
-                 f'<td style="text-align:right;color:#f1c40f;white-space:nowrap">{be_s}</td>'
-                 f'<td style="text-align:center;white-space:nowrap">{ev_s}</td></tr>')
+                ev_e.append('<span style="color:#e67e22;font-weight:700">&#9651; 期待値マイナス</span>')
+        rows += (f'<tr>'
+                 f'<td style="font-weight:700;white-space:nowrap;{vmid}">{bt}</td>'
+                 f'<td style="{vmid}">{_cols_html(cols, sep, waku)}</td>'
+                 f'<td style="text-align:right;{vmid}">{pts}</td>'
+                 f'<td style="text-align:center;{vmid}">{mark}</td>'
+                 f'<td style="padding:0">{_stack(fm_e, "flex-start")}</td>'
+                 f'<td style="padding:0;white-space:nowrap">{_stack(pay_e, "flex-end")}</td>'
+                 f'<td style="text-align:right;color:{roi_c};font-weight:700;{vmid}">{roi:.0f}%</td>'
+                 f'<td style="padding:0;white-space:nowrap">{_stack(be_e, "flex-end")}</td>'
+                 f'<td style="padding:0;white-space:nowrap">{_stack(ev_e, "center")}</td>'
+                 f'</tr>')
     note = ('軸固定の券種は軸が3着内に来ないと連鎖で外れます。'
             if not ev_eval['box'] else '軸不在の混戦としてBOX評価。')
     return f'''<div class="section" id="section-bettype">
@@ -465,7 +470,7 @@ def render_panel(rec, ev_eval):
     <thead><tr><th>券種</th><th>推奨フォーメーション</th><th style="text-align:right">点数</th><th style="text-align:center">的中</th><th>的中フォーメーション</th><th style="text-align:right">確定配当(100円)</th><th style="text-align:right">回収率</th><th style="text-align:right">採算オッズ</th><th style="text-align:center">期待値</th></tr></thead>
     <tbody>{rows}</tbody>
   </table></div>
-  <div class="note">予想ダッシュボードが提案する各券種フォーメーションを、この結果の確定配当で照合（各組1点ずつ）。{note} 採算オッズ＝1÷的中率（予想時の合成採算オッズ）。的中馬券の確定配当が採算オッズを上回れば期待値プラス、下回れば期待値マイナス。馬番バッジの色は枠番カラー。</div>
+  <div class="note">予想ダッシュボードが提案する各券種フォーメーションを、この結果の確定配当で照合（各組1点ずつ）。{note} 採算オッズ＝1÷その買い目の的中率（内訳の個別採算オッズ）。的中馬券ごとに確定配当が採算オッズを上回れば期待値プラス。回収率はフォーメーション全体（総払戻÷総投資）。馬番バッジの色は枠番カラー。</div>
 </div>'''
 
 

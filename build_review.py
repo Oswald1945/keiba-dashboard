@@ -617,6 +617,16 @@ _display_name = (race_name if race_name and str(race_name) not in ('nan','None',
 lap_h1 = race['前半3F'] * 18
 lap_h2 = race['後半3F'] * 18
 
+# 券種別 結果照合パネル（pred HTMLのEV_DATA + 確定配当で照合）
+try:
+    import bet_recon as _br
+    import os as _osbt
+    _rid_bt = _osbt.path.splitext(_osbt.path.basename(args.result))[0].replace('レース結果_', '').replace('レース結果', '')
+    _outdir_bt = args.outdir or _osbt.path.dirname(_osbt.path.abspath(args.result))
+    bettype_panel_html = _br.build_panel_for_review(_rid_bt, _outdir_bt, res, _payouts)
+except Exception as _bte:
+    bettype_panel_html = ''
+
 head = f"""<!DOCTYPE html>
 <html lang="ja"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -694,6 +704,7 @@ tr:hover td{{background:#1f2f42}}
     <tbody id="detailBody"></tbody>
   </table></div>
 </div>
+{bettype_panel_html}
 <div class="section"><h2>&#128205; コーナー通過順の変化</h2>
   <div class="chart-wrap-lg"><canvas id="cornerChart"></canvas></div>
   <div class="corner-legend" id="cornerLegend"></div>

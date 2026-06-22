@@ -165,6 +165,10 @@ def reconstruct(ev):
         col2 = sorted([n for n in contend if ex(n)], key=lambda n: -P2(n))[:2]
     col2 = col2[:5]
     col3 = sorted([n for n in contend if ex(n)], key=lambda n: -P3(n))
+    # 予想ダッシュボードと同じく、各列は最終的に馬番(若い順)で表示・組成する
+    col1 = sorted(col1, key=lambda n: um[n])
+    col2 = sorted(col2, key=lambda n: um[n])
+    col3 = sorted(col3, key=lambda n: um[n])
     return dict(A=A, umA=um[A], wA=wA, srcA=srcA, verdict=verdict, miyomi=miyomi,
                 boxMode=boxMode, col1=col1, col2=col2, col3=col3, um=um,
                 names=names, waku=waku)

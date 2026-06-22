@@ -73,6 +73,64 @@ def _placeProb(probs, idx, k):
     return min(1, pi + p2 + p3)
 
 
+def _formation_probs(names, pv, wp, gi, A, col1, col2, col3, boxMode):
+    """予想ダッシュボードと同一ロジックで各券種フォーメーションの的中率Pを返す。"""
+    o3 = {}
+    for seq in itertools.permutations(names, 3):
+        rem = 1.0; pr = 1.0
+        for nm in seq:
+            if rem <= 1e-9:
+                pr = 0; break
+            pr *= pv[nm] / rem; rem -= pv[nm]
+        o3['|'.join(seq)] = pr
+    P3 = lambda n: _placeProb(wp, gi[n], 3)
+    if boxMode:
+        bx = names[:min(4, len(names))]
+        probs = {}
+        probs['複勝BOX'] = (sum(P3(n) for n in bx) / len(bx)) if bx else 0
+        pairs = list(itertools.combinations(bx, 2))
+        pw = 0
+        for c in pairs:
+            for k, v in o3.items():
+                ss = k.split('|')
+                if c[0] in ss and c[1] in ss:
+                    pw += v
+        probs['ワイドBOX'] = pw
+        probs['馬連BOX'] = sum(pv[c[0]] * pv[c[1]] / (1 - pv[c[0]]) + pv[c[1]] * pv[c[0]] / (1 - pv[c[1]]) for c in pairs)
+        pt = 0
+        for c in itertools.combinations(bx, 3):
+            for seq in itertools.permutations(c, 3):
+                pt += o3.get('|'.join(seq), 0)
+        probs['三連複BOX'] = pt
+        return probs
+    uren = [n for n in col2 if n != A]
+    wd = [n for n in col3 if n != A]
+    p_uren = sum(pv[A] * pv[o] / (1 - pv[A]) + pv[o] * pv[A] / (1 - pv[o]) for o in uren)
+    p_wide = 0
+    for o in wd:
+        for k, v in o3.items():
+            ss = k.split('|')
+            if A in ss and o in ss:
+                p_wide += v
+    p_3p = 0
+    for c in itertools.combinations(wd, 2):
+        for seq in itertools.permutations([A, c[0], c[1]], 3):
+            p_3p += o3.get('|'.join(seq), 0)
+    p_utan = 0
+    for i in col1:
+        for j in col2:
+            if i != j:
+                p_utan += pv[i] * pv[j] / (1 - pv[i])
+    p_3t = 0
+    for i in col1:
+        for j in col2:
+            for k in col3:
+                if i != j and j != k and i != k:
+                    p_3t += o3.get('|'.join([i, j, k]), 0)
+    return {'単勝': pv[A], '複勝': P3(A), '馬連': p_uren, 'ワイド': p_wide,
+            '馬単': p_utan, '三連複': p_3p, '三連単': p_3t}
+
+
 def reconstruct(ev):
     wp = _softmax_winprobs(ev)
     mean = sum(h['スコア'] for h in ev) / len(ev)
@@ -169,9 +227,10 @@ def reconstruct(ev):
     col1 = sorted(col1, key=lambda n: um[n])
     col2 = sorted(col2, key=lambda n: um[n])
     col3 = sorted(col3, key=lambda n: um[n])
+    probs = _formation_probs(names, pv, wp, gi, A, col1, col2, col3, boxMode)
     return dict(A=A, umA=um[A], wA=wA, srcA=srcA, verdict=verdict, miyomi=miyomi,
                 boxMode=boxMode, col1=col1, col2=col2, col3=col3, um=um,
-                names=names, waku=waku)
+                names=names, waku=waku, probs=probs)
 
 
 def _to_int(x):
@@ -374,13 +433,25 @@ def render_panel(rec, ev_eval):
         mark = '<span style="color:#5DCAA5">&#9711;</span>' if hit else '<span style="color:#7a8694">&times;</span>'
         pay_s = f'&yen;{r:,}' if hit else '<span style="color:#7a8694">&mdash;</span>'
         roi_c = '#5DCAA5' if br >= 100 else ('#bdc3c7' if br > 0 else '#7a8694')
+        P = (rec.get('probs') or {}).get(bt)
+        be = (1.0 / P) if (P and P > 0) else None
+        be_s = f'{be:.1f}倍' if be else '<span style="color:#7a8694">&mdash;</span>'
+        if hit and be:
+            if br >= be * 100:
+                ev_s = '<span style="color:#5DCAA5;font-weight:700">&#9678; 期待値プラス</span>'
+            else:
+                ev_s = '<span style="color:#e67e22;font-weight:700">&#9651; 期待値マイナス</span>'
+        else:
+            ev_s = '<span style="color:#7a8694">&mdash;</span>'
         rows += (f'<tr><td style="font-weight:700;white-space:nowrap">{bt}</td>'
                  f'<td>{_cols_html(cols, sep, waku)}</td>'
                  f'<td style="text-align:right">{pts}</td>'
                  f'<td style="text-align:center">{mark}</td>'
                  f'<td>{_hits_html(hits, sep, waku)}</td>'
                  f'<td style="text-align:right;white-space:nowrap">{pay_s}</td>'
-                 f'<td style="text-align:right;color:{roi_c};font-weight:700">{br:.0f}%</td></tr>')
+                 f'<td style="text-align:right;color:{roi_c};font-weight:700">{br:.0f}%</td>'
+                 f'<td style="text-align:right;color:#f1c40f;white-space:nowrap">{be_s}</td>'
+                 f'<td style="text-align:center;white-space:nowrap">{ev_s}</td></tr>')
     note = ('軸固定の券種は軸が3着内に来ないと連鎖で外れます。'
             if not ev_eval['box'] else '軸不在の混戦としてBOX評価。')
     return f'''<div class="section" id="section-bettype">
@@ -391,10 +462,10 @@ def render_panel(rec, ev_eval):
     <span style="font-size:11px;color:#7f8c8d;margin-left:auto">着順 {'-'.join(str(x) for x in order[:3])}…</span>
   </div>
   <div style="overflow-x:auto"><table>
-    <thead><tr><th>券種</th><th>推奨フォーメーション</th><th style="text-align:right">点数</th><th style="text-align:center">的中</th><th>的中フォーメーション</th><th style="text-align:right">確定配当(100円)</th><th style="text-align:right">回収率</th></tr></thead>
+    <thead><tr><th>券種</th><th>推奨フォーメーション</th><th style="text-align:right">点数</th><th style="text-align:center">的中</th><th>的中フォーメーション</th><th style="text-align:right">確定配当(100円)</th><th style="text-align:right">回収率</th><th style="text-align:right">採算オッズ</th><th style="text-align:center">期待値</th></tr></thead>
     <tbody>{rows}</tbody>
   </table></div>
-  <div class="note">予想ダッシュボードが提案する各券種フォーメーションを、この結果の確定配当で照合（各組1点ずつ）。{note} 馬番バッジの色は枠番カラー。</div>
+  <div class="note">予想ダッシュボードが提案する各券種フォーメーションを、この結果の確定配当で照合（各組1点ずつ）。{note} 採算オッズ＝1÷的中率（予想時の合成採算オッズ）。的中馬券の確定配当が採算オッズを上回れば期待値プラス、下回れば期待値マイナス。馬番バッジの色は枠番カラー。</div>
 </div>'''
 
 

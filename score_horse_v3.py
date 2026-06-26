@@ -2576,10 +2576,16 @@ if __name__ == '__main__':
         shutuba_df['馬名'] = shutuba_df['馬名'].astype(str).str.strip()
 
     if args.sakuro:
-        sakuro_df = _read_df(args.sakuro, sheet_name=0)
+        try:
+            sakuro_df = _read_df(args.sakuro, sheet_name=0)
+        except pd.errors.EmptyDataError:
+            raise SystemExit('[skip] 坂路データが空です（取得失敗）。このレースは生成しません。坂路を取得し直して再実行してください。')
 
     if args.wood:
-        wood_df = _read_df(args.wood, sheet_name=0)
+        try:
+            wood_df = _read_df(args.wood, sheet_name=0)
+        except pd.errors.EmptyDataError:
+            raise SystemExit('[skip] ウッドデータが空です（取得失敗）。このレースは生成しません。ウッドを取得し直して再実行してください。')
 
     if args.shutuba:
         _rd          = date(int(float(_race_info['年'])), int(float(_race_info['月'])), int(float(_race_info['日'])))

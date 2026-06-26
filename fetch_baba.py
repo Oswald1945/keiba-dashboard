@@ -97,6 +97,27 @@ def detect_venue(html: str) -> str | None:
     return None
 
 
+def parse_meeting_date(html: str):
+    """開催見出し(例:「第3回東京競馬6日（2026年6月21日（日））」)から開催日を抽出。
+    年付き日付(YYYY年M月D日)のみ対象。馬場状態の『◯月◯日現在』(年なし)は拾わない。"""
+    for m in re.finditer(r'<h2[^>]*>([^<]{2,80})', html):
+        text = m.group(1)
+        if any(v in text for v in KNOWN_VENUES):
+            dm = re.search(r'(\d{4})年(\d{1,2})月(\d{1,2})日', text)
+            if dm:
+                try:
+                    return datetime.date(int(dm.group(1)), int(dm.group(2)), int(dm.group(3)))
+                except ValueError:
+                    pass
+    dm = re.search(r'(\d{4})年(\d{1,2})月(\d{1,2})日', html)
+    if dm:
+        try:
+            return datetime.date(int(dm.group(1)), int(dm.group(2)), int(dm.group(3)))
+        except ValueError:
+            pass
+    return None
+
+
 def _norm_going(g: str) -> str:
     """馬場状態文字を正規化。稍→稍重, 不→不良"""
     s = str(g).strip()
@@ -339,6 +360,7 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
     どのページでも取得できない場合はデフォルト値を返す。
     debug=True のとき parse_html を baba_debug_<venue>.html に保存。
     """
+    stale_seen = False
     for suffix in PAGE_SUFFIXES:
         url = BASE_URL + suffix
         html = fetch_page(url)
@@ -352,6 +374,18 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
         if content_venue != venue_name:
             label = content_venue if content_venue else '不明'
             print(f'  [parse] {suffix}: コンテンツ会場={label}（対象: {venue_name}）→ スキップ')
+            continue
+
+        # 開催日の照合: ページが古い開催（先週など）の馬場を指している場合は誤用しない
+        _mdate = parse_meeting_date(html)
+        try:
+            _rdate = datetime.datetime.strptime(date_str, '%Y%m%d').date()
+        except Exception:
+            _rdate = None
+        if _mdate and _rdate and abs((_mdate - _rdate).days) > 4:
+            print(f'  [parse] {suffix}: {venue_name} だが掲載開催日 {_mdate} がレース日 {_rdate} と乖離'
+                  f'（{abs((_mdate - _rdate).days)}日）→ 古い開催の可能性でスキップ')
+            stale_seen = True
             continue
 
         # 正しいページなので全体をパース（会場セクション分割不要）
@@ -416,7 +450,13 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
         }
 
     # どのページでも該当会場が見つからなかった場合
-    print(f'  [fetch_baba] {venue_name} の馬場情報ページが見つかりませんでした', file=sys.stderr)
+    if stale_seen:
+        _reason = ('該当会場は検出したが掲載が古い開催（先週など）でレース日と乖離→最新の馬場が未掲載。'
+                   'JRA馬場ページ更新後に再取得するか baba_manual.json で指定してください（要手動確認）')
+    else:
+        _reason = '該当会場の馬場ページが見つからず失敗（要手動確認）'
+    print(f'  [fetch_baba] {venue_name} の馬場情報ページが見つかりませんでした'
+          f'{"（古い開催のみ検出＝未更新の可能性）" if stale_seen else ""}', file=sys.stderr)
     return {
         '場所':          venue_name,
         '取得日時':      datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -430,7 +470,7 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
         'コース替わり初週': False,
         '推定馬場_芝':      None,
         '推定馬場_ダート':  None,
-        '推定根拠':         '該当会場の馬場ページが見つからず失敗（要手動確認）',
+        '推定根拠':         _reason,
     }
 
 

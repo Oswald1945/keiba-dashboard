@@ -2188,9 +2188,10 @@ function _seqHtml(umaArr, sep){
   return '<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap">'+umaArr.map(_umaChip).join(s)+'</span>';
 }
 function _evCell(P, key){
-  var be = P>0 ? (1/P) : 0; var od=_betOdds[key];
+  var Pc = (P>1?1:P);  // 的中率は100%上限・採算オッズは1.0倍下限（多点的中で確率合計が100%超になる不整合を是正）
+  var be = Pc>0 ? (1/Pc) : 0; var od=_betOdds[key];
   var evStr='-', cls='', judge='';
-  if(od!=null && od>0 && P>0){ var e=od*P-1; evStr=e.toFixed(2); if(e>0.05){cls='ev-positive';judge='◎ 妙味';} else if(e>=-0.1){cls='ev-neutral';judge='△';} else {cls='ev-negative';judge='✕';} }
+  if(od!=null && od>0 && Pc>0){ var e=od*Pc-1; evStr=e.toFixed(2); if(e>0.05){cls='ev-positive';judge='◎ 妙味';} else if(e>=-0.1){cls='ev-neutral';judge='△';} else {cls='ev-negative';judge='✕';} }
   var inp='<input type="number" inputmode="decimal" min="0" step="0.1" data-betkey="'+key+'" value="'+(od!=null?od:'')+'" style="width:66px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;border-radius:4px;padding:2px 5px;font-size:12px;text-align:right" onchange="_betOddsInput(this)">';
   return {be:(be>0?be.toFixed(1)+'倍':'-'), inp:inp, ev:evStr, cls:cls, judge:judge};
 }
@@ -2306,7 +2307,7 @@ function renderBets(){
     var bh=document.getElementById('betHead'); if(bh) bh.innerHTML='<th>券種</th><th>買い目(BOX)</th><th>点数</th><th>的中率</th><th>合成採算オッズ</th><th>実オッズ(入力)</th><th>期待値</th><th>判定</th>';
     var bf=[ {bt:'複勝BOX(各1点)', M:bx.length, P:P_fk/bx.length}, {bt:'ワイドBOX', M:pr.length, P:P_wb}, {bt:'馬連BOX', M:pr.length, P:P_mb}, {bt:'三連複BOX', M:tri.length, P:P_tb} ];
     body.innerHTML=bf.map(function(f){ if(f.M<1) return ''; var key=f.bt+'|'+bxu.join(','); var c=_evCell(f.P,key);
-      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_seqHtml(bxu,'')+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(f.P*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>'; }).join('');
+      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_seqHtml(bxu,'')+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>'; }).join('');
     var bmn=document.getElementById('betModeNote'); if(bmn) bmn.textContent='軸不在の混戦のためBOX推奨。複勝BOXの的中率は1点あたり平均（検証ROI93%）';
     return;
   }
@@ -2335,7 +2336,7 @@ function renderBets(){
       if(f.M<1) return '<tr><td style="font-weight:700">'+f.bt+'</td><td colspan="7" style="color:#667">相手不足</td></tr>';
       var key=f.bt+'|'+f.cols.map(function(c){return c.join(',');}).join(f.sep);
       var c=_evCell(f.P,key);
-      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_colHtml(f.cols,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(f.P*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
+      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_colHtml(f.cols,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
     }).join('');
     var mn=document.getElementById('betModeNote'); if(mn) mn.textContent='券種ごとのフォーメーション（合成採算オッズ）。馬単/三連単は列ごとに取捨';
     return;
@@ -2352,7 +2353,7 @@ function renderBets(){
   st.sort(function(a,b){return b.p-a.p;}); st.forEach(function(x){ rows.push(['三連単',x.c,'→',x.p]); });
   body.innerHTML=rows.map(function(r){
     var key=r[0]+'|'+r[1].join(r[2]); var c=_evCell(r[3],key);
-    return '<tr><td style="font-weight:700">'+r[0]+'</td><td>'+_seqHtml(r[1],r[2])+'</td><td style="text-align:center">1点</td><td>'+(r[3]*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
+    return '<tr><td style="font-weight:700">'+r[0]+'</td><td>'+_seqHtml(r[1],r[2])+'</td><td style="text-align:center">1点</td><td>'+(Math.min(r[3],1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
   }).join('');
   var mn2=document.getElementById('betModeNote'); if(mn2) mn2.textContent='列取捨に基づく全買い目（個別採算オッズ）';
 }

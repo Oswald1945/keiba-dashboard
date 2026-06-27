@@ -49,6 +49,16 @@ FORCE_REVIEW = '--force' in sys.argv  # review生成済でも強制再生成
 NO_BROWSER   = '--no-browser' in sys.argv  # ブラウザ自動起動を抑制
 REVIEW_MODE  = '--review' in sys.argv   # 回顧のみ生成（予想はスキップ）。無指定は予想のみ生成。
 
+# --regen <YYYYMMDD>: done/ から該当日付の入力を input/ に戻し、強制再生成する（馬場をbaba_manual.jsonで直した後の作り直し用）
+REGEN_DATE = None
+for _i in range(len(sys.argv) - 1):
+    if sys.argv[_i] == '--regen':
+        REGEN_DATE = sys.argv[_i + 1]
+        break
+if REGEN_DATE:
+    FORCE_PRED = True
+    FORCE_REVIEW = True
+
 SHARE_URL_LOG = SCRIPT_DIR / 'shared_urls.txt'
 GITHUB_PAGES_BASE = 'https://oswald1945.github.io/keiba-dashboard'
 
@@ -539,6 +549,15 @@ def main():
     if not INPUT_DIR.exists():
         print(f'input/ が見つかりません')
         return
+
+    if REGEN_DATE:
+        _moved = 0
+        for _f in sorted(DONE_DIR.glob(f'*_{REGEN_DATE}_*.csv')):
+            _dest = INPUT_DIR / _f.name
+            if not _dest.exists():
+                shutil.move(str(_f), str(_dest))
+                _moved += 1
+        print(f'[regen] {REGEN_DATE}: done/ から {_moved} 件の入力を input/ へ復元しました（強制再生成）')
 
     races = scan_input()
     if not races:

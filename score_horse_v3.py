@@ -2355,6 +2355,27 @@ def compute_scores(
             res.at[idx, '人気補正pts'] = bonus
             res.at[idx, '総合スコア']  = model_score + bonus
 
+    # ── ④ 偏差値gap収縮補正（過剰評価の是正）────────────────────────────
+    # 過去走バックテスト(157R)で、軸の偏差値gapが大きい「抜けた1頭」ほど
+    # モデル想定勝率を大きく下回ることが判明（gap≥7帯: 想定37%→実勝率15%）。
+    # 偏差値の裾(|z|>τ)を緩く圧縮し、過剰な確信度を是正する。順位は単調変換で不変。
+    # 補正後スコアを唯一の基準として偏差値・勝率・EV・買い判定すべてが整合する。
+    # 強度は的中率較正で決定（中gap帯を保ちつつ裾を是正）。データ蓄積後に再較正可。
+    _DEV_SHRINK_TAU = 1.75   # 圧縮を始める閾値（z=1.75 ≒ 偏差値68）
+    _DEV_SHRINK_LAM = 0.20   # 閾値超過分に掛ける係数（<1で圧縮、1.0で無効）
+    _sc_series = res['総合スコア']
+    _sc_mean = float(_sc_series.mean())
+    _sc_sd   = float(_sc_series.std(ddof=0)) or 1.0
+    def _shrink_dev_score(_s):
+        _z = (_s - _sc_mean) / _sc_sd
+        if _z > _DEV_SHRINK_TAU:
+            _z = _DEV_SHRINK_TAU + (_z - _DEV_SHRINK_TAU) * _DEV_SHRINK_LAM
+        elif _z < -_DEV_SHRINK_TAU:
+            _z = -_DEV_SHRINK_TAU + (_z + _DEV_SHRINK_TAU) * _DEV_SHRINK_LAM
+        return _sc_mean + _sc_sd * _z
+    res['総合スコア'] = res['総合スコア'].apply(_shrink_dev_score)
+    # ────────────────────────────────────────────────────────────────────
+
     res['順位予想'] = res['総合スコア'].rank(ascending=False, method='min').astype(int)
     res = res.sort_values('総合スコア', ascending=False).reset_index(drop=True)
 

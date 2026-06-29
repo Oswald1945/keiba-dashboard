@@ -2243,24 +2243,38 @@ function renderBets(){
   EV_DATA.forEach(function(h){ var ep=Number(h['SmartRC推定人気順']); var pr=Number(h['順位予想']);
     if(ep===1) _fav1Rank=pr; if(ep>=5&&pr<=3&&!_anaH) _anaH={uma:h['馬番'],ep:ep}; });
   var _ana=!!_anaH;
+  var _dev4=(arr[3]!=null)?arr[3].dev:arr[arr.length-1].dev; var spread=dv[A]-_dev4;
   if(_srcA>=4){ V={b:'🟡 要検討（中穴軸）',c:'#f1c40f',bg:'#3a2e10',r:'モデル最上位が推定'+_srcA+'番人気の中穴。的中時の妙味は大きいが軸成績は低くハイリスク（買うなら少点数の三連複・ワイドで）'}; }
   else if((_srcA===2||_srcA===3)&&(_fav1Rank>=4||_ana)){ miyomi=true;
     var _why=_ana?('推定'+_anaH.ep+'番人気の穴('+_anaH.uma+'番)をモデルが上位評価'):('推定1番人気をモデルが'+_fav1Rank+'位に低評価');
     V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(推定'+_srcA+'番人気)が最上位＋'+_why+'＝市場乖離のある妙味の買いレース'}; }
-  else if(wA<0.18){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'抜けた軸が不在の混戦。頭固定は危険なので上位拮抗馬をBOX（検証: 上位3頭の複勝BOXで回収率93%）'}; }
+  else if(spread<=4.0){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'上位が偏差値で僅差（spread'+spread.toFixed(1)+'）＝抜けた軸が不在の混戦。頭固定は危険なので上位拮抗馬をBOX'}; }
   else { var _rs=(_srcA<=1)?('軸'+um[A]+'番は推定1番人気＝市場の中心で単勝に妙味が乏しい'):('軸'+um[A]+'番(推定'+_srcA+'番人気)は堅調だが、推定1番人気もモデル上位かつ穴不在＝市場通りで妙味なし');
     V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:_rs}; }
   // ── 妙味レースの買い目精製: 切れる人気馬(相手の推定上位人気1-3番でモデル評価=勝率最低)を外して妙味のある買い目に。
   //    外せる人気馬も穴(推定5番↓)も無く妙味が組めなければ見送りに倒す（人気馬を外す＋ダメなら見送り）──
   var _cutHorse=null;
   if(miyomi){
+    var _D_CLEAR=5.0, _D_CLOSE=2.0;
     var _topPop=partners.filter(function(n){ return sc[n]!=null && Number(sc[n])<=3; });
     var _hasAna=partners.some(function(n){ return sc[n]!=null && Number(sc[n])>=5; });
     if(_topPop.length){
-      _cutHorse=_topPop.reduce(function(a,b){ return pv[b]<pv[a]?b:a; });
-      partners=partners.filter(function(n){ return n!==_cutHorse; });
-      contend=[A].concat(partners);
-      V.r=V.r+'。相手の切れる人気馬'+um[_cutHorse]+'番(推定'+sc[_cutHorse]+'番人気)を外して妙味化';
+      var _cand=_topPop.reduce(function(a,b){ return dv[b]<dv[a]?b:a; });
+      var _others=partners.filter(function(n){ return n!==_cand; });
+      var _bestOther=_others.length?Math.max.apply(null,_others.map(function(n){return dv[n];})):dv[A];
+      var _pd=partners.map(function(n){return dv[n];});
+      var _rng=(partners.length>=2)?(Math.max.apply(null,_pd)-Math.min.apply(null,_pd)):0;
+      if(_bestOther-dv[_cand]>=_D_CLEAR){
+        _cutHorse=_cand; partners=partners.filter(function(n){ return n!==_cutHorse; }); contend=[A].concat(partners);
+        V.r=V.r+'。相手の人気馬'+um[_cutHorse]+'番(推定'+sc[_cutHorse]+'番人気)は偏差値が明確に低く実力差で切り';
+      } else if(_rng<=_D_CLOSE){
+        _cutHorse=_topPop.reduce(function(a,b){ return Number(sc[b])<Number(sc[a])?b:a; });
+        partners=partners.filter(function(n){ return n!==_cutHorse; }); contend=[A].concat(partners);
+        V.r=V.r+'。上位が偏差値で僅差の混戦のため、過剰人気の'+um[_cutHorse]+'番(推定'+sc[_cutHorse]+'番人気)を割り切って切り';
+      } else {
+        miyomi=false;
+        V={b:'\ud83d\udd34 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番は妙味候補だが、相手の人気馬を実力差でも混戦でも切れず＝妙味の買い目が組めない見送り'};
+      }
     } else if(!_hasAna){
       miyomi=false;
       V={b:'\ud83d\udd34 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番(推定'+_srcA+'番人気)は妙味候補だが、相手が人気馬だけで妙味のある買い目が組めない＝見送り'};
@@ -2301,14 +2315,14 @@ function renderBets(){
     var bx=names.slice(0,Math.min(4,names.length)).sort(function(a,b){return um[a]-um[b];}); var bxu=bx.map(function(n){return um[n];});
     var pr=_combK(bx,2);
     var P_mb=0; pr.forEach(function(c){ P_mb+=pv[c[0]]*pv[c[1]]/(1-pv[c[0]])+pv[c[1]]*pv[c[0]]/(1-pv[c[1]]); });
-    var P_wb=0; pr.forEach(function(c){ var t=0; for(var k in o3){var ss=k.split('|'); if(ss.indexOf(c[0])>=0&&ss.indexOf(c[1])>=0) t+=o3[k];} P_wb+=t; });
+    var P_wb=0; for(var kw in o3){var _ss=kw.split('|'); var _cnt=0; for(var _bi=0;_bi<bx.length;_bi++){if(_ss.indexOf(bx[_bi])>=0)_cnt++;} if(_cnt>=2) P_wb+=o3[kw];}
     var tri=_combK(bx,3); var P_tb=0; tri.forEach(function(c){ _permK(c,3).forEach(function(seq){P_tb+=o3[seq.join('|')]||0;}); });
-    var P_fk=0; bx.forEach(function(n){ P_fk+=P3(n); });
+    var P_fk=0; for(var kf in o3){var _ss=kf.split('|'); if(bx.some(function(n){return _ss.indexOf(n)>=0;})) P_fk+=o3[kf];}
     var bh=document.getElementById('betHead'); if(bh) bh.innerHTML='<th>券種</th><th>買い目(BOX)</th><th>点数</th><th>的中率</th><th>合成採算オッズ</th><th>実オッズ(入力)</th><th>期待値</th><th>判定</th>';
-    var bf=[ {bt:'複勝BOX(各1点)', M:bx.length, P:P_fk/bx.length}, {bt:'ワイドBOX', M:pr.length, P:P_wb}, {bt:'馬連BOX', M:pr.length, P:P_mb}, {bt:'三連複BOX', M:tri.length, P:P_tb} ];
+    var bf=[ {bt:'複勝BOX', M:bx.length, P:P_fk}, {bt:'ワイドBOX', M:pr.length, P:P_wb}, {bt:'馬連BOX', M:pr.length, P:P_mb}, {bt:'三連複BOX', M:tri.length, P:P_tb} ];
     body.innerHTML=bf.map(function(f){ if(f.M<1) return ''; var key=f.bt+'|'+bxu.join(','); var c=_evCell(f.P,key);
       return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_seqHtml(bxu,'')+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>'; }).join('');
-    var bmn=document.getElementById('betModeNote'); if(bmn) bmn.textContent='軸不在の混戦のためBOX推奨。複勝BOXの的中率は1点あたり平均（検証ROI93%）';
+    var bmn=document.getElementById('betModeNote'); if(bmn) bmn.textContent='軸不在の混戦のためBOX推奨。的中率は「BOX内で1組以上的中」する確率（複勝BOXは1頭以上、ワイドBOXは2頭以上が3着内）';
     return;
   }
   var head=document.getElementById('betHead');
@@ -2317,7 +2331,7 @@ function renderBets(){
     var uren=col2.filter(function(n){return n!==A;});
     var wd=col3.filter(function(n){return n!==A;});
     var P_uren=0; uren.forEach(function(o){ P_uren += pv[A]*pv[o]/(1-pv[A]) + pv[o]*pv[A]/(1-pv[o]); });
-    var P_wide=0; wd.forEach(function(o){ var t=0; for(var k in o3){var ss=k.split('|'); if(ss.indexOf(A)>=0&&ss.indexOf(o)>=0) t+=o3[k];} P_wide+=t; });
+    var P_wide=0; for(var kw in o3){var _ss=kw.split('|'); if(_ss.indexOf(A)>=0 && wd.some(function(o){return _ss.indexOf(o)>=0;})) P_wide+=o3[kw];}
     var trios=_combK(wd,2); var P_3p=0; trios.forEach(function(c){ _permK([A,c[0],c[1]],3).forEach(function(seq){P_3p+=o3[seq.join('|')]||0;}); });
     // 馬単 col1->col2
     var utanCnt=0,P_utan=0; col1.forEach(function(i){ col2.forEach(function(j){ if(i!==j){ utanCnt++; P_utan+=pv[i]*pv[j]/(1-pv[i]); } }); });

@@ -133,6 +133,10 @@ def reconstruct(ev):
         if ep >= 5 and pr <= 3 and _anaH is None and pr > 0:
             _anaH = dict(uma=h['馬番'], ep=ep)
     _ana = _anaH is not None
+    # 偏差値ベースの混戦判定: 上位4頭の偏差値が僅差(spread小)＝抜けた軸不在
+    _S_BOX = 4.0
+    _dev4 = dv[arr[3]['name']] if len(arr) >= 4 else dv[arr[-1]['name']]
+    spread = dv[A] - _dev4
     miyomi = False
     boxMode = False
     if _srcA >= 4:
@@ -140,18 +144,32 @@ def reconstruct(ev):
     elif (_srcA == 2 or _srcA == 3) and (_fav1Rank >= 4 or _ana):
         miyomi = True
         verdict = '買い妙味'
-    elif wA < 0.18:
+    elif spread <= _S_BOX:
         boxMode = True
         verdict = '混戦BOX'
     else:
         verdict = '見送り'
+    # 妙味精製: 偏差値で相手の切りを判断（明確に離れた相手は実力で切る／僅差混戦は過剰人気を割り切り／根拠弱ければ妙味組めず見送り）
     if miyomi:
+        _D_CLEAR = 5.0   # 切る候補が残す最強相手より偏差値で5以上低い→実力差で切る
+        _D_CLOSE = 2.0   # 相手間の偏差値レンジ≤2→僅差混戦→過剰人気を割り切り
         topPop = [n for n in partners if sc[n] is not None and _num(sc[n], 99) <= 3]
         hasAna = any(sc[n] is not None and _num(sc[n], 99) >= 5 for n in partners)
         if topPop:
-            cutHorse = min(topPop, key=lambda n: pv[n])
-            partners = [n for n in partners if n != cutHorse]
-            contend = [A] + partners
+            cand = min(topPop, key=lambda n: dv[n])   # 人気相手で偏差値最低=切る候補
+            others = [n for n in partners if n != cand]
+            bestOther = max((dv[n] for n in others), default=dv[A])
+            rng = (max(dv[n] for n in partners) - min(dv[n] for n in partners)) if len(partners) >= 2 else 0.0
+            if bestOther - dv[cand] >= _D_CLEAR:
+                partners = [n for n in partners if n != cand]   # 実力差で切り
+                contend = [A] + partners
+            elif rng <= _D_CLOSE:
+                overpop = min(topPop, key=lambda n: _num(sc[n], 99))   # 最人気の相手を割り切り
+                partners = [n for n in partners if n != overpop]
+                contend = [A] + partners
+            else:
+                miyomi = False                          # 切る根拠弱い→妙味組めず
+                verdict = '見送り'
         elif not hasAna:
             miyomi = False
             verdict = '見送り'

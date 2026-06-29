@@ -189,6 +189,16 @@ def parse_kansui(html: str) -> float | None:
     return None
 
 
+def parse_weather(html: str) -> str | None:
+    """当日の天候（晴/曇/小雨/雨/雪 等）を解析。取れなければ None。
+    JRA馬場ページは天候を明示しないことが多いため best-effort。"""
+    m = re.search(r'天[候気][：:\s]{0,4}(晴|快晴|曇|くもり|小雨|雨|大雨|雪|みぞれ)', html)
+    if m:
+        w = m.group(1)
+        return {'快晴': '晴', 'くもり': '曇'}.get(w, w)
+    return None
+
+
 def parse_course(html: str) -> tuple[str | None, bool]:
     """
     HTML から使用コース（A/B/C/D）とコース替わり初週フラグを解析。
@@ -321,9 +331,10 @@ def parse_weekly_rain(html: str, target_date_str: str) -> float | None:
     return None
 
 
-def estimate_race_baba(current_baba: str | None, rain_mm: float | None) -> tuple[str, str]:
+def estimate_race_baba(current_baba: str | None, rain_mm: float | None,
+                       weather: str | None = None) -> tuple[str, str]:
     """
-    現在馬場 + 降水量 → (推定馬場, 根拠文字列)
+    現在馬場 + 当日降水見込み(週間天気) + 天候 → (当日推定馬場, 根拠文字列)
 
     降水量別の悪化目安:
       0mm     : 変化なし
@@ -331,27 +342,36 @@ def estimate_race_baba(current_baba: str | None, rain_mm: float | None) -> tuple
       3-15mm  : 1ランク悪化（稍重化の可能性）
       15-30mm : 1ランク悪化（ほぼ確実）
       30mm以上 : 2ランク悪化
+    降水量が取得できない場合は天候(雨/雪)から最小限の悪化を補完する。
     """
     if not current_baba or current_baba not in BABA_LEVELS:
         return '良', '馬場情報なし（デフォルト:良）'
 
     idx = BABA_LEVELS.index(current_baba)
-    rain = rain_mm if rain_mm is not None else 0.0
 
-    if rain <= 0:
-        degrade, reason = 0, f'降水なし'
-    elif rain < 3:
-        degrade, reason = 0, f'降水量{rain}mm（少量・影響小）'
-    elif rain < 15:
-        degrade, reason = 1, f'降水量{rain}mm → 1ランク悪化見込み'
-    elif rain < 30:
-        degrade, reason = 1, f'降水量{rain}mm → 稍重〜重相当'
+    if rain_mm is not None:
+        rain = rain_mm
+        if rain <= 0:
+            degrade, reason = 0, '当日降水見込みなし'
+        elif rain < 3:
+            degrade, reason = 0, f'当日降水{rain}mm（少量・影響小）'
+        elif rain < 15:
+            degrade, reason = 1, f'当日降水{rain}mm → 1ランク悪化見込み'
+        elif rain < 30:
+            degrade, reason = 1, f'当日降水{rain}mm → 稍重〜重相当'
+        else:
+            degrade, reason = 2, f'当日降水{rain}mm → 重〜不良相当'
+    elif weather in ('小雨',):
+        degrade, reason = 1, f'天候{weather}（降水量不明・1ランク悪化見込み）'
+    elif weather in ('雨', '大雨', '雪', 'みぞれ'):
+        degrade, reason = 1, f'天候{weather}（降水量不明・悪化見込み）'
     else:
-        degrade, reason = 2, f'降水量{rain}mm → 重〜不良相当'
+        degrade, reason = 0, '当日降水見込みなし'
 
     new_idx = min(3, idx + degrade)
     estimated = BABA_LEVELS[new_idx]
-    return estimated, f'現在馬場:{current_baba} + {reason}'
+    _wx = f'／天候{weather}' if weather else ''
+    return estimated, f'現在馬場:{current_baba}{_wx} + {reason}'
 
 
 def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict:
@@ -406,6 +426,7 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
         cushion                = parse_cushion_value(parse_html)
         kansui                 = parse_kansui(parse_html)
         rain_mm                = parse_weekly_rain(html, date_str)  # 降水量は全体から
+        weather                = parse_weather(parse_html)
         course, is_course_change = parse_course(parse_html)
 
         print(f'  [parse]   芝:{shiba_baba}({shiba_conf})  ダート:{dart_baba}({dart_conf})  '
@@ -424,8 +445,8 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
             status = '要確認'
 
         if status == '確定':
-            est_shiba, shiba_reason = estimate_race_baba(shiba_baba, rain_mm)
-            est_dart,  _            = estimate_race_baba(dart_baba,  rain_mm)
+            est_shiba, shiba_reason = estimate_race_baba(shiba_baba, rain_mm, weather)
+            est_dart,  _            = estimate_race_baba(dart_baba,  rain_mm, weather)
         else:
             est_shiba = est_dart = None
             shiba_reason = ('馬場状態の裏付けデータが取れず要確認（凡例誤検出の疑い）'
@@ -439,9 +460,12 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
             '取得状態':          status,
             '芝馬場':            shiba_baba,
             'ダート馬場':        dart_baba,
+            '現在馬場_芝':       shiba_baba,
+            '現在馬場_ダート':   dart_baba,
             'クッション値':      cushion,
             '含水率':            kansui,
             '降水量_mm':         rain_mm,
+            '天候':              weather,
             '使用コース':        course,
             'コース替わり初週':  is_course_change,
             '推定馬場_芝':       est_shiba,
@@ -463,9 +487,12 @@ def fetch_baba_info(venue_name: str, date_str: str, debug: bool = False) -> dict
         '取得状態':      '失敗',
         '芝馬場':        None,
         'ダート馬場':    None,
+        '現在馬場_芝':   None,
+        '現在馬場_ダート': None,
         'クッション値':  None,
         '含水率':        None,
         '降水量_mm':     None,
+        '天候':          None,
         '使用コース':       None,
         'コース替わり初週': False,
         '推定馬場_芝':      None,

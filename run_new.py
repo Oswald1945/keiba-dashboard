@@ -85,8 +85,83 @@ def _load_baba_manual():
 
 def _baba_manual_for(venue, date):
     """その日付(YYYYMMDD)の競馬場の手動馬場を返す。無ければ None（=自動取得を使用）。
-    baba_manual.json は {"YYYYMMDD": {"東京": {...}}} の日付キー形式。別日付の値は使われない。"""
+    baba_manual.json は {"YYYYMMDD": {"東京": {...}}} の日付キー形式。別日付の値は使われない。
+    各会場は {芝, ダート} に加えて任意で {降水mm, 天候} を持てる（当日馬場予測に使用）。"""
     return (_load_baba_manual().get(date) or {}).get(venue)
+
+
+def _apply_manual_baba(_man, _bi, _surface):
+    """手動指定の『現在馬場』に当日の降水見込み(週間天気)＋天候を加味して
+    『当日推定馬場』を算出し、_bi（baba_json辞書）を更新して estimated_baba を返す。
+    降水/天候は baba_manual.json の手動値を最優先、無ければ自動取得値を使用。"""
+    try:
+        from fetch_baba import estimate_race_baba
+    except Exception:
+        estimate_race_baba = None
+    _cur_shiba = _man.get('芝') or _man.get('ダート') or '良'
+    _cur_dart  = _man.get('ダート') or _man.get('芝') or '良'
+    _rain = _man.get('降水mm', _man.get('降水量_mm', None))
+    if _rain is None:
+        _rain = _bi.get('降水量_mm') if _bi else None
+    try:
+        _rain = float(_rain) if _rain is not None else None
+    except Exception:
+        _rain = None
+    _wx = _man.get('天候') or (_bi.get('天候') if _bi else None)
+    if estimate_race_baba:
+        _est_shiba, _rsn = estimate_race_baba(_cur_shiba, _rain, _wx)
+        _est_dart,  _    = estimate_race_baba(_cur_dart,  _rain, _wx)
+    else:
+        _est_shiba, _est_dart, _rsn = _cur_shiba, _cur_dart, f'現在馬場:{_cur_shiba}'
+    if _bi is None:
+        _bi = {}
+    _bi['取得状態']       = '手動'
+    _bi['現在馬場_芝']     = _cur_shiba
+    _bi['現在馬場_ダート'] = _cur_dart
+    _bi['推定馬場_芝']     = _est_shiba
+    _bi['推定馬場_ダート'] = _est_dart
+    if _rain is not None:
+        _bi['降水量_mm'] = _rain
+    if _wx:
+        _bi['天候'] = _wx
+    _bi['推定根拠'] = f'手動指定 / {_rsn}'
+    estimated_baba = _est_dart if _surface == 'dart' else _est_shiba
+    return estimated_baba, _bi
+
+
+def _log_baba_history(race_id, venue, date, surface, bi):
+    """クッション値・含水率・天候など当日馬場データをレース単位で baba_history.csv に追記。
+    将来クッション値等をスコアに反映するためのデータ蓄積用（現時点ではスコア未使用）。
+    同一 race_id は最新で上書き（重複再生成に耐える）。"""
+    import csv
+    _path = SCRIPT_DIR / 'baba_history.csv'
+    _cols = ['race_id', '日付', '会場', '芝ダ', '現在馬場_芝', '現在馬場_ダート',
+             '推定馬場_芝', '推定馬場_ダート', 'クッション値', '含水率', '降水量_mm',
+             '天候', '使用コース', '取得状態', '記録日時']
+    bi = bi or {}
+    _row = {
+        'race_id': race_id, '日付': date, '会場': venue, '芝ダ': surface,
+        '現在馬場_芝': bi.get('現在馬場_芝') or bi.get('芝馬場'),
+        '現在馬場_ダート': bi.get('現在馬場_ダート') or bi.get('ダート馬場'),
+        '推定馬場_芝': bi.get('推定馬場_芝'), '推定馬場_ダート': bi.get('推定馬場_ダート'),
+        'クッション値': bi.get('クッション値'), '含水率': bi.get('含水率'),
+        '降水量_mm': bi.get('降水量_mm'), '天候': bi.get('天候'),
+        '使用コース': bi.get('使用コース'), '取得状態': bi.get('取得状態'),
+        '記録日時': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+    }
+    try:
+        _rows = []
+        if _path.exists():
+            with open(_path, encoding='utf-8', newline='') as f:
+                _rows = [r for r in csv.DictReader(f) if r.get('race_id') != race_id]
+        _rows.append(_row)
+        with open(_path, 'w', encoding='utf-8', newline='') as f:
+            w = csv.DictWriter(f, fieldnames=_cols)
+            w.writeheader()
+            for r in _rows:
+                w.writerow({c: r.get(c, '') for c in _cols})
+    except Exception as _e:
+        print(f'  [baba] 履歴記録スキップ: {_e}')
 
 
 def _read_surface(shutuba_path):
@@ -398,11 +473,11 @@ def process_race(race_id, files) -> pathlib.Path | None:
                         _mk      = 'ダート' if _surface == 'dart' else '芝'
                         _man     = _baba_manual_for(_venue, _date)
                         if _man:  # baba_manual.json による手動上書き（最優先）
-                            estimated_baba = _man.get(_mk) or _man.get('芝') or _man.get('ダート') or '良'
-                            print(f'  [baba] 手動指定(baba_manual.json)を使用: {_venue} {_mk}={estimated_baba}')
-                            _bi['推定馬場_芝']     = _man.get('芝', estimated_baba)
-                            _bi['推定馬場_ダート'] = _man.get('ダート', estimated_baba)
-                            _bi['取得状態'] = '手動'
+                            estimated_baba, _bi = _apply_manual_baba(_man, _bi, _surface)
+                            print(f'  [baba] 手動指定(baba_manual.json)＋当日予測を使用: {_venue} '
+                                  f'現在 芝{_bi.get("現在馬場_芝")}/ダ{_bi.get("現在馬場_ダート")} '
+                                  f'→ 推定 芝{_bi.get("推定馬場_芝")}/ダ{_bi.get("推定馬場_ダート")} '
+                                  f'（{_bi.get("推定根拠","")}）')
                             baba_json.write_text(_j.dumps(_bi, ensure_ascii=False, indent=2), encoding='utf-8')
                         elif _status == '確定':
                             estimated_baba = (_bi.get('推定馬場_ダート') if _surface == 'dart' else _bi.get('推定馬場_芝')) or '良'
@@ -420,13 +495,18 @@ def process_race(race_id, files) -> pathlib.Path | None:
                         print(f'  [baba] 【警告】取得失敗（ネットワーク/ページ無し）: {(_out + _err).strip()[:80]}')
                         _man = _baba_manual_for(_venue, _date)
                         if _man:
-                            _mk2 = 'ダート' if _surface == 'dart' else '芝'
-                            estimated_baba = _man.get(_mk2) or _man.get('芝') or '良'
-                            print(f'  [baba] 手動指定を使用: {_venue} {_mk2}={estimated_baba}')
+                            import json as _j
+                            estimated_baba, _bi = _apply_manual_baba(_man, {'場所': _venue}, _surface)
+                            print(f'  [baba] 手動指定＋当日予測を使用（自動取得失敗）: {_venue} '
+                                  f'→ 推定 芝{_bi.get("推定馬場_芝")}/ダ{_bi.get("推定馬場_ダート")}')
+                            try:
+                                baba_json.write_text(_j.dumps(_bi, ensure_ascii=False, indent=2), encoding='utf-8')
+                            except Exception:
+                                baba_json = None
                         else:
                             _BABA_ALERTS.append((race_id, _venue, 'ネットワーク失敗'))
                             print(f'  [baba] 【警告】暫定「良」で継続。baba_manual.json で指定し再生成できます。')
-                        baba_json = None
+                            baba_json = None
                 except subprocess.TimeoutExpired:
                     print(f'  [baba] タイムアウト → デフォルト(良)で継続')
                     baba_json = None
@@ -435,6 +515,17 @@ def process_race(race_id, files) -> pathlib.Path | None:
                     baba_json = None
             else:
                 print(f'  [baba] race_id から会場を特定できず → デフォルト(良)で継続')
+
+            # 当日馬場データを履歴に蓄積（クッション値等の将来スコア反映用）
+            if _venue and not DRY_RUN:
+                try:
+                    _bi_log = {}
+                    if baba_json and baba_json.exists():
+                        import json as _j
+                        _bi_log = _j.loads(baba_json.read_text(encoding='utf-8'))
+                    _log_baba_history(race_id, _venue, _date, _surface, _bi_log)
+                except Exception as _e:
+                    print(f'  [baba] 履歴記録スキップ: {_e}')
 
         cmd = [sys.executable, SCORE_PY,
                '--excel', kako, '--shutuba', shutuba, '--outdir', OUT_DIR,

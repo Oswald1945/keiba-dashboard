@@ -124,12 +124,15 @@ def reconstruct(ev):
     contend = [A] + partners
     _srcA = srcA if srcA < 99 else 99
     _fav1Rank = 99
+    _fav2Rank = 99
     _anaH = None
     for h in ev:
         ep = _num(h.get('SmartRC推定人気順'), 0)
         pr = _num(h.get('順位予想'), 0)
         if ep == 1:
             _fav1Rank = pr
+        if ep == 2:
+            _fav2Rank = pr
         if ep >= 5 and pr <= 3 and _anaH is None and pr > 0:
             _anaH = dict(uma=h['馬番'], ep=ep)
     _ana = _anaH is not None
@@ -147,8 +150,16 @@ def reconstruct(ev):
         miyomi = True
         verdict = '買い妙味'
     elif spread <= _S_BOX and _gapA <= _GAP_LEAD:
-        boxMode = True
-        verdict = '混戦BOX'
+        # 人気総流しBOXは妙味なし→見送り。BOX4頭に穴馬(推定5番人気以下)を含み、
+        # かつ推定1・2番人気がともにモデル評価5番手以下のときだけBOX妙味ありとする。
+        _ANA_POP = 5
+        _box_has_ana = any(_num(arr[i].get('src'), 99) >= _ANA_POP
+                           for i in range(min(4, len(arr))))
+        if _box_has_ana and (_fav1Rank >= 5 or _fav2Rank >= 5):
+            boxMode = True
+            verdict = '混戦BOX'
+        else:
+            verdict = '見送り'
     else:
         verdict = '見送り'
     # 妙味精製: 偏差値で相手の切りを判断（明確に離れた相手は実力で切る／僅差混戦は過剰人気を割り切り／根拠弱ければ妙味組めず見送り）

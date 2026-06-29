@@ -133,10 +133,12 @@ def reconstruct(ev):
         if ep >= 5 and pr <= 3 and _anaH is None and pr > 0:
             _anaH = dict(uma=h['馬番'], ep=ep)
     _ana = _anaH is not None
-    # 偏差値ベースの混戦判定: 上位4頭の偏差値が僅差(spread小)＝抜けた軸不在
-    _S_BOX = 4.0
+    # 偏差値ベースの混戦判定: 上位4頭が僅差(spread小) かつ 軸が2位に抜けていない(gapA小)＝1強不在
+    _S_BOX = 4.0      # 軸-4位の偏差値差。これ以内＝上位4頭僅差
+    _GAP_LEAD = 2.0   # 軸-2位の偏差値差。これ超＝軸が抜けた1強→混戦ではない(頭固定/見送り側)
     _dev4 = dv[arr[3]['name']] if len(arr) >= 4 else dv[arr[-1]['name']]
     spread = dv[A] - _dev4
+    _gapA = dv[A] - dv[arr[1]['name']]
     miyomi = False
     boxMode = False
     if _srcA >= 4:
@@ -144,7 +146,7 @@ def reconstruct(ev):
     elif (_srcA == 2 or _srcA == 3) and (_fav1Rank >= 4 or _ana):
         miyomi = True
         verdict = '買い妙味'
-    elif spread <= _S_BOX:
+    elif spread <= _S_BOX and _gapA <= _GAP_LEAD:
         boxMode = True
         verdict = '混戦BOX'
     else:

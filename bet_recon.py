@@ -186,6 +186,33 @@ def reconstruct(ev):
         elif not hasAna:
             miyomi = False
             verdict = '見送り'
+    # 穴妙味（要検討）: 軸=本命でも推定5番人気以降&偏差値58以上の優秀穴がいれば馬連/ワイド/三連複で妙味
+    anaMode = False
+    ana_oppMW = []
+    ana_opp3 = []
+    if not miyomi and not boxMode and verdict == '見送り':
+        _scr = {x['name']: ev[x['idx']].get('スコア') for x in arr}
+        anaPicks = [x['name'] for x in arr
+                    if x['name'] != A and _num(x['src'], 99) >= 5 and x['dev'] >= 58]
+        if anaPicks:
+            anaMode = True
+            verdict = '穴妙味'
+            for _nm in anaPicks:
+                if _nm not in contend:
+                    partners.append(_nm); contend.append(_nm)
+            # 馬連/ワイド相手＝穴のみ
+            ana_oppMW = sorted(um[n] for n in anaPicks)
+            # 三連複相手＝軸以外をスコア降順、連続ギャップ5以上で切る（穴は必ず含める）
+            _cand3 = sorted([n for n in contend if n != A], key=lambda n: -_scr[n])
+            _opp3 = []; _prevS = None
+            for _nm in _cand3:
+                if _prevS is not None and (_prevS - _scr[_nm]) >= 5:
+                    break
+                _opp3.append(_nm); _prevS = _scr[_nm]
+            for _nm in anaPicks:
+                if _nm not in _opp3:
+                    _opp3.append(_nm)
+            ana_opp3 = sorted(um[n] for n in _opp3)
     col1 = [n for n in contend if n == A or W(n) >= 0.6 * wA]
     col1.sort(key=lambda n: -W(n))
     col1 = col1[:3]
@@ -214,7 +241,8 @@ def reconstruct(ev):
     p3_uma = {um[n]: _placeProb(wp, gi[n], 3) for n in names}
     o3_uma = {tuple(um[n] for n in seq): v for seq, v in o3.items()}
     return dict(A=A, umA=um[A], wA=wA, srcA=srcA, verdict=verdict, miyomi=miyomi,
-                boxMode=boxMode, col1=col1, col2=col2, col3=col3, um=um,
+                boxMode=boxMode, anaMode=anaMode, ana_oppMW=ana_oppMW, ana_opp3=ana_opp3,
+                col1=col1, col2=col2, col3=col3, um=um,
                 names=names, waku=waku, pv_uma=pv_uma, p3_uma=p3_uma, o3_uma=o3_uma)
 
 
@@ -308,6 +336,30 @@ def eval_race(rec, res_df, payouts):
         return dict(order=order, bets=bets, box=True, axis_uma=umA,
                     axis_fin=order.index(umA) + 1 if umA in order else None)
 
+    if rec.get('anaMode'):
+        oppMW = rec['ana_oppMW']; opp3 = rec['ana_opp3']
+        bets = {}
+        hits = []; ret = 0
+        for o in oppMW:
+            for cs, a in umaren:
+                if cs == {umA, o}:
+                    hits.append((sorted([umA, o]), a)); ret += a
+        bets['馬連'] = (len(oppMW), ret, hits)
+        hits = []; ret = 0
+        for o in oppMW:
+            for cs, a in wide:
+                if cs == {umA, o}:
+                    hits.append((sorted([umA, o]), a)); ret += a
+        bets['ワイド'] = (len(oppMW), ret, hits)
+        hits = []; ret = 0
+        for c in itertools.combinations(opp3, 2):
+            for cs, a in s3p:
+                if cs == {umA, c[0], c[1]}:
+                    hits.append((sorted([umA, c[0], c[1]]), a)); ret += a
+        bets['三連複'] = (len(list(itertools.combinations(opp3, 2))), ret, hits)
+        return dict(order=order, bets=bets, box=False, ana=True, axis_uma=umA,
+                    axis_fin=order.index(umA) + 1 if umA in order else None)
+
     col1u = [um[n] for n in rec['col1']]
     col2u = [um[n] for n in rec['col2']]
     col3u = [um[n] for n in rec['col3']]
@@ -373,6 +425,7 @@ _VERDICT_STYLE = {
     '買い妙味': ('#27ae60', '#1a3a28', '#5DCAA5'),
     '中穴軸': ('#f1c40f', '#3a2e10', '#f1c40f'),
     '混戦BOX': ('#f1c40f', '#3a2e10', '#f1c40f'),
+    '穴妙味': ('#f1c40f', '#3a2e10', '#f1c40f'),
     '見送り': ('#e74c3c', '#3a1a1a', '#F09595'),
 }
 _WAKU_BG = {1: '#f4f4f4', 2: '#2b2b2b', 3: '#d63a3a', 4: '#3a66d6',
@@ -427,6 +480,11 @@ def _forms(rec):
         bxu = sorted(um[n] for n in rec['names'][:min(4, len(rec['names']))])
         return [('複勝BOX', [bxu], ''), ('ワイドBOX', [bxu], '-'),
                 ('馬連BOX', [bxu], '-'), ('三連複BOX', [bxu], '-')]
+    if rec.get('anaMode'):
+        oppMW = rec['ana_oppMW']; opp3 = rec['ana_opp3']
+        return [('馬連', [[A], oppMW], '-'),
+                ('ワイド', [[A], oppMW], '-'),
+                ('三連複', [[A], opp3], '-')]
     uren = [um[n] for n in rec['col2'] if n != rec['A']]
     wd = [um[n] for n in rec['col3'] if n != rec['A']]
     col1u = [um[n] for n in rec['col1']]

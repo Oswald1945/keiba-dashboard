@@ -665,15 +665,31 @@ _baba_venue = _baba_info.get('場所', '')
 if _est_shiba:
     _shiba_color = _baba_color_map.get(_est_shiba, '#ecf0f1')
     _dart_color  = _baba_color_map.get(_est_dart,  '#ecf0f1')
+    _cur_shiba   = _baba_info.get('現在馬場_芝')
+    _cur_dart    = _baba_info.get('現在馬場_ダート')
     _cushion_str = (f'　クッション値: {_baba_info["クッション値"]}' if _baba_info.get('クッション値') else '')
-    _rain_str    = (f'　降水量: {_baba_info["降水量_mm"]}mm' if _baba_info.get('降水量_mm') is not None else '')
+    _rain_str    = (f'　降水: {_baba_info["降水量_mm"]}mm' if _baba_info.get('降水量_mm') is not None else '')
+    _wx          = _baba_info.get('天候')
+    _wx_str      = (f'　天候: {_wx}' if _wx else '')
+    _status      = _baba_info.get('取得状態', '')
+    _badge_map   = {'手動': ('#16a085', '手動指定'), '確定': ('#2980b9', '自動取得'),
+                    '要確認': ('#e67e22', '要確認'), '失敗': ('#c0392b', '取得失敗')}
+    _bcol, _blabel = _badge_map.get(_status, ('#7f8c8d', _status or '—'))
+    _badge       = f'<span style="background:{_bcol};color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:8px">{_blabel}</span>'
+    _venue_str   = (f'（{_baba_venue}）' if _baba_venue else '')
+    _chg = ''
+    if (_cur_shiba and _cur_shiba != _est_shiba) or (_cur_dart and _cur_dart != _est_dart):
+        _chg = (f'<span style="font-size:10px;color:#f1c40f;margin-left:8px">'
+                f'当日悪化見込み（現在 芝{_cur_shiba}／ダ{_cur_dart}）</span>')
     _konkyo_str  = _baba_info.get('推定根拠', '')
+    _konkyo_span = (f'<span style="font-size:10px;color:#bdc3c7;margin-left:12px">（{_konkyo_str}）</span>'
+                    if _konkyo_str else '')
     baba_banner = f'''<div class="shutuba-banner" style="background:linear-gradient(135deg,#1a3a6b 0%,#2c5282 100%);color:#fff;border-left:4px solid #f1c40f;margin-bottom:8px">
-      🌤 <b>推定馬場状態</b>（{_baba_venue}）：
+      🌤 <b>当日推定馬場</b>{_venue_str}{_badge}：
       芝 <b style="color:{_shiba_color};font-size:15px">{_est_shiba}</b>
       ／ダート <b style="color:{_dart_color};font-size:15px">{_est_dart}</b>
-      {_cushion_str}{_rain_str}
-      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（{_konkyo_str}）</span>
+      {_chg}{_cushion_str}{_rain_str}{_wx_str}
+      {_konkyo_span}
     </div>'''
 else:
     baba_banner = ''

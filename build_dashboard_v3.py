@@ -715,8 +715,10 @@ ev_data_json = json.dumps([
             h.get('SmartRC推定人気順') is not None
             and int(h.get('SmartRC推定人気順')) > len(horses) // 2
             and h['順位予想'] <= 3
-            and (h.get('コース適性pts', 0) + h.get('馬場適性pts', 0)
-                 + h.get('距離pts', 0) + h.get('展開pts', 0) + h.get('枠順pts', 0)) > 0
+        ),
+        'is_dark':         (
+            h.get('SmartRC推定人気順') is not None
+            and int(h.get('SmartRC推定人気順')) >= -(-len(horses) * 7 // 10)  # 推定人気下位30%(ceil(n*0.7))
         ),
     }
     for h in horses
@@ -1686,6 +1688,13 @@ html = f'''<!DOCTYPE html>
     </div>
     <!-- 2行目: 注目馬 / 本命馬自信あり バッジエリア（該当なければ非表示） -->
     {_badge_area_html}
+    <!-- バッジ凡例 -->
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:10px;padding:8px 14px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:11px;color:#bbb">
+      <span style="color:#888;font-weight:700">バッジ凡例:</span>
+      <span><span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 6px;border-radius:3px">大穴</span> 推定人気が下位（人気薄）</span>
+      <span><span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 6px;border-radius:3px">🎯</span> 注目穴馬（推定人気は下位だがモデル予想3位以内）</span>
+      <span><span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 6px;border-radius:3px">📌</span> メモ馬（過去に次走注目として登録）</span>
+    </div>
     <!-- モデル信頼度スライダーは廃止（T=20固定）-->
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="ev-tab active" id="tabTanshо" onclick="switchTab('tansho')">単勝 EV</button>
@@ -2059,7 +2068,7 @@ function computeEV(temp) {{
     }}
     const odds     = (!isFuku && _userOdds[h['馬番']] != null) ? _userOdds[h['馬番']] : _rawOdds;
     const ev       = (odds !== null && odds !== undefined) ? prob * odds - 1.0 : undefined;
-    const isDark = !!(h['オッズ'] && h['オッズ'] > DARK_THRESHOLD);
+    const isDark = !!h['is_dark'];  // 大穴=推定人気下位（実オッズではなく推定人気で判定）
     return {{ ...h, _prob: prob, _ev: ev, _isDark: isDark }};
   }});
   renderRows(rows);

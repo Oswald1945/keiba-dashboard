@@ -2310,6 +2310,14 @@ function renderBets(){
       V={b:'\ud83d\udd34 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番(推定'+_srcA+'番人気)は妙味候補だが、相手が人気馬だけで妙味のある買い目が組めない＝見送り'};
     }
   }
+  // ── 穴妙味（要検討）: 軸が本命でも、推定5番人気以降かつ偏差値58以上の優秀な穴がいれば馬連/ワイド/三連複で妙味 ──
+  var anaMode=false, _anaPicks=[];
+  arr.forEach(function(x){ if(x.name!==A && Number(x.src)>=5 && x.dev>=58){ _anaPicks.push(x.name); } });
+  if(!miyomi && !boxMode && _anaPicks.length>0 && V && V.b.indexOf('見送り')>=0){
+    anaMode=true;
+    _anaPicks.forEach(function(nm){ if(contend.indexOf(nm)<0){ partners.push(nm); contend.push(nm); } });
+    V={b:'🟡 要検討（穴妙味）',c:'#f1c40f',bg:'#3a2e10',r:'軸'+um[A]+'番は本命で単勝に妙味は乏しいが、推定5番人気以降で偏差値58以上の優秀な穴('+_anaPicks.map(function(nm){return um[nm]+'番';}).join('・')+')あり＝馬連・ワイドは軸→穴、三連複は穴＋スコア上位の強相手で高配当を狙う要検討レース'};
+  }
   var eb=document.getElementById('evRecBanner'); if(eb){ eb.style.background=V.bg; eb.style.borderColor=V.c; }
   var ebd=document.getElementById('evRecBadge'); if(ebd){ ebd.textContent=V.b; ebd.style.color=V.c; ebd.style.borderColor=V.c; }
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }
@@ -2340,6 +2348,36 @@ function renderBets(){
       return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+kya+'</td>'+'<td style="text-align:right;color:#bdc3c7">'+sco+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+srk+'</td>'+'<td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
     }).join('');
     pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（脚質／スコア／推定人気＝SmartRC ・ 勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="width:100%;max-width:720px"><thead><tr><th>馬</th><th style="text-align:center">脚質</th><th style="text-align:right">スコア</th><th style="text-align:center">推定人気</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
+  }
+  if(anaMode){
+    var scr={}; arr.forEach(function(x){ scr[x.name]=(EV_DATA[gi[x.name]]||{})['スコア']; });
+    // 馬連/ワイド相手＝穴のみ（妙味を最大化）
+    var oppMW=_anaPicks.slice().sort(_byUma);
+    // 三連複相手＝軸以外をスコア降順で並べ、連続ギャップ5以上で切る（穴は必ず含める）
+    var cand3=contend.filter(function(n){return n!==A;}).sort(function(a,b){return scr[b]-scr[a];});
+    var opp3=[]; var _prevS=null;
+    for(var _ci=0;_ci<cand3.length;_ci++){ var _nm=cand3[_ci];
+      if(_prevS!==null && (_prevS-scr[_nm])>=5){ break; }
+      opp3.push(_nm); _prevS=scr[_nm];
+    }
+    _anaPicks.forEach(function(nm){ if(opp3.indexOf(nm)<0) opp3.push(nm); });
+    opp3=opp3.sort(_byUma);
+    var P_urenA=0; oppMW.forEach(function(o){ P_urenA+=pv[A]*pv[o]/(1-pv[A])+pv[o]*pv[A]/(1-pv[o]); });
+    var P_wideA=0; for(var kwA in o3){var _ssA=kwA.split('|'); if(_ssA.indexOf(A)>=0 && oppMW.some(function(o){return _ssA.indexOf(o)>=0;})) P_wideA+=o3[kwA];}
+    var triosA=_combK(opp3,2); var P_3pA=0; triosA.forEach(function(c){ _permK([A,c[0],c[1]],3).forEach(function(seq){P_3pA+=o3[seq.join('|')]||0;}); });
+    var bhA=document.getElementById('betHead'); if(bhA) bhA.innerHTML='<th>券種</th><th>買い目</th><th>点数</th><th>的中率</th><th>合成採算オッズ</th><th>実オッズ(入力)</th><th>期待値</th><th>判定</th>';
+    var formsA=[
+      {bt:'馬連(軸→穴)', cols:[[um[A]],oppMW.map(function(n){return um[n];})], sep:'-', M:oppMW.length, P:P_urenA},
+      {bt:'ワイド(軸→穴)', cols:[[um[A]],oppMW.map(function(n){return um[n];})], sep:'-', M:oppMW.length, P:P_wideA},
+      {bt:'三連複(軸-強相手)', cols:[[um[A]],opp3.map(function(n){return um[n];})], sep:'-', M:triosA.length, P:P_3pA}
+    ];
+    body.innerHTML=formsA.map(function(f){
+      if(f.M<1) return '<tr><td style="font-weight:700">'+f.bt+'</td><td colspan="7" style="color:#667">相手不足</td></tr>';
+      var key=f.bt+'|'+f.cols.map(function(c){return c.join(',');}).join(f.sep); var c=_evCell(f.P,key);
+      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_colHtml(f.cols,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
+    }).join('');
+    var bmnA=document.getElementById('betModeNote'); if(bmnA) bmnA.textContent='穴妙味: 馬連・ワイドは軸→穴(相手は穴のみ)、三連複は穴＋スコア上位の強相手(スコア5以上離れた人気馬は実力差で除外)。高配当狙いの要検討。';
+    return;
   }
   if(boxMode){
     var bx=names.slice(0,Math.min(4,names.length)).sort(function(a,b){return um[a]-um[b];}); var bxu=bx.map(function(n){return um[n];});

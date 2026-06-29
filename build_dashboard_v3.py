@@ -2260,11 +2260,12 @@ function renderBets(){
     if(ep===1) _fav1Rank=pr; if(ep>=5&&pr<=3&&!_anaH) _anaH={uma:h['馬番'],ep:ep}; });
   var _ana=!!_anaH;
   var _dev4=(arr[3]!=null)?arr[3].dev:arr[arr.length-1].dev; var spread=dv[A]-_dev4;
+  var _gapA=(arr[1]!=null)?(dv[A]-arr[1].dev):99;  // 軸-2位偏差値差。>2で軸が抜けた1強＝混戦ではない
   if(_srcA>=4){ V={b:'🟡 要検討（中穴軸）',c:'#f1c40f',bg:'#3a2e10',r:'モデル最上位が推定'+_srcA+'番人気の中穴。的中時の妙味は大きいが軸成績は低くハイリスク（買うなら少点数の三連複・ワイドで）'}; }
   else if((_srcA===2||_srcA===3)&&(_fav1Rank>=4||_ana)){ miyomi=true;
     var _why=_ana?('推定'+_anaH.ep+'番人気の穴('+_anaH.uma+'番)をモデルが上位評価'):('推定1番人気をモデルが'+_fav1Rank+'位に低評価');
     V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(推定'+_srcA+'番人気)が最上位＋'+_why+'＝市場乖離のある妙味の買いレース'}; }
-  else if(spread<=4.0){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'上位が偏差値で僅差（spread'+spread.toFixed(1)+'）＝抜けた軸が不在の混戦。頭固定は危険なので上位拮抗馬をBOX'}; }
+  else if(spread<=4.0&&_gapA<=2.0){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'上位4頭が偏差値で僅差（spread'+spread.toFixed(1)+'）かつ軸も2位と僅差（gapA'+_gapA.toFixed(1)+'）＝抜けた1強が不在の混戦。頭固定は危険なので上位拮抗馬をBOX'}; }
   else { var _rs=(_srcA<=1)?('軸'+um[A]+'番は推定1番人気＝市場の中心で単勝に妙味が乏しい'):('軸'+um[A]+'番(推定'+_srcA+'番人気)は堅調だが、推定1番人気もモデル上位かつ穴不在＝市場通りで妙味なし');
     V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:_rs}; }
   // ── 妙味レースの買い目精製: 切れる人気馬(相手の推定上位人気1-3番でモデル評価=勝率最低)を外して妙味のある買い目に。

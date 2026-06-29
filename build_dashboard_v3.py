@@ -2255,9 +2255,9 @@ function renderBets(){
   var miyomi=false, boxMode=false, V;
   // 妙味の複合条件: 軸=推定2-3番人気 かつ「推定1番人気をモデルが低評価(順位≥4)」または「穴(推定5番人気以下)がモデル上位3」
   // 検証(122R): 複合条件あり31R 単勝ROI73%(穴ありは83%) vs 市場通り(条件なし)16R 46%。堅調なだけは妙味でない。
-  var _fav1Rank=99, _anaH=null;
+  var _fav1Rank=99, _fav2Rank=99, _anaH=null;
   EV_DATA.forEach(function(h){ var ep=Number(h['SmartRC推定人気順']); var pr=Number(h['順位予想']);
-    if(ep===1) _fav1Rank=pr; if(ep>=5&&pr<=3&&!_anaH) _anaH={uma:h['馬番'],ep:ep}; });
+    if(ep===1) _fav1Rank=pr; if(ep===2) _fav2Rank=pr; if(ep>=5&&pr<=3&&!_anaH) _anaH={uma:h['馬番'],ep:ep}; });
   var _ana=!!_anaH;
   var _dev4=(arr[3]!=null)?arr[3].dev:arr[arr.length-1].dev; var spread=dv[A]-_dev4;
   var _gapA=(arr[1]!=null)?(dv[A]-arr[1].dev):99;  // 軸-2位偏差値差。>2で軸が抜けた1強＝混戦ではない
@@ -2265,7 +2265,11 @@ function renderBets(){
   else if((_srcA===2||_srcA===3)&&(_fav1Rank>=4||_ana)){ miyomi=true;
     var _why=_ana?('推定'+_anaH.ep+'番人気の穴('+_anaH.uma+'番)をモデルが上位評価'):('推定1番人気をモデルが'+_fav1Rank+'位に低評価');
     V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(推定'+_srcA+'番人気)が最上位＋'+_why+'＝市場乖離のある妙味の買いレース'}; }
-  else if(spread<=4.0&&_gapA<=2.0){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'上位4頭が偏差値で僅差（spread'+spread.toFixed(1)+'）かつ軸も2位と僅差（gapA'+_gapA.toFixed(1)+'）＝抜けた1強が不在の混戦。頭固定は危険なので上位拮抗馬をBOX'}; }
+  else if(spread<=4.0&&_gapA<=2.0){
+    var _boxHasAna=false; for(var _bi=0;_bi<Math.min(4,arr.length);_bi++){ if(Number(arr[_bi].src)>=5){_boxHasAna=true;break;} }
+    if(_boxHasAna&&(_fav1Rank>=5||_fav2Rank>=5)){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'上位4頭が偏差値で僅差（spread'+spread.toFixed(1)+'）かつ軸も2位と僅差（gapA'+_gapA.toFixed(1)+'）＝抜けた1強が不在の混戦。BOXに穴馬を含み推定1or2番人気がモデル5番手以下＝妙味あり。頭固定せず上位拮抗馬をBOX'}; }
+    else{ V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'上位は偏差値僅差の混戦だが、BOX4頭が人気馬中心（推定1・2番人気がともにモデル上位 or 穴不在）＝人気総流しのBOXで妙味なし'}; }
+  }
   else { var _rs=(_srcA<=1)?('軸'+um[A]+'番は推定1番人気＝市場の中心で単勝に妙味が乏しい'):('軸'+um[A]+'番(推定'+_srcA+'番人気)は堅調だが、推定1番人気もモデル上位かつ穴不在＝市場通りで妙味なし');
     V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:_rs}; }
   // ── 妙味レースの買い目精製: 切れる人気馬(相手の推定上位人気1-3番でモデル評価=勝率最低)を外して妙味のある買い目に。

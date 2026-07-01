@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<title>レース回顧 函館9R 1勝クラス 2026/06/27</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);min-height:100vh;color:#e0e0e0;
+      font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic",Meiryo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      font-size:14px;line-height:1.5;padding:16px;max-width:1100px;margin:0 auto}
+h1{font-size:24px;color:#f1c40f;margin-bottom:4px;font-weight:700} .subtitle{font-size:13px;color:#7f8c8d;margin-bottom:20px}
+h2{font-size:18px;color:#f1c40f;margin-bottom:12px;border-left:3px solid #f1c40f;padding-left:8px;font-weight:700}
+.section{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px;margin-bottom:18px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.kpi{background:#0d1117;border-radius:8px;padding:12px;text-align:center}
+.kpi-val{font-size:26px;font-weight:700;color:#f1c40f} .kpi-lbl{font-size:11px;color:#7f8c8d;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#243447;color:#7f8c8d;padding:7px 8px;text-align:left;border-bottom:1px solid #2c3e50;white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid #1e2d3d;vertical-align:middle}
+tr:hover td{background:#1f2f42}
+.hit{color:#2ecc71;font-weight:700} .miss{color:#e74c3c} .mid{color:#f39c12}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600}
+.chart-wrap-lg{position:relative;height:420px} .note{font-size:11px;color:#7f8c8d;margin-top:8px;line-height:1.6}
+.improve-item{background:#0d1117;border-radius:6px;padding:10px 12px;margin-bottom:8px;border-left:3px solid #f39c12}
+.improve-title{font-weight:700;color:#f1c40f;font-size:13px;margin-bottom:4px}
+.improve-body{font-size:12px;color:#bdc3c7;line-height:1.6}
+.lap-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px}
+.lap-seg{height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;min-width:60px}
+.corner-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding:10px;background:#0d1117;border-radius:6px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#bdc3c7}
+.waku-circle{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;border:1px solid #333}
+.ev-pos{color:#2ecc71;font-weight:700} .ev-neg{color:#e74c3c}
+.ev-summary{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.ev-card{background:#0d1117;border-radius:6px;padding:8px 14px;font-size:12px;flex:1;min-width:140px}
+.ev-card-val{font-size:20px;font-weight:700;color:#f1c40f} .ev-card-lbl{color:#7f8c8d;font-size:11px;margin-top:2px}
+.pickup-note{font-size:12px;color:#bdc3c7;line-height:1.7;margin-bottom:14px;padding:10px;background:#0d1117;border-radius:6px;border-left:3px solid #9b59b6}
+.pickup-card{background:#0d1117;border-radius:8px;padding:12px 14px;margin-bottom:10px;border-left:4px solid #9b59b6}
+.pickup-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.pickup-name{font-size:15px;font-weight:700;color:#e0e0e0}
+.pickup-meta{font-size:11px;color:#7f8c8d;margin-left:auto}
+.waku-pill{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;border:1px solid #333}
+.pickup-reason{font-size:12px;color:#bdc3c7;line-height:1.8;padding-left:4px}
+.memo-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
+  background:#243447;border:1px solid #2c3e50;cursor:pointer;transition:all 0.15s;
+  font-size:12px;color:#e0e0e0;user-select:none}
+.memo-chip:hover{background:#2c3e50}
+.memo-chip-rank{font-size:11px;color:#7f8c8d;min-width:24px}
+.memo-chip-name{font-weight:700}
+.memo-chip-auto{font-size:10px;color:#f1c40f;font-weight:700;margin-left:2px}
+.memo-pre-selected{border-color:#8e44ad}
+</style></head><body>
+<h1>&#127943; レース回顧 &#8212; 函館9R 1勝クラス</h1>
+<div class="subtitle">2026年6月27日（土）・函館競馬場 芝1200m ・1勝クラス ・9頭立て</div>
+<div class="section"><h2>&#128203; レース概要</h2>
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-val">1.08.5</div><div class="kpi-lbl">勝ちタイム</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#e74c3c">ハイペース（前傾）</div><div class="kpi-lbl">ペース判定（PCI=37.0）</div></div>
+    <div class="kpi"><div class="kpi-val">晴 / 稍重</div><div class="kpi-lbl">天候 / 馬場状態</div></div>
+  </div>
+  <div style="margin-bottom:10px">
+    <div style="font-size:12px;color:#7f8c8d;margin-bottom:6px">ラップ構成（600m区間）</div>
+    <div class="lap-row"><span style="width:60px;color:#7f8c8d;font-size:12px">前半3F</span>
+      <div class="lap-seg" style="width:610px;background:#e74c3c">33.9秒</div></div>
+    <div class="lap-row"><span style="width:60px;color:#7f8c8d;font-size:12px">後半3F</span>
+      <div class="lap-seg" style="width:824px;background:#3498db">45.8秒</div></div>
+    <div style="font-size:11px;color:#7f8c8d;margin-top:4px">前後差 +-11.9秒 ／最速上がり 33.9秒</div>
+  </div>
+  <div style="font-size:12px;color:#7f8c8d">通過ラップ: 12.0-10.7-11.2-11.6-11.6-11.4 → 上りラップ: 68.5-56.5-45.8</div>
+</div>
+<div class="section"><h2>&#128202; 全馬成績詳細</h2>
+  <div style="overflow-x:auto"><table>
+    <thead><tr><th>着順</th><th>枠/馬番</th><th>馬名</th><th>人気/単勝</th><th>決め手</th><th>走破タイム</th><th>通過順位</th><th>上り3F</th><th>予想順位</th><th>スコア</th><th>順位差</th><th>予想精度</th></tr></thead>
+    <tbody id="detailBody"></tbody>
+  </table></div>
+</div>
+<div class="section"><h2>&#128205; コーナー通過順の変化</h2>
+  <div class="chart-wrap-lg"><canvas id="cornerChart"></canvas></div>
+  <div class="corner-legend" id="cornerLegend"></div>
+  <div class="note">各馬の1〜4コーナー通過順位と最終着順の推移。円の色は枠番カラー、数字は馬番。値が小さいほど前のポジション。</div>
+</div>
+<div class="section"><h2>&#9889; 上がり3F比較（速い順）</h2>
+  <div id="agariViz" style="padding:4px 0"></div>
+  <div class="note">バーが長いほど末脚が速い（最速: 33.9秒）。色は枠番カラー、右の数字は実際の着順。</div>
+</div>
+<div class="section" id="section-bettype">
+  <h2>&#127915; 券種別 結果照合</h2>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+    <span style="background:#3a1a1a;color:#F09595;border:1px solid #e74c3c;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700">予想時判定: 見送り</span>
+    <span style="font-size:12px;color:#9fb3c8">軸 4番 &rarr; <b style="color:#e0e0e0">2着</b>（推定1番人気）</span>
+    <span style="font-size:11px;color:#7f8c8d;margin-left:auto">着順 7-4-3…</span>
+  </div>
+  <div style="overflow-x:auto"><table>
+    <thead><tr><th>券種</th><th>推奨フォーメーション</th><th style="text-align:right">点数</th><th style="text-align:center">的中</th><th>的中フォーメーション</th><th style="text-align:right">確定配当(100円)</th><th style="text-align:right">回収率</th><th style="text-align:right">採算オッズ</th><th style="text-align:center">期待値</th></tr></thead>
+    <tbody><tr><td style="font-weight:700;white-space:nowrap;vertical-align:middle;">単勝</td><td style="vertical-align:middle;"><span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span></span></span></td><td style="text-align:right;vertical-align:middle;">1</td><td style="text-align:center;vertical-align:middle;"><span style="color:#7a8694">&times;</span></td><td style="padding:0"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-start"><span style="color:#7a8694">&mdash;</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#7a8694">&mdash;</span></div></td><td style="text-align:right;color:#7a8694;font-weight:700;vertical-align:middle;">0%</td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#7a8694">&mdash;</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:center"><span style="color:#7a8694">&mdash;</span></div></td></tr><tr><td style="font-weight:700;white-space:nowrap;vertical-align:middle;">複勝</td><td style="vertical-align:middle;"><span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span></span></span></td><td style="text-align:right;vertical-align:middle;">1</td><td style="text-align:center;vertical-align:middle;"><span style="color:#5DCAA5">&#9711;</span></td><td style="padding:0"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-start"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end">&yen;120</div></td><td style="text-align:right;color:#5DCAA5;font-weight:700;vertical-align:middle;">120%</td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#f1c40f">1.3倍</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:center"><span style="color:#e67e22;font-weight:700">&#9651; 期待値マイナス</span></div></td></tr><tr><td style="font-weight:700;white-space:nowrap;vertical-align:middle;">馬連</td><td style="vertical-align:middle;"><span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span></span><span style="margin:0 3px;color:#9ab">-</span><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#2b9b46;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">6</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">9</span></span></span></td><td style="text-align:right;vertical-align:middle;">3</td><td style="text-align:center;vertical-align:middle;"><span style="color:#5DCAA5">&#9711;</span></td><td style="padding:0"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-start"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span><span style="margin:0 3px;color:#9ab">-</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end">&yen;400</div></td><td style="text-align:right;color:#5DCAA5;font-weight:700;vertical-align:middle;">133%</td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#f1c40f">5.8倍</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:center"><span style="color:#e67e22;font-weight:700">&#9651; 期待値マイナス</span></div></td></tr><tr><td style="font-weight:700;white-space:nowrap;vertical-align:middle;">ワイド</td><td style="vertical-align:middle;"><span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span></span><span style="margin:0 3px;color:#9ab">-</span><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#2b9b46;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">6</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">8</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">9</span></span></span></td><td style="text-align:right;vertical-align:middle;">4</td><td style="text-align:center;vertical-align:middle;"><span style="color:#5DCAA5">&#9711;</span></td><td style="padding:0"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-start"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span><span style="margin:0 3px;color:#9ab">-</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end">&yen;200</div></td><td style="text-align:right;color:#bdc3c7;font-weight:700;vertical-align:middle;">50%</td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#f1c40f">2.4倍</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:center"><span style="color:#e67e22;font-weight:700">&#9651; 期待値マイナス</span></div></td></tr><tr><td style="font-weight:700;white-space:nowrap;vertical-align:middle;">馬単</td><td style="vertical-align:middle;"><span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span></span><span style="margin:0 3px;color:#9ab">&rarr;</span><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#2b9b46;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">6</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">9</span></span></span></td><td style="text-align:right;vertical-align:middle;">6</td><td style="text-align:center;vertical-align:middle;"><span style="color:#5DCAA5">&#9711;</span></td><td style="padding:0"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-start"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span><span style="margin:0 3px;color:#9ab">&rarr;</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end">&yen;900</div></td><td style="text-align:right;color:#5DCAA5;font-weight:700;vertical-align:middle;">150%</td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#f1c40f">12.6倍</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:center"><span style="color:#e67e22;font-weight:700">&#9651; 期待値マイナス</span></div></td></tr><tr><td style="font-weight:700;white-space:nowrap;vertical-align:middle;">三連複</td><td style="vertical-align:middle;"><span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span></span><span style="margin:0 3px;color:#9ab">-</span><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#2b9b46;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">6</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">8</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">9</span></span></span></td><td style="text-align:right;vertical-align:middle;">6</td><td style="text-align:center;vertical-align:middle;"><span style="color:#7a8694">&times;</span></td><td style="padding:0"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-start"><span style="color:#7a8694">&mdash;</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#7a8694">&mdash;</span></div></td><td style="text-align:right;color:#7a8694;font-weight:700;vertical-align:middle;">0%</td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#7a8694">&mdash;</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:center"><span style="color:#7a8694">&mdash;</span></div></td></tr><tr><td style="font-weight:700;white-space:nowrap;vertical-align:middle;">三連単</td><td style="vertical-align:middle;"><span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span></span><span style="margin:0 3px;color:#9ab">&rarr;</span><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#2b9b46;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">6</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">9</span></span><span style="margin:0 3px;color:#9ab">&rarr;</span><span style="display:inline-flex;flex-wrap:wrap;align-items:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#3a66d6;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">4</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#2b9b46;color:#fff;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">6</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f08a24;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">7</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">8</span><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f2a0c0;color:#000;font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">9</span></span></span></td><td style="text-align:right;vertical-align:middle;">18</td><td style="text-align:center;vertical-align:middle;"><span style="color:#7a8694">&times;</span></td><td style="padding:0"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-start"><span style="color:#7a8694">&mdash;</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#7a8694">&mdash;</span></div></td><td style="text-align:right;color:#7a8694;font-weight:700;vertical-align:middle;">0%</td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:flex-end"><span style="color:#7a8694">&mdash;</span></div></td><td style="padding:0;white-space:nowrap"><div style="min-height:26px;display:flex;align-items:center;justify-content:center"><span style="color:#7a8694">&mdash;</span></div></td></tr></tbody>
+  </table></div>
+  <div class="note">予想ダッシュボードが提案する各券種フォーメーションを、この結果の確定配当で照合（各組1点ずつ）。軸固定の券種は軸が3着内に来ないと連鎖で外れます。 採算オッズ＝1÷その買い目の的中率（内訳の個別採算オッズ）。的中馬券ごとに確定配当が採算オッズを上回れば期待値プラス。回収率はフォーメーション全体（総払戻÷総投資）。馬番バッジの色は枠番カラー。</div>
+</div>
+<div class="section"><h2>&#128176; 期待値分析（予測勝率 vs 市場オッズ）</h2>
+  <div class="ev-summary" id="evSummary"></div>
+  <div style="overflow-x:auto" id="evTableWrap"></div>
+  <div class="note">予測勝率 = スコアをsoftmax変換（温度T=20）した確率。市場確率 = 1÷単勝オッズ。<br>期待値 = 予測勝率 × 単勝オッズ − 1（プラスなら理論上のプラスEV馬）。過去走データなし等の理由で予想対象外となった馬はこのパネルから除外されます。</div>
+</div>
+<div class="section"><h2>&#128161; 次回への改善点</h2><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"><div class="kpi"><div class="kpi-val" style="color:#2ecc71">2/3</div><div class="kpi-lbl">予想上位3頭<br>3着内的中数</div></div><div class="kpi"><div class="kpi-val" style="color:#2ecc71">2着</div><div class="kpi-lbl">本命馬（予想1位）<br>実際着順</div></div><div class="kpi"><div class="kpi-val" style="color:#f39c12">2.4位</div><div class="kpi-lbl">全馬平均<br>着順誤差</div></div><div class="kpi"><div class="kpi-val" style="color:#f39c12">4.8着</div><div class="kpi-lbl">予想上位5頭<br>平均実際着順</div></div></div><div class="improve-item"><div class="improve-title">✓ 的中：上位予想の2頭が3着内に好走</div><div class="improve-body">ララバニュルス（予想1位→実際2着）・ドリーミングアップ（予想2位→実際1着） を正しく上位評価できた。</div></div><div class="improve-item"><div class="improve-title">⚠ 課題：ファニーバニー（予想3位→実際8着, +5）</div><div class="improve-body">脚質:中団 上り3F:35.0秒。スコアが過大評価だった可能性。補正要因を回顧で確認してください。</div></div><div class="improve-item"><div class="improve-title">⚠ 課題：ナンナンプー（予想4位→実際9着, +5）</div><div class="improve-body">脚質:先行 上り3F:36.5秒。スコアが過大評価だった可能性。補正要因を回顧で確認してください。</div></div><div class="improve-item"><div class="improve-title">⚠ 見落とし：ナオミライトニング（予想6位→実際3着）</div><div class="improve-body">脚質:追込 上り3F:34.3秒。スコアが過小評価だった可能性。臨戦・調教・コース適性補正を再確認。</div></div><div class="improve-item"><div class="improve-title">📌 脚質傾向：PCI=37.0（ハイペース（前傾））</div><div class="improve-body">5着以内の脚質構成：先行:2頭・差し:1頭・追込:1頭・逃げ:1頭。ペース予測と実際の脚質傾向を次回に活かすこと。</div></div></div>
+
+<div class="section" id="memo-section">
+<h2>&#128204; 次走注目馬メモ</h2>
+<div style="font-size:12px;color:#bdc3c7;margin-bottom:12px;line-height:1.7;
+     padding:10px;background:#0d1117;border-radius:6px;border-left:3px solid #8e44ad">
+  ★印はシステムが自動ピックアップした馬です。クリックで選択・解除できます。<br>
+  選択後「メモに保存」ボタンを押すと <b>memo_horses.json</b> に追記されます。
+</div>
+<div id="memo-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+  <div class="memo-chip" id="chip-ドリーミングアップ" data-name="ドリーミングアップ" data-rank="1" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">1着</span><span class="memo-chip-name">ドリーミングアップ</span></div><div class="memo-chip" id="chip-ララバニュルス" data-name="ララバニュルス" data-rank="2" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">2着</span><span class="memo-chip-name">ララバニュルス</span></div><div class="memo-chip" id="chip-ナオミライトニング" data-name="ナオミライトニング" data-rank="3" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">3着</span><span class="memo-chip-name">ナオミライトニング</span></div><div class="memo-chip" id="chip-シュークリーム" data-name="シュークリーム" data-rank="4" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">4着</span><span class="memo-chip-name">シュークリーム</span></div><div class="memo-chip" id="chip-クワイエットアイ" data-name="クワイエットアイ" data-rank="5" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">5着</span><span class="memo-chip-name">クワイエットアイ</span></div><div class="memo-chip" id="chip-ブライアーヒル" data-name="ブライアーヒル" data-rank="6" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">6着</span><span class="memo-chip-name">ブライアーヒル</span></div><div class="memo-chip" id="chip-トップオンザヒル" data-name="トップオンザヒル" data-rank="7" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">7着</span><span class="memo-chip-name">トップオンザヒル</span></div><div class="memo-chip" id="chip-ファニーバニー" data-name="ファニーバニー" data-rank="8" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">8着</span><span class="memo-chip-name">ファニーバニー</span></div><div class="memo-chip" id="chip-ナンナンプー" data-name="ナンナンプー" data-rank="9" data-selected="false" onclick="toggleMemoChip(this)"><span class="memo-chip-rank">9着</span><span class="memo-chip-name">ナンナンプー</span></div>
+</div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+  <button onclick="saveMemoToFile({"日付": "2026/06/27", "場所": "函館", "R": 9, "レース名": "", "クラス": "1勝クラス"})"
+     style="padding:8px 20px;background:linear-gradient(135deg,#8e44ad,#6c3483);
+            color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;
+            cursor:pointer;box-shadow:0 0 8px rgba(142,68,173,0.4)">
+    &#128204; メモに保存（memo_horses.json へ書き込み）
+  </button>
+  <button onclick="selectAllMemo(true)"
+     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+            border-radius:5px;font-size:12px;cursor:pointer">全選択</button>
+  <button onclick="selectAllMemo(false)"
+     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+            border-radius:5px;font-size:12px;cursor:pointer">全解除</button>
+  <span id="memo-save-msg" style="font-size:12px;color:#2ecc71;display:none;margin-left:8px"></span>
+</div>
+<div id="memo-browser-warn" style="display:none;margin-top:10px;padding:8px 12px;
+     background:#3a1a1a;border-radius:6px;font-size:12px;color:#e74c3c">
+  ⚠ このブラウザはFile System Access APIに対応していません。<br>
+  「JSONをダウンロード」ボタンでファイルを保存し、keiba-dashboardフォルダの
+  memo_horses.jsonに手動でマージしてください。
+  <br><button onclick="downloadMemoJson({"日付": "2026/06/27", "場所": "函館", "R": 9, "レース名": "", "クラス": "1勝クラス"})"
+    style="margin-top:6px;padding:5px 12px;background:#c0392b;color:#fff;
+           border:none;border-radius:4px;font-size:12px;cursor:pointer">
+    JSONをダウンロード
+  </button>
+</div>
+</div>
+<script>
+(function(){
+  var MEMO_RACE_INFO = {"日付": "2026/06/27", "場所": "函館", "R": 9, "レース名": "", "クラス": "1勝クラス"};
+  // チップの選択状態切り替え
+  window.toggleMemoChip = function(el) {
+    var sel = el.getAttribute('data-selected') === 'true';
+    el.setAttribute('data-selected', sel ? 'false' : 'true');
+    el.style.opacity = sel ? '0.4' : '1';
+    el.style.boxShadow = sel ? 'none' : '0 0 0 2px #8e44ad';
+  };
+  window.selectAllMemo = function(flag) {
+    document.querySelectorAll('.memo-chip').forEach(function(el) {
+      el.setAttribute('data-selected', flag ? 'true' : 'false');
+      el.style.opacity = flag ? '1' : '0.4';
+      el.style.boxShadow = flag ? '0 0 0 2px #8e44ad' : 'none';
+    });
+  };
+  // 初期スタイル適用
+  document.querySelectorAll('.memo-chip').forEach(function(el) {
+    var sel = el.getAttribute('data-selected') === 'true';
+    el.style.opacity = sel ? '1' : '0.4';
+    el.style.boxShadow = sel ? '0 0 0 2px #8e44ad' : 'none';
+  });
+  // 選択馬を収集してエントリ配列を返す
+  function collectEntries(raceInfo) {
+    var today = new Date().toISOString().slice(0,10);
+    var entries = [];
+    document.querySelectorAll('.memo-chip[data-selected="true"]').forEach(function(el) {
+      entries.push({
+        '馬名':   el.getAttribute('data-name'),
+        '登録日': today,
+        '元レース': raceInfo,
+        'メモ': ''
+      });
+    });
+    return entries;
+  }
+  // File System Access API で memo_horses.json に追記保存
+  window.saveMemoToFile = async function(raceInfo) {
+    if (!window.showOpenFilePicker) {
+      document.getElementById('memo-browser-warn').style.display = 'block';
+      return;
+    }
+    var newEntries = collectEntries(raceInfo);
+    if (!newEntries.length) {
+      alert('注目馬が選択されていません。');
+      return;
+    }
+    try {
+      var [fh] = await showOpenFilePicker({
+        types: [{ description: 'JSON', accept: {'application/json': ['.json']} }],
+        multiple: false
+      });
+      var f = await fh.getFile();
+      var existing = [];
+      try { existing = JSON.parse(await f.text()); } catch(e) { existing = []; }
+      // 同レースの同名馬は重複登録しない
+      var existingKeys = new Set(existing.map(function(e) {
+        return e['馬名'] + '|' + (e['元レース']||{})['日付'] + '|' + (e['元レース']||{})['R'];
+      }));
+      newEntries.forEach(function(e) {
+        var key = e['馬名'] + '|' + (e['元レース']||{})['日付'] + '|' + (e['元レース']||{})['R'];
+        if (!existingKeys.has(key)) { existing.push(e); }
+      });
+      var writable = await fh.createWritable();
+      await writable.write(JSON.stringify(existing, null, 2));
+      await writable.close();
+      var msg = document.getElementById('memo-save-msg');
+      msg.textContent = '✅ ' + newEntries.length + '頭を保存しました！';
+      msg.style.display = 'inline';
+      setTimeout(function(){ msg.style.display='none'; }, 4000);
+    } catch(e) {
+      if (e.name !== 'AbortError') alert('保存エラー: ' + e.message);
+    }
+  };
+  // フォールバック: JSONダウンロード
+  window.downloadMemoJson = function(raceInfo) {
+    var entries = collectEntries(raceInfo);
+    var blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'memo_additions.json';
+    a.click();
+  };
+})();
+</script>
+<script>
+const DATA = [{"入線順位": 1, "馬番": 7, "枠番": 7, "馬名": "ドリーミングアップ", "人気": 2, "単勝オッズ": 3.4, "決め手": "差し", "タイム": "1.08.5", "着差": "", "上り3F": 33.9, "通過1": 6, "通過2": 6, "通過3": null, "通過4": null, "体重": 462, "増減": 0, "予想順位": 2, "スコア": 70.7, "予想脚質": "追込", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 0.0}, {"入線順位": 2, "馬番": 4, "枠番": 4, "馬名": "ララバニュルス", "人気": 1, "単勝オッズ": 2.5, "決め手": "先行", "タイム": "1.08.9", "着差": "2", "上り3F": 34.9, "通過1": 2, "通過2": 2, "通過3": null, "通過4": null, "体重": 546, "増減": 8, "予想順位": 1, "スコア": 79.4, "予想脚質": "差し", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 0.4}, {"入線順位": 3, "馬番": 3, "枠番": 3, "馬名": "ナオミライトニング", "人気": 5, "単勝オッズ": 9.4, "決め手": "追込", "タイム": "1.09.0", "着差": "3/4", "上り3F": 34.3, "通過1": 6, "通過2": 7, "通過3": null, "通過4": null, "体重": 454, "増減": -2, "予想順位": 6, "スコア": 46.1, "予想脚質": "差し", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 0.5}, {"入線順位": 4, "馬番": 8, "枠番": 8, "馬名": "シュークリーム", "人気": 3, "単勝オッズ": 4.3, "決め手": "逃げ", "タイム": "1.09.1", "着差": "1", "上り3F": 35.2, "通過1": 1, "通過2": 1, "通過3": null, "通過4": null, "体重": 438, "増減": 2, "予想順位": 5, "スコア": 46.8, "予想脚質": "先行", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 0.6}, {"入線順位": 5, "馬番": 1, "枠番": 1, "馬名": "クワイエットアイ", "人気": 6, "単勝オッズ": 18.1, "決め手": "先行", "タイム": "1.09.1", "着差": "頭", "上り3F": 34.8, "通過1": 3, "通過2": 3, "通過3": null, "通過4": null, "体重": 456, "増減": 2, "予想順位": 7, "スコア": 33.3, "予想脚質": "差し", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 0.6}, {"入線順位": 6, "馬番": 2, "枠番": 2, "馬名": "ブライアーヒル", "人気": 8, "単勝オッズ": 76.0, "決め手": "後方", "タイム": "1.09.2", "着差": "3/4", "上り3F": 34.1, "通過1": 8, "通過2": 8, "通過3": null, "通過4": null, "体重": 484, "増減": -2, "予想順位": 8, "スコア": 29.8, "予想脚質": "差し", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 0.7}, {"入線順位": 7, "馬番": 5, "枠番": 5, "馬名": "トップオンザヒル", "人気": 9, "単勝オッズ": 111.1, "決め手": "後方", "タイム": "1.09.3", "着差": "クビ", "上り3F": 34.2, "通過1": 8, "通過2": 8, "通過3": null, "通過4": null, "体重": 468, "増減": 0, "予想順位": 9, "スコア": 1.0, "予想脚質": "差し", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 0.8}, {"入線順位": 8, "馬番": 6, "枠番": 6, "馬名": "ファニーバニー", "人気": 4, "単勝オッズ": 7.5, "決め手": "中団", "タイム": "1.09.5", "着差": "1 1/4", "上り3F": 35.0, "通過1": 5, "通過2": 5, "通過3": null, "通過4": null, "体重": 432, "増減": -6, "予想順位": 3, "スコア": 66.1, "予想脚質": "先行", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 1.0}, {"入線順位": 9, "馬番": 9, "枠番": 8, "馬名": "ナンナンプー", "人気": 7, "単勝オッズ": 59.2, "決め手": "先行", "タイム": "1.10.7", "着差": "7", "上り3F": 36.5, "通過1": 3, "通過2": 3, "通過3": null, "通過4": null, "体重": 460, "増減": -4, "予想順位": 4, "スコア": 63.3, "予想脚質": "差し", "複勝下限": null, "複勝上限": null, "過去走なし": false, "着差_sec": 2.2}];
+const RACE = {"レース名": "", "場所": "函館", "距離": 1200, "芝ダ": "芝", "天候": "晴", "馬場": "稍重", "頭数": 9, "前半3F": 33.9, "後半3F": 45.8, "PCI": 37.0, "前後差": -11.9, "最速上3F": 33.9, "通過ラップ": "12.0-10.7-11.2-11.6-11.6-11.4", "上りラップ": "68.5-56.5-45.8", "1着タイム": "1.08.5", "R": "9", "クラス名": "1勝クラス", "年": "2026", "月": "6", "日": "27"};
+const WAKU_BG = {1:'#ffffff',2:'#555555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'#22bb22',7:'#ff8822',8:'#ffaacc'};
+const WAKU_FG = {1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111',8:'#111'};
+function wBg(w){return WAKU_BG[w]||'#888';}
+function wFg(w){return WAKU_FG[w]||'#fff';}
+function rColor(r){return r===1?'#f1c40f':r<=3?'#2ecc71':r<=6?'#f39c12':'#7f8c8d';}
+function lColor(l){return({'先行':'#f39c12','逃げ':'#e74c3c','差し':'#3498db','後方':'#9b59b6','中団':'#1abc9c'})[l]||'#7f8c8d';}
+
+// コーナー通過順 カスタムプラグイン（枠番カラー + 馬番）
+const bangoPlugin={id:'bangoPlugin',afterDatasetsDraw(chart){
+  const ctx=chart.ctx;
+  chart.data.datasets.forEach((ds,i)=>{
+    const meta=chart.getDatasetMeta(i);
+    const bg=wBg(ds.waku),fg=wFg(ds.waku);
+    meta.data.forEach(pt=>{
+      ctx.save();ctx.beginPath();ctx.arc(pt.x,pt.y,10,0,Math.PI*2);
+      ctx.fillStyle=bg;ctx.fill();
+      ctx.strokeStyle='#0d1117';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.fillStyle=fg;ctx.font='bold 8px sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(ds.bango,pt.x,pt.y);ctx.restore();
+    });
+  });
+}};
+
+const cornerCtx=document.getElementById('cornerChart').getContext('2d');
+// 有効なコーナー列を動的に判定（nullのみの列はスキップ）
+const _cKeys=['通過1','通過2','通過3','通過4'];
+const _cLbls=['1角','2角','3角','4角'];
+const _activeCols=_cKeys.filter(k=>DATA.some(h=>h[k]!==null&&h[k]!==undefined));
+const _chartLabels=[..._activeCols.map(k=>_cLbls[_cKeys.indexOf(k)]),'着順'];
+const cornerDS=DATA.map(h=>{
+  const w=h['枠番']||Math.ceil(h['馬番']/2);
+  const pts=[..._activeCols.map(k=>h[k]),h['入線順位']];
+  return{label:h['馬番']+'番 '+h['馬名'],bango:h['馬番'],waku:w,
+    data:pts,
+    borderColor:wBg(w),backgroundColor:'transparent',
+    borderWidth:h['入線順位']<=3?3:1.2,pointRadius:0,tension:0.25};
+});
+new Chart(cornerCtx,{type:'line',
+  data:{labels:_chartLabels,datasets:cornerDS},
+  options:{responsive:true,maintainAspectRatio:false,
+    scales:{
+      y:{reverse:true,min:1,max:DATA.length,ticks:{color:'#7f8c8d',stepSize:2},grid:{color:'#2c3e50'},
+         title:{display:true,text:'通過順位（小=前）',color:'#7f8c8d'}},
+      x:{ticks:{color:'#bdc3c7',font:{size:13}},grid:{color:'#2c3e50'}}
+    },
+    plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y}番手`}}}
+  },plugins:[bangoPlugin]});
+
+// 凡例
+document.getElementById('cornerLegend').innerHTML=
+  [...DATA].sort((a,b)=>a['馬番']-b['馬番']).map(h=>{
+    const w=h['枠番']||Math.ceil(h['馬番']/2);
+    return `<div class="legend-item"><div class="waku-circle" style="background:${wBg(w)};color:${wFg(w)}">${h['馬番']}</div><span>${h['馬名']}</span></div>`;
+  }).join('');
+
+// 上がり3F CSS棒グラフ
+const agS=[...DATA].sort((a,b)=>a['上り3F']-b['上り3F']);
+const minA=Math.min(...agS.map(h=>h['上り3F'])),maxA=Math.max(...agS.map(h=>h['上り3F']));
+const rngA=maxA-minA||1;
+document.getElementById('agariViz').innerHTML=agS.map((h,i)=>{
+  const pct=((1-(h['上り3F']-minA)/rngA)*70+15).toFixed(0);
+  const w=h['枠番']||Math.ceil(h['馬番']/2);
+  const barBg=wBg(w);
+  const barFg=wFg(w);
+  // バーが短い(40%未満)場合はテキストをバー外(右側)に白で表示して視認性を確保
+  const shortBar=Number(pct)<40;
+  const timeLabel=`${h['上り3F'].toFixed(1)}秒${i===0?' ★最速':''}`;
+  const innerSpan=shortBar?''
+    :`<span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:${barFg};font-weight:700;text-shadow:0 0 3px rgba(0,0,0,0.5)">${timeLabel}</span>`;
+  const outerSpan=shortBar
+    ?`<span style="font-size:11px;color:#ecf0f1;font-weight:600;margin-left:4px;white-space:nowrap">${timeLabel}</span>`
+    :'';
+  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+    <div style="width:26px;height:26px;border-radius:50%;background:${barBg};color:${barFg};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid #444">${h['馬番']}</div>
+    <div style="width:110px;font-size:11px;color:#bdc3c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h['馬名']}</div>
+    <div style="flex:1;background:#243447;border-radius:4px;height:22px;position:relative;overflow:visible;display:flex;align-items:center">
+      <div style="height:100%;width:${pct}%;background:${barBg};opacity:0.9;border-radius:4px;position:relative;flex-shrink:0">${innerSpan}</div>
+      ${outerSpan}
+    </div>
+    <div style="width:32px;font-size:12px;color:${rColor(h['入線順位'])};font-weight:700;text-align:right">${h['入線順位']}着</div>
+  </div>`;
+}).join('');
+
+// 期待値分析（参考スコアのみの馬＝過去走なしは除外してsoftmax計算）
+const T=20;
+const sc=DATA.filter(h=>h['スコア']!==null&&!h['過去走なし']&&h['単勝オッズ']>0);
+const mxS=Math.max(...sc.map(h=>h['スコア']));
+const ep=sc.map(h=>Math.exp((h['スコア']-mxS)/T));
+const sm=ep.reduce((a,b)=>a+b,0);
+sc.forEach((h,i)=>{h._p=ep[i]/sm;h._mp=1/h['単勝オッズ'];h._ev=h._p*h['単勝オッズ']-1;});
+const evS=[...sc].sort((a,b)=>b._ev-a._ev);
+const posEV=sc.filter(h=>h._ev>0);
+const hit1=posEV.filter(h=>h['入線順位']===1);
+const tb=posEV.length*100,tr2=hit1.reduce((s,h)=>s+h['単勝オッズ']*100,0);
+const pf=(tr2-tb).toFixed(0),roi=tb>0?((tr2/tb-1)*100).toFixed(1):'—';
+// 期待値判別成功の集計（2×2マトリクス）
+const evByRatio0=[...sc].sort((a,b)=>(b._p/b._mp)-(a._p/a._mp));
+const successEV=sc.filter(h=>(h._p/h._mp)>1&&h['入線順位']<h['人気']);
+const overEV   =sc.filter(h=>(h._p/h._mp)>1&&h['入線順位']>=h['人気']);
+const missEV   =sc.filter(h=>(h._p/h._mp)<=1&&h['入線順位']<h['人気']);
+const cutEV    =sc.filter(h=>(h._p/h._mp)<=1&&h['入線順位']>=h['人気']);
+const posCount =sc.filter(h=>(h._p/h._mp)>1).length;
+const successRate=posCount>0?(successEV.length/posCount*100).toFixed(0):'—';
+// 期待値判定成功 = ◎（高評価×好走）＋ ○（低評価×凡走）
+const totalSuccess=successEV.length+cutEV.length;
+const totalRate=(totalSuccess/sc.length*100).toFixed(0);
+document.getElementById('evSummary').innerHTML=`
+  <div class="ev-card"><div class="ev-card-val" style="color:#f1c40f">${totalSuccess}頭</div><div class="ev-card-lbl">期待値判定成功<br><small>◎高評価×好走 ＋ ○低評価×凡走</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#f1c40f">${totalRate}%</div><div class="ev-card-lbl">期待値判定成功率<br><small>（全出走馬中）</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#f1c40f">${successEV.length}頭</div><div class="ev-card-lbl">◎ 高評価×好走<br><small>確率比>1 かつ 人気超え好走</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#2ecc71">${cutEV.length}頭</div><div class="ev-card-lbl">○ 低評価×凡走<br><small>確率比≤1 かつ 人気どおり凡走</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#e74c3c">${overEV.length}頭</div><div class="ev-card-lbl">△ 過大評価<br><small>確率比>1 だが 人気どおり</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#95a5a6">${missEV.length}頭</div><div class="ev-card-lbl">✕ 見落とし<br><small>確率比≤1 だが 人気超え好走</small></div></div>`;
+// 確率比（予測÷市場）でソート：モデルが市場より高く評価した順
+const evByRatio=[...sc].sort((a,b)=>(b._p/b._mp)-(a._p/a._mp));
+const barMax=Math.max(...sc.map(h=>Math.max(h._p,h._mp)));
+const legend2='<div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:#7f8c8d;flex-wrap:wrap">'
+  +'<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:28px;height:10px;border-radius:3px;background:#f1c40f"></span>予測勝率（モデル）</span>'
+  +'<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:28px;height:10px;border-radius:3px;background:#4a6080"></span>市場確率（1÷オッズ）</span>'
+  +'<span style="margin-left:8px">確率比＝予測÷市場 / 1.0超＝モデルが市場より高く評価（黄背景）</span>'
+  +'</div>';
+const rows2=evByRatio.map(h=>{
+  const ratio=h._p/h._mp;
+  const isOver=ratio>1.0;
+  const evPct=(h._ev*100).toFixed(1);
+  const w=h['枠番']||Math.ceil(h['馬番']/2);
+  const mk=h['入線順位']===1?'🥇':h['入線順位']===2?'🥈':h['入線順位']===3?'🥉':'';
+  const pW=((h._p/barMax)*100).toFixed(1);
+  const mW=((h._mp/barMax)*100).toFixed(1);
+  // 人気以上に好走 = 入線順位 < 人気（市場期待以上のパフォーマンス）
+  const outperform=h['入線順位']<h['人気'];
+  // ◎ 高評価×好走 ／ ○ 低評価×凡走 → どちらも期待値判定成功
+  const jdg=isOver&&outperform  ?'<b style="color:#f1c40f">◎期待値判定成功</b>'
+            :!isOver&&!outperform?'<span style="color:#2ecc71;font-size:10px">○期待値判定成功</span>'
+            :isOver&&!outperform ?'<span style="color:#e74c3c;font-size:10px">△過大評価</span>'
+            :                    '<span style="color:#95a5a6;font-size:10px">✕見落とし</span>';
+  const rc2=ratio>=1.5?'#f1c40f':ratio>=1.0?'#e8d07a':ratio>=0.7?'#7f8c8d':'#e74c3c';
+  return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:7px 10px;border-radius:7px;'
+    +'background:'+(isOver?'rgba(241,196,15,0.07)':'rgba(255,255,255,0.02)')+'">'
+    +'<div style="width:26px;height:26px;border-radius:50%;background:'+wBg(w)+';color:'+wFg(w)
+    +';font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid #333">'+h['馬番']+'</div>'
+    +'<div style="width:108px;font-size:12px;color:#e0e0e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0"><b>'+h['馬名']+'</b></div>'
+    +'<div style="flex:1;min-width:100px">'
+      +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">'
+        +'<div style="height:11px;background:#f1c40f;border-radius:2px;width:'+pW+'%;min-width:2px"></div>'
+        +'<span style="font-size:10px;color:#f1c40f;white-space:nowrap">'+(h._p*100).toFixed(1)+'%</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:5px">'
+        +'<div style="height:11px;background:#4a6080;border-radius:2px;width:'+mW+'%;min-width:2px"></div>'
+        +'<span style="font-size:10px;color:#7f8c8d;white-space:nowrap">'+(h._mp*100).toFixed(1)+'%</span>'
+      +'</div>'
+    +'</div>'
+    +'<div style="width:54px;text-align:center;font-size:13px;font-weight:700;color:'+rc2+'">x'+ratio.toFixed(2)+'</div>'
+    +'<div style="width:46px;text-align:right;font-size:11px;font-weight:700;color:'+(isOver?'#2ecc71':'#e74c3c')+'">'+(isOver?'+':'')+evPct+'%</div>'
+    +'<div style="width:80px;text-align:right;font-size:11px;line-height:1.4">'
+    +'<span style="color:#7f8c8d">'+h['人気']+'人気</span>'
+    +'<span style="color:'+(outperform?'#2ecc71':'#e74c3c')+';font-weight:700"> → </span>'
+    +'<span style="color:'+rColor(h['入線順位'])+';font-weight:700">'+mk+h['入線順位']+'着</span>'
+    +'</div>'
+    +'<div style="width:60px;text-align:center;font-size:11px">'+jdg+'</div>'
+    +'</div>';
+}).join('');
+document.getElementById('evTableWrap').innerHTML=legend2+rows2;
+
+// 全馬成績詳細
+document.getElementById('detailBody').innerHTML=
+  [...DATA].sort((a,b)=>a['入線順位']-b['入線順位']).map(h=>{
+    const isTarget=h['スコア']!==null;
+    const isRef=h['過去走なし']===true;  // 参考スコア（過去走データなし）
+    const d=isTarget&&h['予想順位']?h['予想順位']-h['入線順位']:null;
+    const ds=d===null?'—':d>0?'+'+d:d===0?'±0':String(d);
+    const dc=d===null?'':d>=3?'class="hit"':d<=-3?'class="miss"':'class="mid"';
+    const ev2=!isTarget?'<span style="font-size:10px;color:#7f8c8d">対象外</span>'
+             :isRef?'<span style="font-size:10px;color:#7f8c8d">参考</span>'
+             :d===null?'—'
+             :Math.abs(d)<=1?'<span class="badge" style="background:#27ae60">◎</span>'
+             :Math.abs(d)<=3?'<span class="badge" style="background:#f39c12">△</span>'
+             :'<span class="badge" style="background:#e74c3c">✕</span>';
+    const predCell=!isTarget?'<span style="font-size:10px;color:#7f8c8d">対象外</span>'
+                  :isRef?'<span style="font-size:10px;color:#7f8c8d">参考'+h['予想順位']+'位</span>'
+                  :h['予想順位']?h['予想順位']+'位':'—';
+    const scoreCell=!isTarget?'<span style="font-size:10px;color:#7f8c8d">—</span>'
+                   :isRef?'<span style="font-size:10px;color:#7f8c8d">'+h['スコア'].toFixed(1)+'(参考)</span>'
+                   :h['スコア'].toFixed(1);
+    const rowBg=h['入線順位']===1?'background:rgba(241,196,15,0.12)':h['入線順位']<=3?'background:rgba(46,204,113,0.08)':h['入線順位']<=5?'background:rgba(243,156,18,0.06)':'';
+    const rankTxt=h['入線順位']<=5?`color:${rColor(h['入線順位'])}`:'color:inherit';
+    // 走破タイム + 着差
+    const gapSec=h['着差_sec'];
+    const gapStr=(gapSec!==null&&gapSec>0)?`<span style="font-size:10px;color:#e67e22"> +${gapSec.toFixed(1)}秒</span>`:'';
+    const timeCell=`${h['タイム']}${gapStr}`;
+    // 通過順位（null除外してハイフン連結）
+    const passes=[h['通過1'],h['通過2'],h['通過3'],h['通過4']].filter(v=>v!==null&&v!==undefined);
+    const passCell=passes.length>0?passes.join('-'):'—';
+    const wn=h['枠番']||Math.ceil(h['馬番']/2);
+    const wakuCell=`<div style="display:flex;align-items:center;gap:4px;white-space:nowrap">
+      <div style="width:20px;height:20px;border-radius:3px;background:${wBg(wn)};color:${wFg(wn)};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:1px solid #555;flex-shrink:0">${wn}</div>
+      <div style="width:20px;height:20px;border-radius:50%;background:${wBg(wn)};color:${wFg(wn)};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:1px solid #555;flex-shrink:0">${h['馬番']}</div>
+    </div>`;
+    return `<tr style="${rowBg}"><td><b style="${rankTxt}">${h['入線順位']}着</b></td>
+      <td>${wakuCell}</td>
+      <td><b>${h['馬名']}</b></td><td>${h['人気']}人気 / ${h['単勝オッズ']}倍</td>
+      <td style="color:${lColor(h['決め手'])}">${h['決め手']}</td>
+      <td style="white-space:nowrap">${timeCell}</td><td style="font-size:12px;color:#ccc;letter-spacing:0.5px">${passCell}</td>
+      <td>${h['上り3F'].toFixed(1)}秒</td><td>${predCell}</td><td>${scoreCell}</td>
+      <td ${dc}>${ds}</td><td>${ev2}</td></tr>`;
+  }).join('');
+</script></body></html>

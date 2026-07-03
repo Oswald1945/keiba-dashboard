@@ -1,0 +1,17 @@
+# 改行コードをLFに正規化し、生成HTML等のCRLF↔LF差分ノイズを止める
+*.html  text eol=lf
+*.py    text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.bat   text eol=crlf
+# 入力CSV(Shift-JIS)は変換しない
+*.csv   -text
+# バイナリ
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.xlsx  binary
+*.xls   binary
+*.pdf   binary

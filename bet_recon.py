@@ -108,7 +108,7 @@ def reconstruct(ev):
     cum = wA
     for n in cand:
         s2 = _num(sc[n], 99)
-        live = (dv[n] >= 48) or (s2 <= 4) or (P2(n) >= 0.30)
+        live = (dv[n] >= 48) or (P2(n) >= 0.30)  # 相手はスコア/複勝率主導。人気だけ(推定≤4番)の低スコア馬は入れない
         noHope = (dv[n] < 42) and (s2 > 6) and (P3(n) < 0.18)
         if noHope:
             continue

@@ -2842,7 +2842,7 @@ function renderBets(){
   var partners=[]; var cum=wA;
   for(var ci=0; ci<cand.length; ci++){
     var n=cand[ci]; var s2=(sc[n]!=null)?Number(sc[n]):99;
-    var live=(dv[n]>=48)||(s2<=4)||(P2(n)>=0.30);
+    var live=(dv[n]>=48)||(P2(n)>=0.30);  // 相手はスコア/複勝率主導。人気だけ(推定≤4番)の低スコア馬は入れない
     var noHope=(dv[n]<42)&&(s2>6)&&(P3(n)<0.18);
     if(noHope) continue;
     if(partners.length>=2 && cum>=0.82 && !(s2<=2)) break;

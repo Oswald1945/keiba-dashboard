@@ -66,6 +66,7 @@ FETCH_BABA_PY = SCRIPT_DIR / 'fetch_baba.py'
 
 _BABA_ALERTS = []          # 馬場を確定できなかったレース (race_id, venue, status)
 _REVIEW_PENDING = []       # 予想済・結果ありだが回顧未生成(=--review待ち)のレース
+_REVIEW_SHARE_QUEUE = []    # 回顧HTMLを末尾で一括pushするためのキュー
 _BABA_MANUAL_CACHE = None
 
 
@@ -296,8 +297,10 @@ def publish_batch_to_github(html_paths: list) -> list:
         if memo_json.exists():
             files_to_add.append(str(memo_json))
         subprocess.run(git + ['add'] + files_to_add, check=True)
-        date_tag = html_paths[0].stem.split('_')[1] if '_' in html_paths[0].stem else 'batch'
-        msg = f'pred: {date_tag} {len(html_paths)}レース'
+        _stem0 = html_paths[0].stem
+        _kind = 'review' if _stem0.endswith('_review') else 'pred'
+        _date_tag = _stem0.split('_')[0] if '_' in _stem0 else 'batch'
+        msg = f'{_kind}: {_date_tag} {len(html_paths)}件'
         result = subprocess.run(
             git + ['commit', '-m', msg],
             capture_output=True, text=True
@@ -590,29 +593,9 @@ def process_race(race_id, files) -> pathlib.Path | None:
                 review_html_p = next(iter(_new))
                 # 次走注目馬を memo_horses.json に自動登録
                 update_memo_from_review(review_html_p)
-                print(f'  [share] {review_html_p.name} を GitHub に公開中...')
-                share_url = publish_to_github(review_html_p)
-                if share_url:
-                    print(f'  ╔════════════════════════════════════════════╗')
-                    print(f'  ║  共有URL: {share_url:<38}║')
-                    print(f'  ╚════════════════════════════════════════════╝')
-                    # 重複排除してURL記録
-                    _ex: dict[str, str] = {}
-                    if SHARE_URL_LOG.exists():
-                        for _l in SHARE_URL_LOG.read_text(encoding='utf-8').splitlines():
-                            _p = _l.split('\t')
-                            if len(_p) == 2:
-                                _ex[_p[0]] = _p[1]
-                    _ex[f'{race_id}_review'] = share_url
-                    with open(SHARE_URL_LOG, 'w', encoding='utf-8') as _lg:
-                        for _k, _v in sorted(_ex.items()):
-                            _lg.write(f'{_k}\t{_v}\n')
-                    if not NO_BROWSER:
-                        webbrowser.open(share_url)
-                else:
-                    if not NO_BROWSER:
-                        webbrowser.open(review_html_p.as_uri())
-                        print(f'  [browser] {review_html_p.name} をローカルで開きました')
+                # 予想と同様に末尾で一括push（個別pushを廃止／ブラウザは開かない）
+                _REVIEW_SHARE_QUEUE.append(review_html_p)
+                print(f'  [review] {review_html_p.name} 生成完了（末尾で一括公開）')
 
     pred_ok   = already_pred   or generated_pred
     review_ok = already_review or generated_review or result is None
@@ -692,6 +675,28 @@ def main():
                 print(f'  {url}')
         else:
             print('[share] push 失敗 → ローカルHTMLで確認してください')
+
+    # 回顧HTMLを一括push（予想と同様に末尾で1回。個別pushによる反映遅延を回避）
+    if _REVIEW_SHARE_QUEUE and not DRY_RUN:
+        print(f'\n[share] 回顧 {len(_REVIEW_SHARE_QUEUE)}件のHTMLを GitHub に一括公開中...')
+        _rurls = publish_batch_to_github(_REVIEW_SHARE_QUEUE)
+        if _rurls:
+            _ex: dict[str, str] = {}
+            if SHARE_URL_LOG.exists():
+                for _l in SHARE_URL_LOG.read_text(encoding='utf-8').splitlines():
+                    _pp = _l.split('\t')
+                    if len(_pp) == 2:
+                        _ex[_pp[0]] = _pp[1]
+            for _h, _u in zip(_REVIEW_SHARE_QUEUE, _rurls):
+                _ex[_h.stem] = _u
+            with open(SHARE_URL_LOG, 'w', encoding='utf-8') as _lg:
+                for _k, _v in sorted(_ex.items()):
+                    _lg.write(f'{_k}\t{_v}\n')
+            print(f'[share] ✓ 回顧 公開完了: {len(_rurls)}件')
+            for _u in _rurls:
+                print(f'  {_u}')
+        else:
+            print('[share] 回顧の push 失敗 → ローカルHTMLで確認してください')
 
     if _BABA_ALERTS:
         print('\n' + '=' * 64)

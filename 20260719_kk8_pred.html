@@ -458,7 +458,7 @@
     </div>
     <div class="prob-note">
       ※ 勝率・連対率・複勝率は期待値シミュレーターと同一基準（T=20固定）。<br>
-      <b>軸＝スコア偏差値1位</b>。相手＝軸との偏差値差20以内かつ最大min(6,頭数/3)頭。列1(≤3)/列2(≤10)/列3(相手全部)で馬連・馬単・ワイド・三連複・三連単を生成。<b>購入推奨/非推奨</b>は次の全条件で判定：①軸+相手の1-3番人気が最大2頭 ②軸が1/2番人気なら相手に1-4番人気なし ③軸のコース特徴pts＞0。<br>
+      <b>軸＝スコア偏差値1位</b>。相手＝軸との偏差値差20以内かつ最大min(6,頭数/3)頭、さらに偏差値の連続ギャップが5.0を超えたら断層として打ち切り。列1(≤3)/列2(≤10)/列3(相手全部)で馬連・馬単・ワイド・三連複・三連単を生成。<b>購入推奨/非推奨</b>は次の全条件で判定：①軸+相手の1-3番人気が最大2頭 ②軸が1/2番人気なら相手に1-4番人気なし ③軸のコース特徴pts＞0。<br>
       <b>馬単・三連単は 1着列＝勝率／2着列＝連対率／3着列＝複勝率</b> でフォーメーション化（2・3列目を自動取捨）。馬連は連対率上位、ワイド・三連複は複勝率上位を相手に。<br>
       <b>合成採算オッズ＝1÷フォーメーション全体の的中率</b>。投票画面の合成オッズがこれを上回れば<b>期待値プラス（◎）</b>。「内訳」で個別組も確認可。
     </div>
@@ -3021,12 +3021,19 @@ function renderBets(){
   // ── 軸 = 偏差値1位（モデル最上位） ──
   var A=arr[0].name; var wA=pv[A]; var srcA=(sc[A]!=null)?Number(sc[A]):99;
   var w2=arr[1]?arr[1].p:0; var gap=wA-w2;
-  // ── ③ 相手候補: 軸との偏差値差 ≤20、上限 min(6, 頭数//3) ──
+  // ── ③ 相手候補: 軸との偏差値差 ≤20、上限 min(6, 頭数//3)、断層カット(ギャップ5.0超で打切り) ──
   var n_run=EV_DATA.filter(function(h){return h['馬番']!=null;}).length;
   var cand=names.filter(function(n){return n!==A && (dv[A]-dv[n])<=20.0;});
   cand.sort(function(a,b){return dv[b]-dv[a];});
   var cap=Math.min(6, Math.floor(n_run/3));
-  var partners=cand.slice(0,cap);
+  // 断層カット: 偏差値降順で連続ギャップが5.0超なら打ち切り（上限も併用）
+  var _GAP=5.0, partners=[], _prev=null;
+  for(var _pi=0;_pi<cand.length;_pi++){
+    if(partners.length>=cap) break;
+    var _pn=cand[_pi];
+    if(partners.length>0 && (_prev-dv[_pn])>_GAP) break;
+    partners.push(_pn); _prev=dv[_pn];
+  }
   var contend=[A].concat(partners);
   // ③-3 偏差値バンド 列1≤3 / 列2≤10 / 列3=相手全部
   var col1=[A].concat(partners.filter(function(n){return (dv[A]-dv[n])<=3.0;})).slice(0,3);

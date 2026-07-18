@@ -104,16 +104,26 @@ def reconstruct(ev):
     srcA = float(sc[A]) if sc[A] is not None else 99
     devA = dv[A]
     n_runners = sum(1 for h in ev if h.get('馬番') is not None)
-    # ③-1,2 相手候補: 軸との偏差値差 ≤ 20、上限 min(6, 頭数//3)
+    # ③-1,2 相手候補: 軸との偏差値差 ≤ 20、上限 min(6, 頭数//3)、さらに断層カット
     cand = [x['name'] for x in arr if x['name'] != A and (devA - dv[x['name']]) <= 20.0]
     cand.sort(key=lambda nm: -dv[nm])
     cap = min(6, n_runners // 3)
-    partners = cand[:cap]
+    # ③-2b 断層カット: 偏差値降順で連続ギャップが 5.0 超ならそこで打ち切り（上限と併用）
+    _GAP = 5.0
+    partners = []
+    _prev = None
+    for _nm in cand:
+        if len(partners) >= cap:
+            break
+        if partners and (_prev - dv[_nm]) > _GAP:
+            break
+        partners.append(_nm)
+        _prev = dv[_nm]
     # ③-3 偏差値バンドで列1/2/3（軸との差 ≤3 / ≤10 / ≤20）
     _B1, _B2 = 3.0, 10.0
     col1 = ([A] + [nm for nm in partners if (devA - dv[nm]) <= _B1])[:3]
-    col2 = [nm for nm in partners if (devA - dv[nm]) <= _B2]
-    col3 = list(partners)
+    col2 = [A] + [nm for nm in partners if (devA - dv[nm]) <= _B2]   # 軸も2着列に（頭固定でない）
+    col3 = [A] + list(partners)                                       # 軸も3着列に
     contend = [A] + partners
     # 軸のコース特徴pts
     kt_axis = None
@@ -126,7 +136,11 @@ def reconstruct(ev):
     cond1 = _top3 <= 2                                                   # 1-3番人気は最大2頭
     cond2 = True if _pop(A) not in (1, 2) else all(_pop(nm) not in (1, 2, 3, 4) for nm in partners)  # 軸が1/2番人気なら相手に1-4番人気なし
     cond3 = (kt_axis is not None and kt_axis > 0)                        # 軸のコース特徴pts>0
-    verdict = '購入推奨' if (len(partners) >= 1 and cond1 and cond2 and cond3) else '購入非推奨'
+    _pops_ct = [_pop(nm) for nm in contend]
+    _only123  = all(p in (1, 2, 3) for p in _pops_ct)                    # フォーメーションが1-3番人気のみ
+    _all123in = all(r in _pops_ct for r in (1, 2, 3))                    # 1-3番人気を全て軸+相手が総取り
+    cond4 = not (_only123 or _all123in)                                  # 上記は妙味皆無→非推奨
+    verdict = '購入推奨' if (len(partners) >= 1 and cond1 and cond2 and cond3 and cond4) else '購入非推奨'
     # 表示は馬番順
     col1 = sorted(col1, key=lambda nm: um[nm])
     col2 = sorted(col2, key=lambda nm: um[nm])

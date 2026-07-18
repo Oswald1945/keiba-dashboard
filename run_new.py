@@ -91,6 +91,30 @@ def _baba_manual_for(venue, date):
     return (_load_baba_manual().get(date) or {}).get(venue)
 
 
+_CUSHION_FIELDS = ('クッション値', '含水率', '含水率_芝', '含水率_ダート')
+
+
+def _resolve_cushion_moisture(venue, date):
+    """クッション値/含水率を『当日→無ければ直近の前日付エントリ→None』で解決して返す。
+    馬場状態(芝/ダート)は対象外（日付厳密）。当日に該当フィールドが無い分だけ直近過去日から補完する。"""
+    man = _load_baba_manual()
+    cur = (man.get(date) or {}).get(venue) or {}
+    _prior = sorted([d for d in man
+                     if isinstance(d, str) and d.isdigit() and d < str(date)
+                     and (man.get(d) or {}).get(venue)], reverse=True)
+    prev = (man.get(_prior[0]) or {}).get(venue) if _prior else {}
+    out = {}
+    for f in _CUSHION_FIELDS:
+        v = cur.get(f)
+        src = date
+        if v is None:
+            v = prev.get(f)
+            src = _prior[0] if _prior else None
+        if v is not None:
+            out[f] = (v, src)
+    return out
+
+
 def _apply_manual_baba(_man, _bi, _surface):
     """手動指定の『現在馬場』に当日の降水見込み(週間天気)＋天候を加味して
     『当日推定馬場』を算出し、_bi（baba_json辞書）を更新して estimated_baba を返す。
@@ -522,6 +546,24 @@ def process_race(race_id, files) -> pathlib.Path | None:
                     baba_json = None
             else:
                 print(f'  [baba] race_id から会場を特定できず → デフォルト(良)で継続')
+
+            # クッション値/含水率: 当日に無ければ直近の前日付から補完（None許容）→ baba_json に反映
+            if _venue and baba_json and baba_json.exists():
+                try:
+                    import json as _jc
+                    _bic = _jc.loads(baba_json.read_text(encoding='utf-8'))
+                    _cm = _resolve_cushion_moisture(_venue, _date)
+                    _chg = False
+                    for _k, (_v, _src) in _cm.items():
+                        if _bic.get(_k) is None and _v is not None:
+                            _bic[_k] = _v
+                            _chg = True
+                            if _src != _date:
+                                print(f'  [baba] {_k} を当日値なし→前日付{_src}から補完: {_v}')
+                    if _chg:
+                        baba_json.write_text(_jc.dumps(_bic, ensure_ascii=False, indent=2), encoding='utf-8')
+                except Exception as _e:
+                    print(f'  [baba] クッション/含水率の前日補完スキップ: {_e}')
 
             # 当日馬場データを履歴に蓄積（クッション値等の将来スコア反映用）
             if _venue and not DRY_RUN:

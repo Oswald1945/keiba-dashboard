@@ -125,6 +125,10 @@ def _apply_manual_baba(_man, _bi, _surface):
         _bi['降水量_mm'] = _rain
     if _wx:
         _bi['天候'] = _wx
+    # トラックバイアス精緻化用: 手入力のクッション値/含水率を転記（あれば）
+    for _fld in ('クッション値', '含水率', '含水率_芝', '含水率_ダート'):
+        if _man.get(_fld) is not None:
+            _bi[_fld] = _man.get(_fld)
     _bi['推定根拠'] = f'手動指定 / {_rsn}'
     estimated_baba = _est_dart if _surface == 'dart' else _est_shiba
     return estimated_baba, _bi

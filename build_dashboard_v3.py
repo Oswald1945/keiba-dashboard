@@ -310,6 +310,7 @@ horse_cards = ''
 for idx, h in enumerate(horses):
     rank   = h['順位予想']
     score  = h['総合スコア']
+    disp_score = h.get('表示スコア', score)
     dev_score = _dev_map.get(h['馬名'], 50)
     label, color = class_label(score)
     leg    = h['脚質']
@@ -327,7 +328,8 @@ for idx, h in enumerate(horses):
     p2 = (h['クラスpts']   / 25) * 100
     p3 = (h['時計pts']     / 25) * 100
 
-    pace_pts       = h['展開pts']
+    course_pts       = h['コース特徴pts']
+    track_pts        = h.get('トラックバイアスpts', 0)
     kinryo_pts     = h.get('斤量pts', 0)
     kyori_pts      = h.get('距離pts', 0)
     course_apt_pts = h.get('コース適性pts', 0)
@@ -403,7 +405,7 @@ for idx, h in enumerate(horses):
     _sr_rank = h.get('SmartRC推定人気順')
     _sr_int  = int(_sr_rank) if _sr_rank is not None else None
     _apt_sum = (h.get('コース適性pts', 0) + h.get('馬場適性pts', 0)
-               + h.get('距離pts', 0) + h.get('展開pts', 0) + h.get('枠順pts', 0))
+               + h.get('距離pts', 0) + h.get('コース特徴pts', 0) + h.get('枠順pts', 0))
     _is_ana  = (_sr_int is not None
                 and _sr_int > len(horses) // 2
                 and rank <= 3
@@ -437,8 +439,8 @@ for idx, h in enumerate(horses):
     </div>
     <div class="score-row">
       <div class="total-score">
-        <span class="big-num">{score:.1f}</span>
-        <span class="small-label">総合スコア</span>
+        <span class="big-num">{disp_score:.1f}</span>
+        <span class="small-label">スコア</span>
         <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:{color};color:#fff;line-height:1.3">{label}</span></div>
         <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 {dev_score}</span>
         <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
@@ -462,24 +464,29 @@ for idx, h in enumerate(horses):
           <span class="val">{h["時計pts"]:.1f}/25</span>
         </div>
         <div class="bar-row">
-          <label>展開適性</label>
-          <div class="bar bipolar">{bipolar_bar(pace_pts, 15)}</div>
-          <span class="val">{pace_pts:+d}/±15</span>
+          <label>コース特徴</label>
+          <div class="bar bipolar">{bipolar_bar(course_pts, 20)}</div>
+          <span class="val">{course_pts:+.1f}/±20</span>
+        </div>
+        <div class="bar-row">
+          <label>トラックバイアス</label>
+          <div class="bar bipolar">{bipolar_bar(track_pts, 20)}</div>
+          <span class="val">{track_pts:+.1f}/+20</span>
         </div>
         <div class="bar-row adj-row">
           <label>斤量補正</label>
-          <div class="bar bipolar">{bonus_bar(kinryo_pts, 3)}</div>
-          <span class="val">{kinryo_pts:+.1f}/±3</span>
+          <div class="bar bipolar">{penalty_bar(kinryo_pts, 1)}</div>
+          <span class="val">{kinryo_pts:+.0f}/−1</span>
         </div>
         <div class="bar-row adj-row">
-          <label>距離補正</label>
+          <label>距離(無効)</label>
           <div class="bar bipolar">{penalty_bar(kyori_pts, 4)}</div>
           <span class="val">{kyori_pts:+.0f}/−4</span>
         </div>
         <div class="bar-row adj-row">
           <label>コース適性</label>
-          <div class="bar bipolar">{bipolar_bar(course_apt_pts, 5)}</div>
-          <span class="val">{course_apt_pts:+.1f}/±5</span>
+          <div class="bar bipolar">{bipolar_bar(course_apt_pts, 10)}</div>
+          <span class="val">{course_apt_pts:+.1f}/±10</span>
         </div>
         <div class="bar-row adj-row">
           <label>臨戦補正</label>
@@ -497,7 +504,7 @@ for idx, h in enumerate(horses):
           <span class="val">{jockey_pts:+.1f}/±2</span>
         </div>
         <div class="bar-row adj-row">
-          <label>枠順補正</label>
+          <label>枠順(無効)</label>
           <div class="bar bipolar">{bipolar_bar(wakuban_pts, 2)}</div>
           <span class="val">{wakuban_pts:+.1f}/±2</span>
         </div>
@@ -593,7 +600,7 @@ for h in horses:
     except (TypeError, ValueError):
         pass
     _apt_sum_am = (h.get('コース適性pts', 0) + h.get('馬場適性pts', 0)
-                 + h.get('距離pts', 0) + h.get('展開pts', 0) + h.get('枠順pts', 0))
+                 + h.get('距離pts', 0) + h.get('コース特徴pts', 0) + h.get('枠順pts', 0))
     _is_ana_am = (_sr_int_am is not None
                   and _sr_int_am > len(horses) // 2
                   and h.get('順位予想', 99) <= 3
@@ -636,7 +643,7 @@ for h in horses:
         f'<td style="white-space:nowrap">{num_str}</td>'
         f'<td><b>{h["馬名"]}</b>{badges}</td>'
         f'<td>{h["脚質"]}</td>'
-        f'<td style="white-space:nowrap"><b>{h["総合スコア"]:.1f}</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差{_dev_t}</span></td>'
+        f'<td style="white-space:nowrap"><b>{h["表示スコア"]:.1f}</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差{_dev_t}</span></td>'
         f'<td>{fmt(h.get("単勝オッズ"), 1)}倍 ({fmt_int(h.get("人気"))}人気)</td>'
         f'{src_ninki_cell}'
         f'{sr_eval_cell}'
@@ -702,8 +709,10 @@ ev_data_json = json.dumps([
         '馬番':            h.get('馬番'),
         '枠番':            h.get('枠番'),
         'スコア':          h['総合スコア'],
+        '表示スコア':       h.get('表示スコア', h['総合スコア']),
         '順位予想':         h['順位予想'],
         'オッズ':          h.get('単勝オッズ'),
+        'コース特徴pts':    h.get('コース特徴pts'),
         '複勝下限':         h.get('複勝下限'),
         '複勝上限':         h.get('複勝上限'),
         '人気':            h.get('人気'),
@@ -777,29 +786,11 @@ _pred1_smartrc_rank = next(
 _pred1_is_fav = _pred1_smartrc_rank == 1  # SmartRC推定1番人気=妙味なし
 _jishin_flag = (_pred1_dev >= 68) and not _pred1_is_fav
 
-# ── 推奨度判定 ───────────────────────────────────────────────
-if _max_kairido >= 4:
-    _rec_badge  = '🟢 妙味有'
-    _rec_color  = '#27ae60'
-    _rec_bg     = '#1a3a28'
-    _rec_reason = f'スコア上位馬がSmartRC推定より{_max_kairido}順位上 ― 大きな市場乖離あり'
-elif _max_kairido >= 2:
-    if _fav1_is_low:
-        _rec_badge  = '🟢 妙味有'
-        _rec_color  = '#27ae60'
-        _rec_bg     = '#1a3a28'
-        _rec_reason = (f'SmartRC推定から{_max_kairido}順位上の乖離あり'
-                       f'＋1番人気スコア低評価（{_fav1_score_rank}位/{_n_horses}頭中）')
-    else:
-        _rec_badge  = '🟡 要検討'
-        _rec_color  = '#f39c12'
-        _rec_bg     = '#3a2e10'
-        _rec_reason = f'SmartRC推定から{_max_kairido}順位上の乖離あり（中穴の可能性）'
-else:
-    _rec_badge  = '🔴 妙味薄'
-    _rec_color  = '#e74c3c'
-    _rec_bg     = '#3a1a1a'
-    _rec_reason = 'スコア上位3頭とSmartRC推定が概ね一致（妙味薄）'
+# ── 推奨度バナー初期値（旧・妙味判定は廃止 2026-07。JS renderBets が 購入推奨/非推奨 に上書き）──
+_rec_badge  = ''
+_rec_color  = '#7f8c8d'
+_rec_bg     = '#222'
+_rec_reason = ''
 
 # ── 本命馬自信ありバッジ（偏差値≥68のみ ― 妙味判定とは独立） ────
 _jishin_html = ''
@@ -881,7 +872,8 @@ _comp_fields = [
     ('最高出力pts',   '最高出力', '#d62728'),  # 赤
     ('クラスpts',     'クラス',   '#ff7f0e'),  # オレンジ
     ('時計pts',       'タイム',   '#1f77b4'),  # 青
-    ('展開pts',       '展開',     '#9467bd'),  # 紫
+    ('コース特徴pts',   'コース特徴', '#9467bd'),  # 紫
+    ('トラックバイアスpts', 'トラックB', '#e91e63'),  # マゼンタ
     ('斤量pts',       '斤量',     '#2ca02c'),  # 緑
     ('距離pts',       '距離',     '#e377c2'),  # ピンク/マゼンタ
     ('コース適性pts', 'コース',   '#17becf'),  # シアン
@@ -1019,6 +1011,8 @@ _formation_json  = json.dumps(_formation_horses_data, ensure_ascii=False)
 _formation_pace  = _today_pace      # 'high' / 'mid' / 'low'
 _formation_total = len(horses)
 _track_direction = _ri.get('回り', '左')   # '左'=反時計 / '右'=時計回り
+_course_use = _baba_info.get('使用コース')
+_course_str = (f' ・ {_course_use}コース' if _course_use else '')
 
 # SmartRC速度競合情報（展開パネルヘッダー表示用）
 _ten_ranks_disp  = [(h.get('ten_r'), h.get('name'), h.get('uma'))
@@ -1334,7 +1328,7 @@ html = f'''<!DOCTYPE html>
   h1 {{ font-size: 28px; color: #f1c40f; margin-bottom: 8px; letter-spacing: 1px; }}
   .subtitle {{ font-size: 14px; color: #95a5a6; }}
   .summary-bar {{
-    display: grid; grid-template-columns: repeat(4, 1fr);
+    display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 16px; margin-top: 20px;
   }}
   .summary-item {{
@@ -1372,6 +1366,12 @@ html = f'''<!DOCTYPE html>
     border-bottom: 2px solid rgba(241,196,15,0.3);
     padding-bottom: 8px;
   }}
+  details.section > summary {{ list-style: none; cursor: pointer; outline: none; }}
+  details.section > summary::-webkit-details-marker {{ display: none; }}
+  details.section > summary > h2 {{ margin-bottom: 0; }}
+  details.section[open] > summary > h2 {{ margin-bottom: 20px; }}
+  details.section > summary > h2::before {{ content: '▶ '; font-size: 13px; color:#f1c40f; vertical-align: middle; }}
+  details.section[open] > summary > h2::before {{ content: '▼ '; }}
 
   .podium {{
     display: grid; grid-template-columns: 1fr 1fr 1fr;
@@ -1624,22 +1624,18 @@ html = f'''<!DOCTYPE html>
 
   <header>
     <h1>🐎 競馬予想 — {_display_title or f'{race_place}{race_r}R {race_class}'}</h1>
-    <div class="subtitle">{race_date_str} ・ {race_place}{race_r}R {race_track}{race_dist}m ・ {race_class} ・ {race_heads}頭立て ・ 16要素スコアリングモデル</div>
+    <div class="subtitle">{race_date_str} ・ {race_place}{race_r}R {race_track}{race_dist}m ・ {race_class} ・ {race_heads}頭立て ・ {_track_direction}回り{_course_str}</div>
     <div class="summary-bar">
       <div class="summary-item">
         <div class="summary-value">{len(horses)}</div>
         <div class="summary-label">出走頭数</div>
       </div>
       <div class="summary-item">
-        {(lambda t: f'<div class="summary-value{" xsmall" if len(t)>10 else " small" if len(t)>7 else ""}">{t}</div>')(meta["pace"].replace("想定",""))}
-        <div class="summary-label">ペース予想</div>
-      </div>
-      <div class="summary-item">
         {(lambda t: f'<div class="summary-value{" small" if len(t)>5 else ""}">{t}</div>')(horses[0]["馬名"])}
         <div class="summary-label">最高スコア馬</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">{horses[0]["総合スコア"]:.1f}<span style="font-size:10px;color:#f1c40f;font-weight:700;margin-left:4px">(偏差{_dev_map.get(horses[0]["馬名"],50)})</span></div>
+        <div class="summary-value">{horses[0]["表示スコア"]:.1f}<span style="font-size:10px;color:#f1c40f;font-weight:700;margin-left:4px">(偏差{_dev_map.get(horses[0]["馬名"],50)})</span></div>
         <div class="summary-label">最高スコア</div>
       </div>
     </div>
@@ -1655,19 +1651,19 @@ html = f'''<!DOCTYPE html>
         <div class="podium-mark">🥇</div>
         <div class="podium-name">{honmei["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(honmei)}{honmei["脚質"]} ・ {honmei["騎手"]} ・ {podium_smartrc_pop(honmei)}</div>
-        <div class="podium-score">{honmei["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(honmei["馬名"],50)}</div></div>
+        <div class="podium-score">{honmei["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(honmei["馬名"],50)}</div></div>
       </div>
       <div class="podium-card second">
         <div class="podium-mark">🥈</div>
         <div class="podium-name">{taikou["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(taikou)}{taikou["脚質"]} ・ {taikou["騎手"]} ・ {podium_smartrc_pop(taikou)}</div>
-        <div class="podium-score">{taikou["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(taikou["馬名"],50)}</div></div>
+        <div class="podium-score">{taikou["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(taikou["馬名"],50)}</div></div>
       </div>
       <div class="podium-card third">
         <div class="podium-mark">🥉</div>
         <div class="podium-name">{tanana["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(tanana)}{tanana["脚質"]} ・ {tanana["騎手"]} ・ {podium_smartrc_pop(tanana)}</div>
-        <div class="podium-score">{tanana["総合スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(tanana["馬名"],50)}</div></div>
+        <div class="podium-score">{tanana["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(tanana["馬名"],50)}</div></div>
       </div>
     </div>
   </div>
@@ -1748,37 +1744,30 @@ html = f'''<!DOCTYPE html>
     </div>
   </div>
 
-  <div class="section">
-    <h2>🏃 展開予想 / 脚質構成</h2>
-    <div class="pace-box">
-      <div class="pace-title">{meta["pace"]}</div>
-      <div>逃げ・先行馬が <b>{leg_counts.get("逃げ",0) + leg_counts.get("先行",0)}頭</b> 揃い、展開面での有利・不利が生じます。</div>
-    </div>
-    <div class="leg-grid">{leg_html}</div>
-  </div>
+  <!-- 展開予想/脚質構成 パネル廃止(2026-07) -->
 
 {_formation_html}
 
-{_matrix_html}
+  <!-- 展開マトリクス パネル廃止(2026-07): _matrix_html ビルダーは保持 -->
 
-  <div class="section">
-    <h2>📊 補正項目の積み上げ比較（全馬）</h2>
+  <details class="section">
+    <summary><h2>📊 補正項目の積み上げ比較（全馬）</h2></summary>
     <div class="chart-wrap-xl"><canvas id="scoreStackChart"></canvas></div>
     <div class="prob-note">各馬の補正項目を積み上げで比較。ゼロ以上が加点、以下が減点要因。予想順位順で左から表示。</div>
-  </div>
+  </details>
 
-  <div class="section">
-    <h2>🏆 補正項目別ランキング</h2>
+  <details class="section">
+    <summary><h2>🏆 補正項目別ランキング</h2></summary>
     <div class="prob-note">各補正項目のスコアが高い順に全馬を並べて表示。同点の場合は馬番順。</div>
     <div id="itemRankingGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:14px"></div>
-  </div>
+  </details>
 
-  <div class="section">
-    <h2>💡 スコア補正の見方（16要素）</h2>
+  <details class="section">
+    <summary><h2>💡 スコア補正の見方</h2></summary>
     <div class="adj-legend">
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#e74c3c"></div>
-        <span><b>最高出力</b>（35pt）: 全過去走の補正タイム最良値を偏差値化</span>
+        <span><b>最高出力</b>（0〜30pt）: 全過去走の補正タイム最良値を偏差値化 [欠損=偏差50中立]</span>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#ff7f0e"></div>
@@ -1790,15 +1779,23 @@ html = f'''<!DOCTYPE html>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#9467bd"></div>
-        <span><b>展開適性</b>（±2pt）: 枠番・頭数・コース特性（コーナー区分）による内枠先行有利度 × 過去走平均4角通過順実績 → 位置取り確率スコア</span>
+        <span><b>コース特徴</b>（±20pt）: コース・距離別の脚質(逃/先/差/追)有利不利 × 枠(内/外)有利不利 × 距離短縮/延長適性 × 末脚重視コースでの実上がり3F加点（course_tenkai_bias.json）</span>
+      </div>
+      <div class="adj-legend-item">
+        <div class="adj-dot" style="background:#e91e63"></div>
+        <span><b>トラックバイアス</b>（0〜+20pt）: 開催進行で内前有利が緩む前提。逃げ・先行に加点し後半へ段階減衰、コース替わり初週はリセット。馬場硬さで強弱（芝=硬い/良で増幅・道悪で弱め、ダートは逆。クッション値/含水率があれば精緻化）</span>
+      </div>
+      <div class="adj-legend-item">
+        <div class="adj-dot" style="background:#16a085"></div>
+        <span><b>上がり</b>（±3pt）: 過去走の上がり3F平均を偏差値化（速いほど加点） [欠損=中立]</span>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#2ca02c"></div>
-        <span><b>斤量補正</b>（±3pt）: 今走斤量 vs 過去平均</span>
+        <span><b>斤量補正</b>（0/−1pt）: 今走57kg以上で−1（増減方式は廃止）</span>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#e377c2"></div>
-        <span><b>距離補正</b>（-2〜+2pt）: 前走から400m以上の距離延長のみ-2pt + 同コース種別×距離帯TGX≥95なら+2pt</span>
+        <span><b>距離補正</b>（現在無効・コース特徴ptsへ統合）: TGXは最高出力／400m+延長はコース特徴が担当</span>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#17becf"></div>
@@ -1818,7 +1815,7 @@ html = f'''<!DOCTYPE html>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#7f7f7f"></div>
-        <span><b>馬体重増減</b>（0/−1pt）: ±12〜19kgで−0.5、±20kg以上で−1pt</span>
+        <span><b>馬体重増減</b>（現在無効）: 出馬表に増減データが無く予想では発火不能（重み0）</span>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#98df8a"></div>
@@ -1826,11 +1823,11 @@ html = f'''<!DOCTYPE html>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#dbdb8d"></div>
-        <span><b>前走着差</b>（−2〜+1pt）: 1着/0.5秒以内+1 / 0.6〜1.0秒±0 / 1.1〜2.0秒−1 / 2.1秒超−2</span>
+        <span><b>前走着差</b>（−2〜+3pt）: 1着 +2×クラス係数(上限+3) / ≤0.5秒 +1×係数 / 0.6〜1.0秒 0 / 1.1〜2.0秒 −1 / 2.1秒超 −2</span>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#9edae5"></div>
-        <span><b>枠順補正</b>（±2pt）: 芝スタートダートは外枠加点 / 通常コースは逃先内枠加点・逃げ大外減点</span>
+        <span><b>枠順補正</b>（現在無効・コース特徴ptsへ統合）: 枠の有利不利はコース特徴ptsが担当</span>
       </div>
       <div class="adj-legend-item">
         <div class="adj-dot" style="background:#c5b0d5"></div>
@@ -1849,15 +1846,15 @@ html = f'''<!DOCTYPE html>
         <span><b>馬場適性</b>（−2〜+3pt）: 過去走の同馬場条件（良/稍重/重/不良）における勝率・複勝率・平均着順率を算出。同馬場2走未満の場合は隣接馬場の成績を0.5倍で補完</span>
       </div>
     </div>
-  </div>
+  </details>
 
-  <div class="section">
-    <h2>🐴 全18頭 詳細スコア（📋で過去走ドリルダウン）</h2>
+  <details class="section">
+    <summary><h2>🐴 全18頭 詳細スコア（📋で過去走ドリルダウン）</h2></summary>
     <div class="horses-grid">{horse_cards}</div>
-  </div>
+  </details>
 
   <footer>
-    生成: {race_date_str} ・ データ: TARGET JV frontier + course-db.com ・ スコアモデル v3（16要素）
+    生成: {race_date_str} ・ データ: TARGET JV frontier + course-db.com ・ スコアモデル v3
   </footer>
 </div>
 
@@ -2012,7 +2009,7 @@ function renderRows(rows) {{
       <td>${{waku_b}}</td>
       <td style="white-space:nowrap"><b style="font-size:13px">${{h['馬名']}}</b>${{h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}}${{h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}}${{h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}}</td>
       <td>${{h['脚質']}}</td>
-      <td>${{h['スコア'].toFixed(1)}}</td>
+      <td>${{(h['表示スコア']!=null?h['表示スコア']:h['スコア']).toFixed(1)}}</td>
       <td>${{h['順位予想']}}</td>
       <td style="text-align:center;white-space:nowrap">${{srcNinkiCell}}</td>
       <td style="text-align:center;white-space:nowrap">${{
@@ -2166,7 +2163,7 @@ _BET_PANEL = """  <!-- 買い目提案パネル -->
     </div>
     <div class="prob-note">
       ※ 勝率・連対率・複勝率は期待値シミュレーターと同一基準（T=20固定）。<br>
-      <b>軸＝偏差値1位（モデル最上位）</b>。買い/見送りの判定は期待値シミュレーターパネルに表示。軸が想定4番人気以下の中穴は<b>要検討（黄）</b>、抜けた軸が不在の混戦は頭固定せず上位拮抗を<b>BOX推奨（黄）</b>。<br>
+      <b>軸＝スコア偏差値1位</b>。相手＝軸との偏差値差20以内かつ最大min(6,頭数/3)頭。列1(≤3)/列2(≤10)/列3(相手全部)で馬連・馬単・ワイド・三連複・三連単を生成。<b>購入推奨/非推奨</b>は次の全条件で判定：①軸+相手の1-3番人気が最大2頭 ②軸が1/2番人気なら相手に1-4番人気なし ③軸のコース特徴pts＞0。<br>
       <b>馬単・三連単は 1着列＝勝率／2着列＝連対率／3着列＝複勝率</b> でフォーメーション化（2・3列目を自動取捨）。馬連は連対率上位、ワイド・三連複は複勝率上位を相手に。<br>
       <b>合成採算オッズ＝1÷フォーメーション全体の的中率</b>。投票画面の合成オッズがこれを上回れば<b>期待値プラス（◎）</b>。「内訳」で個別組も確認可。
     </div>
@@ -2240,106 +2237,37 @@ function renderBets(){
   // ── 軸 = 偏差値1位（モデル最上位） ──
   var A=arr[0].name; var wA=pv[A]; var srcA=(sc[A]!=null)?Number(sc[A]):99;
   var w2=arr[1]?arr[1].p:0; var gap=wA-w2;
-  // ── 相手ユニバース（自動選定）──
-  var cand=names.filter(function(n){return n!==A;});
-  cand.sort(function(a,b){return pv[b]-pv[a];});
-  var partners=[]; var cum=wA;
-  for(var ci=0; ci<cand.length; ci++){
-    var n=cand[ci]; var s2=(sc[n]!=null)?Number(sc[n]):99;
-    var live=(dv[n]>=48)||(P2(n)>=0.30);  // 相手はスコア/複勝率主導。人気だけ(推定≤4番)の低スコア馬は入れない
-    var noHope=(dv[n]<42)&&(s2>6)&&(P3(n)<0.18);
-    if(noHope) continue;
-    if(partners.length>=2 && cum>=0.82 && !(s2<=2)) break;
-    if(live || partners.length<2){ partners.push(n); cum+=pv[n]; }
-    if(partners.length>=6) break;
-  }
-  if(partners.length<1){ partners=cand.slice(0,2); }
+  // ── ③ 相手候補: 軸との偏差値差 ≤20、上限 min(6, 頭数//3) ──
+  var n_run=EV_DATA.filter(function(h){return h['馬番']!=null;}).length;
+  var cand=names.filter(function(n){return n!==A && (dv[A]-dv[n])<=20.0;});
+  cand.sort(function(a,b){return dv[b]-dv[a];});
+  var cap=Math.min(6, Math.floor(n_run/3));
+  var partners=cand.slice(0,cap);
   var contend=[A].concat(partners);
-  // ── 統一「買いレース判定」: 市場(想定人気)に対するモデル勝率のエッジで判定（期待値シミュレーターに表示） ──
-  // 122R検証(軸=偏差値1位): 買い=妙味のみ(23R 軸単勝110%, 前99%/後126%で頑健)。中穴軸15R(要検討) /
-  //   混戦10R は軸単勝36%でも上位3頭複勝BOXなら93% / 見送り37R 58%。
-  function _mktWin(ep){ return ({1:0.31,2:0.18,3:0.15,4:0.12,5:0.08,6:0.05})[Math.min(ep,7)] || 0.03; }
-  var _srcA=(srcA!=null&&srcA<99)?Number(srcA):99;
-  var edge = wA - _mktWin(_srcA<=12?_srcA:12);
-  var miyomi=false, boxMode=false, V;
-  // 妙味の複合条件: 軸=推定2-3番人気 かつ「推定1番人気をモデルが低評価(順位≥4)」または「穴(推定5番人気以下)がモデル上位3」
-  // 検証(122R): 複合条件あり31R 単勝ROI73%(穴ありは83%) vs 市場通り(条件なし)16R 46%。堅調なだけは妙味でない。
-  var _fav1Rank=99, _fav2Rank=99, _anaH=null;
-  EV_DATA.forEach(function(h){ var ep=Number(h['SmartRC推定人気順']); var pr=Number(h['順位予想']);
-    if(ep===1) _fav1Rank=pr; if(ep===2) _fav2Rank=pr; if(ep>=5&&pr<=3&&!_anaH) _anaH={uma:h['馬番'],ep:ep}; });
-  var _ana=!!_anaH;
-  var _dev4=(arr[3]!=null)?arr[3].dev:arr[arr.length-1].dev; var spread=dv[A]-_dev4;
-  var _gapA=(arr[1]!=null)?(dv[A]-arr[1].dev):99;  // 軸-2位偏差値差。>2で軸が抜けた1強＝混戦ではない
-  if(_srcA>=4){ V={b:'🟡 要検討（中穴軸）',c:'#f1c40f',bg:'#3a2e10',r:'モデル最上位が推定'+_srcA+'番人気の中穴。的中時の妙味は大きいが軸成績は低くハイリスク（買うなら少点数の三連複・ワイドで）'}; }
-  else if((_srcA===2||_srcA===3)&&(_fav1Rank>=4||_ana)){ miyomi=true;
-    var _why=_ana?('推定'+_anaH.ep+'番人気の穴('+_anaH.uma+'番)をモデルが上位評価'):('推定1番人気をモデルが'+_fav1Rank+'位に低評価');
-    V={b:'🟢 買い推奨（妙味）',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(推定'+_srcA+'番人気)が最上位＋'+_why+'＝市場乖離のある妙味の買いレース'}; }
-  else if(spread<=4.0&&_gapA<=2.0){
-    var _boxHasAna=false; for(var _bi=0;_bi<Math.min(4,arr.length);_bi++){ if(Number(arr[_bi].src)>=5){_boxHasAna=true;break;} }
-    if(_boxHasAna&&(_fav1Rank>=5||_fav2Rank>=5)){ boxMode=true; V={b:'🟡 要検討（BOX）',c:'#f1c40f',bg:'#3a2e10',r:'上位4頭が偏差値で僅差（spread'+spread.toFixed(1)+'）かつ軸も2位と僅差（gapA'+_gapA.toFixed(1)+'）＝抜けた1強が不在の混戦。BOXに穴馬を含み推定1or2番人気がモデル5番手以下＝妙味あり。頭固定せず上位拮抗馬をBOX'}; }
-    else{ V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'上位は偏差値僅差の混戦だが、BOX4頭が人気馬中心（推定1・2番人気がともにモデル上位 or 穴不在）＝人気総流しのBOXで妙味なし'}; }
-  }
-  else { var _rs=(_srcA<=1)?('軸'+um[A]+'番は推定1番人気＝市場の中心で単勝に妙味が乏しい'):('軸'+um[A]+'番(推定'+_srcA+'番人気)は堅調だが、推定1番人気もモデル上位かつ穴不在＝市場通りで妙味なし');
-    V={b:'🔴 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:_rs}; }
-  // ── 妙味レースの買い目精製: 切れる人気馬(相手の推定上位人気1-3番でモデル評価=勝率最低)を外して妙味のある買い目に。
-  //    外せる人気馬も穴(推定5番↓)も無く妙味が組めなければ見送りに倒す（人気馬を外す＋ダメなら見送り）──
-  var _cutHorse=null;
-  if(miyomi){
-    var _D_CLEAR=5.0, _D_CLOSE=2.0;
-    var _topPop=partners.filter(function(n){ return sc[n]!=null && Number(sc[n])<=3; });
-    var _hasAna=partners.some(function(n){ return sc[n]!=null && Number(sc[n])>=5; });
-    if(_topPop.length){
-      var _cand=_topPop.reduce(function(a,b){ return dv[b]<dv[a]?b:a; });
-      var _others=partners.filter(function(n){ return n!==_cand; });
-      var _bestOther=_others.length?Math.max.apply(null,_others.map(function(n){return dv[n];})):dv[A];
-      var _pd=partners.map(function(n){return dv[n];});
-      var _rng=(partners.length>=2)?(Math.max.apply(null,_pd)-Math.min.apply(null,_pd)):0;
-      if(_bestOther-dv[_cand]>=_D_CLEAR){
-        _cutHorse=_cand; partners=partners.filter(function(n){ return n!==_cutHorse; }); contend=[A].concat(partners);
-        V.r=V.r+'。相手の人気馬'+um[_cutHorse]+'番(推定'+sc[_cutHorse]+'番人気)は偏差値が明確に低く実力差で切り';
-      } else if(_rng<=_D_CLOSE){
-        _cutHorse=_topPop.reduce(function(a,b){ return Number(sc[b])<Number(sc[a])?b:a; });
-        partners=partners.filter(function(n){ return n!==_cutHorse; }); contend=[A].concat(partners);
-        V.r=V.r+'。上位が偏差値で僅差の混戦のため、過剰人気の'+um[_cutHorse]+'番(推定'+sc[_cutHorse]+'番人気)を割り切って切り';
-      } else {
-        miyomi=false;
-        V={b:'\ud83d\udd34 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番は妙味候補だが、相手の人気馬を実力差でも混戦でも切れず＝妙味の買い目が組めない見送り'};
-      }
-    } else if(!_hasAna){
-      miyomi=false;
-      V={b:'\ud83d\udd34 見送り推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番(推定'+_srcA+'番人気)は妙味候補だが、相手が人気馬だけで妙味のある買い目が組めない＝見送り'};
-    }
-  }
-  // ── 穴妙味（要検討）: 軸が本命でも、推定5番人気以降かつ偏差値58以上の優秀な穴がいれば馬連/ワイド/三連複で妙味 ──
-  var anaMode=false, _anaPicks=[], _anaOpp3=[];
-  arr.forEach(function(x){ if(x.name!==A && Number(x.src)>=5 && x.dev>=58){ _anaPicks.push(x.name); } });
-  if(!miyomi && !boxMode && _anaPicks.length>0 && V && V.b.indexOf('見送り')>=0){
-    anaMode=true;
-    _anaPicks.forEach(function(nm){ if(contend.indexOf(nm)<0){ partners.push(nm); contend.push(nm); } });
-    // 三連複相手＝軸以外をスコア降順で並べ連続ギャップ5以上で切る（穴は必ず含める）。買い目に乗る馬を先に確定。
-    var _scrA={}; arr.forEach(function(x){ _scrA[x.name]=(EV_DATA[gi[x.name]]||{})['スコア']; });
-    var _c3=contend.filter(function(n){return n!==A;}).sort(function(x,y){return _scrA[y]-_scrA[x];});
-    var _ps=null;
-    for(var _k=0;_k<_c3.length;_k++){ var _nn=_c3[_k]; if(_ps!==null&&(_ps-_scrA[_nn])>=5){break;} _anaOpp3.push(_nn); _ps=_scrA[_nn]; }
-    _anaPicks.forEach(function(nm){ if(_anaOpp3.indexOf(nm)<0) _anaOpp3.push(nm); });
-    V={b:'🟡 要検討（穴妙味）',c:'#f1c40f',bg:'#3a2e10',r:'軸'+um[A]+'番は本命で単勝に妙味は乏しいが、推定5番人気以降で偏差値58以上の優秀な穴('+_anaPicks.map(function(nm){return um[nm]+'番';}).join('・')+')あり＝馬連・ワイドは軸→穴、三連複は穴＋スコア上位の強相手で高配当を狙う要検討レース'};
-  }
+  // ③-3 偏差値バンド 列1≤3 / 列2≤10 / 列3=相手全部
+  var col1=[A].concat(partners.filter(function(n){return (dv[A]-dv[n])<=3.0;})).slice(0,3);
+  var col2=partners.filter(function(n){return (dv[A]-dv[n])<=10.0;});
+  var col3=partners.slice();
+  // ② 購入推奨ゲート（全条件AND / 推定人気ベース）
+  function _pop(n){ return (sc[n]!=null)?Number(sc[n]):99; }
+  var _ktAxis=(EV_DATA[gi[A]]||{})['コース特徴pts'];
+  var _top3=contend.filter(function(n){var p=_pop(n);return p===1||p===2||p===3;}).length;
+  var _c1=_top3<=2;
+  var _c2=(_pop(A)!==1&&_pop(A)!==2) || partners.every(function(n){var p=_pop(n);return !(p===1||p===2||p===3||p===4);});
+  var _c3=(_ktAxis!=null && Number(_ktAxis)>0);
+  var _buy=(partners.length>=1 && _c1 && _c2 && _c3);
+  var _ktStr=(_ktAxis!=null?((Number(_ktAxis)>0?'+':'')+Number(_ktAxis).toFixed(1)):'-');
+  var V = _buy
+    ? {b:'🟢 購入推奨',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(推定'+(srcA<99?srcA+'番人気':'-')+'/コース特徴pts'+_ktStr+')・相手'+partners.length+'頭。①1-3番人気'+_top3+'頭(≤2) ②'+((_pop(A)<=2)?'軸が人気で相手に1-4番人気なし':'軸は3番人気以下')+' ③コース特徴pts>0 を全て満たす＝妙味あり'}
+    : {b:'🔴 購入非推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番。'+((partners.length<1)?'相手不在':((!_c3)?'軸のコース特徴pts≤0':((!_c1)?'1-3番人気が3頭以上':((!_c2)?'軸1/2番人気なのに相手に1-4番人気を含む':'条件不成立'))))+'＝妙味の条件を満たさず'};
+  var miyomi=_buy, boxMode=false, anaMode=false, _anaPicks=[], _anaOpp3=[];
+  // 表示は各列とも馬番(若い順)
+  function _byUma(a,b){ return um[a]-um[b]; }
+  col1=col1.slice().sort(_byUma); col2=col2.slice().sort(_byUma); col3=col3.slice().sort(_byUma);
+  // バナーを 購入推奨(緑)/購入非推奨(赤) に更新
   var eb=document.getElementById('evRecBanner'); if(eb){ eb.style.background=V.bg; eb.style.borderColor=V.c; }
   var ebd=document.getElementById('evRecBadge'); if(ebd){ ebd.textContent=V.b; ebd.style.color=V.c; ebd.style.borderColor=V.c; }
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }
-  // ── 列の取捨: 1着列=勝率 / 2着列=連対率 / 3着列=複勝率 ──
-  var col1=contend.filter(function(n){ return n===A || W(n)>=0.6*wA; }).sort(function(a,b){return W(b)-W(a);}).slice(0,3);
-  // 頭固定(軸のみが1着列)のときだけ軸を2/3着列から除外。1着候補が複数(流し)なら軸も2/3着に来うる
-  var _headFix=(col1.length===1);
-  function _ex(n){ return _headFix ? (n!==A) : true; }
-  var col2=contend.filter(function(n){ return _ex(n) && P2(n)>=0.18; }).sort(function(a,b){return P2(b)-P2(a);});
-  if(col2.length<2) col2=contend.filter(_ex).sort(function(a,b){return P2(b)-P2(a);}).slice(0,2);
-  col2=col2.slice(0,5);
-  // 3着列=相手全部(複勝率順)。プローブ表に挙げた相手は必ずフォーメーションに含める(取りこぼし防止)
-  var col3=contend.filter(_ex).sort(function(a,b){return P3(b)-P3(a);});
-  // 表示は各列とも馬番(若い順)に並べる
-  function _byUma(a,b){ return um[a]-um[b]; }
-  col1=col1.slice().sort(_byUma); col2=col2.slice().sort(_byUma); col3=col3.slice().sort(_byUma);
   // info & prob table
   var info=document.getElementById('betAnchorInfo');
   if(info){ if(boxMode){ var _bx=names.slice(0,Math.min(4,names.length)); info.innerHTML='<b style="color:#f1c40f">軸不在の混戦</b> — 頭固定せず上位'+_bx.length+'頭 '+_bx.map(function(n){return _umaChip(um[n]);}).join(' ')+' をBOX'; } else { info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(1)+'・モデル1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':''); } }
@@ -2349,7 +2277,7 @@ function renderBets(){
       var tag=(n===A)?'<span style="color:#f1c40f;font-size:10px;margin-left:4px">軸</span>':'';
       var hd=EV_DATA[gi[n]]||{};
       var kya=hd['脚質']?hd['脚質']:'-';
-      var sco=(hd['スコア']!=null)?Number(hd['スコア']).toFixed(1):'-';
+      var sco=(hd['表示スコア']!=null)?Number(hd['表示スコア']).toFixed(1):(hd['スコア']!=null?Number(hd['スコア']).toFixed(1):'-');
       var srk=(sc[n]!=null)?sc[n]+'位':'-';
       return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+kya+'</td>'+'<td style="text-align:right;color:#bdc3c7">'+sco+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+srk+'</td>'+'<td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
     }).join('');
@@ -2403,8 +2331,6 @@ function renderBets(){
     // 三連単 col1->col2->col3
     var stanCnt=0,P_3t=0; col1.forEach(function(i){ col2.forEach(function(j){ col3.forEach(function(k){ if(i!==j&&j!==k&&i!==k){ stanCnt++; P_3t+=o3[[i,j,k].join('|')]||0; } }); }); });
     var forms=[
-      {bt:'単勝', cols:[[um[A]]], sep:'', M:1, P:wA},
-      {bt:'複勝', cols:[[um[A]]], sep:'', M:1, P:P3(A)},
       {bt:'馬連', cols:[[um[A]],uren.map(function(n){return um[n];})], sep:'-', M:uren.length, P:P_uren},
       {bt:'ワイド', cols:[[um[A]],wd.map(function(n){return um[n];})], sep:'-', M:wd.length, P:P_wide},
       {bt:'馬単(1着列→2着列)', cols:[col1.map(function(n){return um[n];}),col2.map(function(n){return um[n];})], sep:'→', M:utanCnt, P:P_utan},
@@ -2422,7 +2348,7 @@ function renderBets(){
   }
   // 内訳
   if(head) head.innerHTML='<th>券種</th><th>買い目</th><th>点数</th><th>的中率</th><th>採算オッズ</th><th>実オッズ(入力)</th><th>期待値</th><th>判定</th>';
-  var rows=[]; rows.push(['単勝',[um[A]],'',wA]); rows.push(['複勝',[um[A]],'',P3(A)]);
+  var rows=[];
   var uren2=col2.filter(function(n){return n!==A;}), wd2=col3.filter(function(n){return n!==A;});
   uren2.map(function(o){return {o:o,p:pv[A]*pv[o]/(1-pv[A])+pv[o]*pv[A]/(1-pv[o])};}).sort(function(a,b){return b.p-a.p;}).forEach(function(x){ rows.push(['馬連',[um[A],um[x.o]].sort(function(p,q){return p-q;}),'-',x.p]); });
   col1.forEach(function(i){ col2.forEach(function(j){ if(i!==j) rows.push(['馬単',[um[i],um[j]],'→',pv[i]*pv[j]/(1-pv[i])]); }); });

@@ -2,21 +2,28 @@
 競馬予想スコア計算ロジック v3
 対象: 東京 芝1600m 18頭立て
 
-スコア構成 (最大値合計 ≈ 100pt):
-  最高出力    30pt  : 出馬表TGX（条件別+時間減衰）の偏差値化
-  クラス補正  25pt  : クラス重み × 着順スコア 加重平均
-  タイム偏差  20pt  : コース平均タイムとの差 (A-1 馬場補正込み)
-  展開適性   ±15pt  : 脚質 × 想定ペース
-  A-2 斤量補正 0/-1pt: 57kg以上で-1pt（重斤量のみ）
-  A-3 距離補正 -2〜+2pt: 400m以上距離延長ペナルティ + TGX高指数ボーナス
-  A-4 コース適性 ±10pt: コース特性類似度（コーナー区分追加）
-  A-5 臨戦補正 -4〜+1pt: 出走間隔7段階（長期休養ペナルティ緩和版）
-  A-7 騎手実績 ±2pt : Bayesian収縮付き騎手スコア
-  ④  馬体重補正 0/-1pt: 大幅増減で減点
-  ⑥  継続騎乗  0/+1pt: 同騎手継続で加点
-  ⑧  前走着差  -2〜+1pt: 着差の大小で評価
-  SmartRC評価補正 -4.5〜+4.5pt: 過去5走の有利不利評価加重平均(A/B=不利→上方修正, D/E=有利→下方修正)
-  ※廃止: A-6 PCI補正、C-3 調教評価（坂路/ウッドLap1は表示のみ）
+スコア構成 (各因子の実効レンジ / 総点検 2026-07 同期):
+  最高出力    0〜30pt : 出馬表TGX（条件別+時間減衰）の偏差値化 [欠損=偏差50中立]
+  クラス補正  0〜25pt : クラス重み × 着順スコア 加重平均
+  タイム偏差  0〜25pt : コース平均タイムとの差 (A-1 馬場補正込み) [欠損=中立]
+  コース特徴  ±20pt  : コース・距離別 脚質×枠×距離短縮延長×末脚(実上がり3F)/2026-07 重視で±5→±20
+                       course_tenkai_bias.json。※旧「展開適性 脚質×想定ペース」ペース判定は廃止
+  上がり      ±3pt   : 過去走 上がり3F平均の偏差値 [欠損=中立]
+  A-2 斤量    0/-1pt : 今走57kg以上で-1（増減方式は廃止）
+  A-3 距離    (無効) : ※コース特徴ptsへ統合。重み0（TGXは最高出力/延長はコース特徴が担当）
+  A-4 コース適性 ±10pt: コース特性類似度（コーナー/回り/直線/坂）
+  A-5 臨戦    -4〜+1pt: 出走間隔7段階
+  A-7 騎手    ±2pt   : Bayesian収縮付き騎手スコア
+  馬体重      (無効) : ※出馬表に増減データが無く予想では発火不能。重み0
+  継続騎乗    0/+1pt : 同騎手継続で加点
+  前走着差   -2〜+3pt: 着差×クラス係数（1着 +2×係数, 上限+3）
+  枠順        (無効) : ※コース特徴ptsへ統合。重み0
+  昇級戦     0〜-3pt : クラス上昇幅で減点
+  クラス適応 -2〜+1.5pt: 今走クラス以上の直近5走 着差加重平均
+  馬場適性   -2〜+3pt: 過去走の同馬場条件成績
+  SmartRC評価 -4.5〜+4.5pt: 過去5走の有利不利評価加重平均(A/B=上方, D/E=下方)
+  人気補正   0〜+3pt : 1-3番人気がモデル中央値未満で上方補正（合算後に直接加算）
+  ※廃止: A-6 PCI補正、ペース判定、C-3 調教評価（坂路/ウッドLap1は表示のみ）
 """
 
 import pandas as pd
@@ -38,17 +45,19 @@ from collections import defaultdict
 #   - 下記因子は within-race ρ≈0（無信号）。除去で妙味馬の単勝回収率 68%→78% に改善
 # 再検証手順: 値を 1.0 に戻して resample → python exp_value.py で回収率A/B比較
 FACTOR_WEIGHTS = {
-    # 注: 有効性が未確認のため現状は全て1.0(=原ロジック)。将来データ蓄積後に0.0で再検証。
+    # 重み: 2026-07 ユーザー判断で 重視=2.0 / 維持=1.0 / 廃止=0.0 に設定。データ蓄積後に再検証。
     'SmartRC評価pts': 1.0,   # 検証メモ: within-race ρ≈-0.005（要再評価）
-    '昇級pts':        1.0,   # 検証メモ: ρ≈-0.003
-    '斤量pts':        1.0,   # 検証メモ: ρ≈-0.023
-    '臨戦pts':        1.0,   # 検証メモ: ρ≈+0.075
-    '枠順pts':        1.0,   # 検証メモ: ρ≈+0.052
+    '昇級pts':        2.0,   # 重視(2026-07): 市場超過ρ高い割に効き小→増幅
+    '斤量pts':        2.0,   # 重視(2026-07)
+    '臨戦pts':        2.0,   # 重視(2026-07): 市場超過ρ最高
+    '枠順pts':        0.0,   # コース特徴pts(course_bias)に枠バイアスを統合したため無効化
     # 以下は通常採用（参考: 明示しておくと一覧で重み調整しやすい）
-    '最高出力pts': 1.0, 'クラスpts': 1.0, '時計pts': 1.0, '展開pts': 1.0,
-    '距離pts': 1.0, 'コース適性pts': 1.0, '騎手pts': 1.0, '馬体重pts': 1.0,
-    '継続pts': 1.0, '着差pts': 1.0, 'クラス適応pts': 1.0, '上がりpts': 1.0,
-    '馬場適性pts': 1.0,
+    # コース特徴pts: course_tenkai_bias.json（脚質×枠×距離短縮延長）±5clip。増幅時はこの重みを上げる
+    '最高出力pts': 1.0, 'クラスpts': 1.0, '時計pts': 1.0, 'コース特徴pts': 1.0,
+    '距離pts': 0.0, 'コース適性pts': 1.0, '騎手pts': 1.0, '馬体重pts': 0.0,   # 距離pts→コース特徴へ統合 / 馬体重→pred無効(出馬表に増減データ無)
+    '継続pts': 2.0, '着差pts': 2.0, 'クラス適応pts': 2.0, '上がりpts': 1.0,   # 継続/着差/クラス適応=重視(2026-07)
+    '馬場適性pts': 2.0, '人気補正pts': 1.0,   # 馬場適性=重視(2026-07,ユーザー判断/ρは負) 人気補正もfw管理下
+    'トラックバイアスpts': 1.0,   # 新規(2026-07): 開催進行×馬場硬さの内前有利、0〜+20
 }
 
 def fw(name: str) -> float:
@@ -490,10 +499,17 @@ def class_score(着順, 頭数) -> float:
 
 
 def deviation_score(values, mean=None, std=None):
+    # 欠損(None/NaN)は偏差50(中立)に固定。最高出力ptsと同じ扱いで統一し、
+    # 過去走なし馬が to_points/to_symmetric の min(cap, nan) 挙動で上限値を得るバグを防ぐ。
     if mean is None: mean = np.nanmean(values)
     if std  is None: std  = np.nanstd(values)
-    if std == 0: return [50.0] * len(values)
-    return [(v - mean) / std * 10 + 50 for v in values]
+    if std == 0 or (isinstance(mean, float) and np.isnan(mean)):
+        return [50.0] * len(values)
+    def _one(v):
+        if v is None or (isinstance(v, float) and np.isnan(v)):
+            return 50.0
+        return (v - mean) / std * 10 + 50
+    return [_one(v) for v in values]
 
 
 
@@ -743,7 +759,7 @@ def classify_脚質(avg_4kaku, 頭数_avg) -> str:
     if pd.isna(avg_4kaku) or avg_4kaku == 0: return '不明'
     # 頭数相対化閾値
     # [A案] 先行閾値を n*0.37→n*0.30 に絞り、中団ポジションの馬が
-    #       先行に誤分類されて展開pts加点される過大評価を抑制。
+    #       先行に誤分類されてコース特徴pts加点される過大評価を抑制。
     # 逃げ: 絶対的な1〜2番手。先行: 頭数の30%以内。差し: 60%以内。
     n = float(頭数_avg) if (頭数_avg is not None and not pd.isna(頭数_avg) and float(頭数_avg) > 1) else 16.0
     nige_thr   = 2.0                        # 逃げ: 1〜2番手（絶対的先頭グループ）
@@ -1419,188 +1435,300 @@ def calc_training_floor_map(
     return floor_map
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# コース特徴pts: コース・距離別 有利不利補正（脚質×枠×距離短縮延長）course_tenkai_bias.jsonベース
+#   ※旧ペース判定ベース(today_pace)は廃止。ペースは統計的振り返りは可能でも
+#     事前予測が困難なため、代わりにコース・距離ごとの定型的な有利不利で補正する。
+# ─────────────────────────────────────────────────────────────────────────────
+import os as _os_cb, json as _json_cb
+_CB_PATH = _os_cb.path.join(_os_cb.path.dirname(_os_cb.path.abspath(__file__)), 'course_tenkai_bias.json')
+try:
+    with open(_CB_PATH, encoding='utf-8') as _cbf:
+        COURSE_BIAS = _json_cb.load(_cbf)
+except Exception as _e:
+    print(f"[WARN] course_tenkai_bias.json 読込失敗: {_e}")
+    COURSE_BIAS = {}
+
+
+def _lookup_course_bias(target_course: str):
+    """target_course（例 '東京芝1600m' / '京都芝1400m内'）でバイアスを引く。
+    内/外 サフィックス付きが無ければベースキーにフォールバック。"""
+    if not target_course:
+        return None
+    if target_course in COURSE_BIAS:
+        return COURSE_BIAS[target_course]
+    base = target_course[:-1] if target_course and target_course[-1] in ('内', '外') else target_course
+    return COURSE_BIAS.get(base)
+
+
 def calc_tenkai_pts_all(
     res: 'pd.DataFrame',
     target_course: str,
-    today_pace: str,
-    num_horses: int,
+    today_pace: str = None,          # 廃止（後方互換のため受けるが未使用）
+    num_horses: int = 0,
     target_dist: int = 0,
-    kai_day: int = 0,                # 開催日次（SmartRC rcodeから取得）
-    is_course_change: bool = False,  # コース替わり初週フラグ（babaページから取得）
-    surface: str = '芝',             # 芝/ダート（バイアスは芝のみ適用）
+    kai_day: int = 0,                # 廃止（未使用）
+    is_course_change: bool = False,  # 廃止（未使用）
+    surface: str = '芝',
+    baba: str = '良',                # 馬場状態: 良/稍重/重/不良（道悪反転の判定に使用）
 ) -> 'pd.Series':
     """
-    展開有利不利スコア（全馬一括計算、±5pt）
+    コース特徴pts: コース・距離別の有利不利補正（±5ptにクリップ / 旧コース特徴ptsと同レンジ）
 
-    旧 calc_position_pts（±2pt, 枠番+通過順のみ）を全面刷新。
+    course_tenkai_bias.json（競馬勉強会コース解説を定量化）を用いて、各馬に対し次を合算:
+      1. 脚質バイアス: 逃げ/先行/差し/追込 それぞれへのコース傾向（raw ±2）
+      2. 枠バイアス:   馬番の内外位置で「内⇔外」を線形補間（raw ±2 / 旧枠順ptsを統合）
+      3. 距離短縮/延長: 前走距離との比較で該当時に加点・減点（raw ±1.5, 100m以上で判定）
+      4. 末脚重要度:   上がり重視コースのみ、実上がり3F偏差×重要度で脚質不問の加点（raw ±1.5）
+                       逃げ・先行でもキレる脚（上がり速い）を持つ馬を拾う。道悪はキレ減衰。
+      5. 道悪反転:     明示コースのみ、馬場 稍重(50%)/重・不良(100%) で内前→外差しへ反転
 
-    考慮要素:
-    1. 予測位置比率: 過去走4角通過順（頭数正規化）+ SmartRCテン速度補正
-    2. ゾーン割り当て: 逃げ/番手/先行/中団/後方
-    3. ペース×ゾーン有利不利（today_pace: high/mid/low）
-       - ハイ: 番手(3〜5番手)が最有利、逃げは消耗、後方もチャンスあり
-       - スロー: 逃げ〜番手が有利、差し・追込は届きにくい
-       [B案] 先行ゾーン(zone=2)のスロー/ミドル加点を強化（見落とし先行13頭対策）
-    4. 同ゾーン競合（混雑）ペナルティ: 許容頭数超過分 × -0.7pt
-    5. コース特性×内枠優先: 小回りほど内枠ボーナス大
-    6. [C案] 1200m以下スプリント補正: 先行ゾーンに+0.5追加
-    7. [②] 開催週バイアス（芝のみ）:
-       コース替わり初週/開催前半 → 前残りバイアス（先行+, 差し-）
-       開催後半 → 差し向きバイアス（先行-, 差し+）
+    合算を ±5 にクリップ。総合スコアへの効き幅は FACTOR_WEIGHTS['コース特徴pts'] で調整可能
+    （現状1.0=±5相当。総点検で増幅する場合はこの重みを上げるだけでよい）。
+    枠の有利不利は本関数に統合済みのため、旧 枠順pts は FACTOR_WEIGHTS で無効化している。
     """
-
     if res.empty:
         return pd.Series(dtype=float, index=res.index)
 
     n = max(int(num_horses), len(res))
+    bias = _lookup_course_bias(target_course)
+    if not bias:
+        print(f"  [コース特徴pts] コースバイアス未登録: {target_course} → 全馬0pt")
+        return pd.Series([0.0] * len(res), index=res.index)
 
-    # ── 1. 予測位置比率 (0=最前方, 1=最後方) ──────────────────────────
-    pos_ratios = []
-    for _, r in res.iterrows():
-        avg4   = r.get('平均4角通過順')
-        avg_h  = r.get('平均頭数')
-        avg4_f = float(avg4) if (avg4 is not None and not pd.isna(avg4) and float(avg4) > 0) else None
-        avg_h_f = float(avg_h) if (avg_h is not None and not pd.isna(avg_h) and float(avg_h) > 1) else float(n)
-
-        if avg4_f:
-            base = (avg4_f - 1.0) / max(avg_h_f - 1.0, 1.0)
-            base = max(0.0, min(1.0, base))
-        else:
-            base = 0.5  # データなし → 中間
-
-        # SmartRCテン速度で補正（テン速度順位が小さい=速い → より前方）
-        ten_r = r.get('SmartRCテン速度順位')
-        if ten_r is not None:
-            try:
-                ten_adj = (float(ten_r) - 1.0) / max(n - 1.0, 1.0) * 0.15 - 0.075
-                base = max(0.0, min(1.0, base + ten_adj))
-            except (TypeError, ValueError):
-                pass
-
-        pos_ratios.append(base)
-
-    res = res.copy()
-    res['_pos_ratio'] = pos_ratios
-
-    # ── 2. ゾーン割り当て (0=逃げ, 1=番手, 2=先行, 3=中団, 4=後方) ──
-    def ratio_to_zone(ratio, nh):
-        idx_f = ratio * (nh - 1)  # 予測絶対位置（0始まり）
-        if idx_f < 1.5:                return 0  # 逃げ（先頭1〜2番手）
-        if idx_f < 4.5:                return 1  # 番手（3〜5番手）
-        if idx_f < nh * 0.32:          return 2  # 先行（〜頭数32%）
-        if idx_f < nh * 0.68:          return 3  # 中団（〜68%）
-        return 4                                   # 後方
-
-    res['_zone'] = res['_pos_ratio'].apply(lambda r: ratio_to_zone(r, n))
-
-    # ── 3. ペース×ゾーン有利不利 ─────────────────────────────────────
-    # [B案] 先行(zone=2)をスロー/ミドルで強化し見落とし先行の過小評価を改善
-    if today_pace == 'high':
-        # ハイペース: 逃げは消耗、番手が最有利、後方に-1.0（強化）
-        pace_zone_bonus = {0: -1.5, 1: +2.5, 2: +0.5, 3: +0.5, 4: -1.0}
-    elif today_pace == 'low':
-        # スローペース: 逃げ〜先行が有利（+2.0）、後方は展開負け（-2.5）
-        pace_zone_bonus = {0: +2.0, 1: +2.5, 2: +2.0, 3: -0.5, 4: -2.5}
-    else:  # mid
-        # ミドル: 番手が最有利、先行も加点、後方は-1.5
-        pace_zone_bonus = {0: +0.5, 1: +2.0, 2: +2.0, 3: -0.5, 4: -1.5}
-
-    # [C案] 1200m以下スプリント: 前め有利をさらに強調
-    if target_dist > 0 and target_dist <= 1200:
-        pace_zone_bonus = {z: v + (0.5 if z in (0, 1, 2) else 0)
-                           for z, v in pace_zone_bonus.items()}
-
-    # [1800-2000m専用] 中団(zone=3)のペナルティを強化（MAE最悪帯の過大評価対策）
-    if target_dist > 0 and 1800 <= target_dist <= 2000:
-        pace_zone_bonus = {z: (v - 0.5 if z == 3 else v)
-                           for z, v in pace_zone_bonus.items()}
-
-    # ── 4. 同ゾーン混雑ペナルティ ────────────────────────────────────
-    zone_counts = res['_zone'].value_counts().to_dict()
-    # zone2(先行)はn*0.32>5.0のとき(n>=16)のみ実質有効。
-    # n≤15ではzone2スロットが0〜1頭分しかなく、5番手以降が全てzone3に飛ぶため
-    # zone1のcapacityを比例拡張してフィールドサイズに合わせる。
-    # (基準16頭: zone1=3, zone2=4 → 合計7スロット相当をn/16でスケール)
-    if n * 0.32 <= 5.0:  # zone2実質不活性(n≤15)
-        z1_cap = max(3, round(7 * n / 16))  # zone1+zone2スロットをnに比例配分
+    # ── 道悪ブレンド係数（明確な反転のみ。良=0 / 稍重=0.5 / 重・不良=1.0）──
+    b = str(baba or '良')
+    if ('不' in b) or (b == '重'):
+        w_dou = 1.0
+    elif '稍' in b:
+        w_dou = 0.5
     else:
-        z1_cap = 3
-    zone_capacity = {0: 2, 1: z1_cap, 2: 4, 3: 5, 4: 4}  # 各ゾーンの許容頭数
-    zone_penalty = {z: min(0.0, -(max(0, cnt - zone_capacity.get(z, 4))) * 0.7)
-                    for z, cnt in zone_counts.items()}
+        w_dou = 0.0
+    dou = bias.get('道悪') if w_dou > 0 else None
 
-    # ── 5. コース特性×内枠ボーナス ───────────────────────────────────
-    f      = COURSE_FEATURES.get(target_course, {})
-    corner = f.get('コーナー', 1)          # 0=大回り, 1=普通, 2=小回り
-    inner_scale = 0.3 + corner * 0.15      # 大回り0.3, 普通0.45, 小回り0.6
+    def _blend(base_d, ov_d):
+        if not ov_d:
+            return base_d
+        return {k: base_d.get(k, 0.0) * (1 - w_dou) + ov_d.get(k, base_d.get(k, 0.0)) * w_dou
+                for k in base_d}
 
-    # ── 6. 各馬スコア計算 ─────────────────────────────────────────────
-    results = []
+    kya = _blend(bias['脚質'], (dou or {}).get('脚質'))
+    wak = _blend(bias['枠'],   (dou or {}).get('枠'))
+    dis = bias.get('距離', {})
+    mend = float(bias.get('末脚', 0.0)) * (1 - 0.7 * w_dou)  # 末脚重要度（道悪はキレ削がれ減衰）
+
+    if dou:
+        print(f"  [コース特徴pts] {target_course} 道悪反転 baba={b} w={w_dou:.1f}")
+
+    out = []
     for _, r in res.iterrows():
-        zone = int(r['_zone'])
-        uma  = r.get('馬番')
-
-        pt = pace_zone_bonus.get(zone, 0.0)
-        pt += zone_penalty.get(zone, 0.0)
-
-        # 内枠ボーナス
-        if uma is not None:
+        pt = 0.0
+        # 1. 脚質バイアス
+        pt += kya.get(str(r.get('脚質')), 0.0)
+        # 2. 枠バイアス（内=馬番1, 外=馬番n の線形補間）
+        uma = r.get('馬番')
+        try:
+            u = int(uma)
+            frac = (u - 1) / max(n - 1, 1)
+            frac = min(1.0, max(0.0, frac))  # 馬番>頭数(取消)時の外挿を防止
+            pt += wak.get('内', 0.0) * (1 - frac) + wak.get('外', 0.0) * frac
+        except (TypeError, ValueError):
+            pass
+        # 3. 距離短縮/延長（前走距離と比較。100m以上の差で判定）
+        prev_d = r.get('前走距離')
+        try:
+            if prev_d is not None and not pd.isna(prev_d) and target_dist:
+                diff = int(target_dist) - int(prev_d)
+                if diff <= -100:
+                    pt += dis.get('短', 0.0)
+                elif diff >= 100:
+                    pt += dis.get('延', 0.0)
+                    # 距離ptsから統合: 大幅延長(+400m以上)で延長バイアス未設定コースは汎用ガード
+                    if diff >= 400 and dis.get('延', 0.0) == 0.0:
+                        pt += -1.0
+        except (TypeError, ValueError):
+            pass
+        # 4. 末脚重要度 × 実上がり3F（脚質不問。逃げ・先行でもキレる馬を拾う）
+        if mend > 0:
+            adev = r.get('上がり_dev')
             try:
-                inner_bonus = (n + 1 - int(uma)) / n * inner_scale
-                pt += inner_bonus
-            except (ValueError, TypeError):
-                pass
-
-        # [③] SmartRC上がり速度ボーナス（差し・追込馬の見落とし対策）
-        # 上がり速度順位が上位の差し・追込馬はスコアに反映されにくいため展開ptsで補正
-        # zone=3(中団)・4(後方)かつSmartRC上がり順位1-3位: +1.0pt
-        # zone=3(中団)・4(後方)かつSmartRC上がり順位4-6位: +0.5pt
-        _agari_r = r.get('SmartRC上がり速度順位')
-        if _agari_r is not None and zone >= 3:
-            try:
-                _ar = int(_agari_r)
-                if _ar <= 3:
-                    pt += 1.0
-                elif _ar <= 6:
-                    pt += 0.5
+                if adev is not None and not pd.isna(adev):
+                    strength = max(-1.0, min(1.0, (float(adev) - 50.0) / 12.0))
+                    pt += mend * strength
             except (TypeError, ValueError):
                 pass
+        out.append(pt)
 
-        results.append(pt)
+    return (pd.Series(out, index=res.index) * 4.0).clip(-20.0, 20.0)  # ±20に増幅(2026-07 重視)
 
-    pts = pd.Series(results, index=res.index)
 
-    # ── 7. 開催週バイアス補正（芝のみ）────────────────────────────────
-    # is_course_change: babaページ「今週から[X]コースを使用」で確定
-    # kai_day: SmartRC rcodeから取得した開催日次（土日2日=1週）
-    # 正値 = 差し向きバイアス, 負値 = 前残りバイアス
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# トラックバイアス実測（フェーズ2 / 2026-07）: 前開催(同場)の実結果から内前有利を測定
+# 中立基準は過去259R較正(csv+html): top3の全コーナー平均位置/頭数 mean0.358 sd0.134 ・ 逃先率 mean0.599 sd0.293
+# ─────────────────────────────────────────────────────────────────────────────
+_RESULT_VENUE_CODES = {
+    '東京': ('tk', 'to', 't'), '中山': ('cb', 'na', 'ns'), '阪神': ('hn', 'hs'),
+    '京都': ('kt', 'ky'), '中京': ('ck', 'cc'), '新潟': ('nk', 'ng', 'ni'),
+    '函館': ('hk', 'hd'), '札幌': ('sm', 'sp'), '福島': ('fk', 'fs'),
+    '小倉': ('ko', 'kk'),
+}
+_TB_BASE_POS, _TB_SD_POS = 0.358, 0.134       # top3 全コーナー平均位置/頭数（低=前有利）
+_TB_BASE_FRONT, _TB_SD_FRONT = 0.599, 0.293   # top3 逃先率（高=前有利）
+_TB_FULL_Z = 1.5      # 1.5sd 前寄り → 実測フル(+20)
+_TB_MIN_RACES = 3     # 実測に必要な最小同芝ダR数
+_TB_MAX_BACK = 21     # 前開催の遡り上限(日)
+
+
+def measure_track_bias(race_date, venue, surface, done_dir=None, max_val=20.0):
+    """前開催(同場)の実結果から内前有利の実測strength[0,max_val]。データ不足はNone。
+    参照日: race_dateより前で同場に結果が存在する直近1開催日（日曜→前日土 / 土曜→前開催が自動選択）。
+    指標: 上位3入線馬の 4角通過位置/頭数（低=前有利）＋ 決め手の逃先率（高=前有利）の複合z。
+    """
+    import os, glob as _glob, re as _re2
+    if race_date is None or not venue:
+        return None
+    codes = _RESULT_VENUE_CODES.get(str(venue).strip())
+    if not codes:
+        return None
+    if done_dir is None:
+        done_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'input', 'done')
+    race_int = int(race_date.strftime('%Y%m%d'))
+    floor_int = int((race_date - timedelta(days=_TB_MAX_BACK)).strftime('%Y%m%d'))
+    cand, _seen = {}, set()
+    _paths = (_glob.glob(os.path.join(done_dir, 'レース結果_*.csv'))
+              + _glob.glob(os.path.join(done_dir, 'レース結果_*.html')))
+    for p in _paths:
+        m = _re2.search(r'レース結果_(\d{8})_([A-Za-z]+)(\d+)\.(?:csv|html)$', os.path.basename(p))
+        if not m:
+            continue
+        di = int(m.group(1)); code = m.group(2).lower()
+        if code not in codes or di >= race_int or di < floor_int:
+            continue
+        key = (di, code + m.group(3))
+        if key in _seen:            # 同一レースのcsv/html重複はcsv優先(先にglob)
+            continue
+        _seen.add(key)
+        cand.setdefault(di, []).append(p)
+    if not cand:
+        return None
+    ref = max(cand)                 # 同場の直近前開催日（yyyymmddで判別）
+    import result_loader as _rl
+    pos_ratios, front_flags, n_races = [], [], 0
+    for p in cand[ref]:
+        try:
+            df, meta, *_ = _rl.load_result(p)
+        except Exception:
+            continue
+        df.columns = [str(c).strip() for c in df.columns]
+        if str(meta.get('芝・ダート', '')) != surface:
+            continue
+        _cpre = [c for c in ('通過1', '通過2', '通過3', '通過4') if c in df.columns]
+        if '入線順位' not in df.columns or not _cpre:
+            continue
+        try:
+            n = int(meta.get('頭数'))
+        except (TypeError, ValueError):
+            n = int(pd.to_numeric(df['入線順位'], errors='coerce').notna().sum())
+        if not n or n < 5:
+            continue
+        fin = pd.to_numeric(df['入線順位'], errors='coerce')
+        top = df[fin <= 3]
+        _added = False
+        for _, _hr in top.iterrows():
+            _cv = [pd.to_numeric(_hr.get(c), errors='coerce') for c in _cpre]
+            _cv = [float(x) for x in _cv if pd.notna(x)]
+            if not _cv:
+                continue
+            pos_ratios.append(float(np.mean(_cv)) / n)   # 各馬の全コーナー平均位置/頭数
+            if '決め手' in top.columns:
+                front_flags.append(1.0 if str(_hr.get('決め手')) in ('逃げ', '先行') else 0.0)
+            _added = True
+        if _added:
+            n_races += 1
+    if n_races < _TB_MIN_RACES:
+        return None
+    day_pos = float(np.mean(pos_ratios))
+    day_front = float(np.mean(front_flags)) if front_flags else _TB_BASE_FRONT
+    z_pos = (_TB_BASE_POS - day_pos) / _TB_SD_POS
+    z_front = (day_front - _TB_BASE_FRONT) / _TB_SD_FRONT
+    z = 0.5 * z_pos + 0.5 * z_front
+    measured = max_val * min(max(z / _TB_FULL_Z, 0.0), 1.0)
+    print(f"  [トラックバイアス実測] {venue}{surface} ref={ref} 同芝ダ{n_races}R "
+          f"pos={day_pos:.3f} front={day_front:.3f} z={z:+.2f} → 実測strength={measured:+.1f}")
+    return measured
+
+
+# トラックバイアス補正（新規 2026-07 / フェーズ2で実測ブレンド）: 開催進行×馬場硬さ ＋ 前開催実測
+# ─────────────────────────────────────────────────────────────────────────────
+def calc_track_bias_pts_all(res, kai_day=0, is_course_change=False, baba='良',
+                            surface='芝', cushion=None, moisture=None,
+                            race_date=None, venue=None):
+    """トラックバイアス補正（0〜+20 / 逃先へのプラス補正のみ、差追は0で減点なし）。
+    heuristic（開催進行×コース替わり×馬場硬さ×クッション/含水）と、前開催同場の実測バイアスを平均ブレンド。
+    実測が取れない場合（開幕週・同場結果なし等）は heuristic 単独。
+    内前有利のプラス補正のみで強弱を付ける（差しへの反転・減点はしない）。枠は含めない。
+    """
+    if res.empty:
+        return pd.Series(dtype=float, index=res.index)
+    _MAX = 20.0
+    # 開催進行の減衰（初週=強→後半=弱）。コース替わり初週はリセット。
+    if is_course_change:
+        decay = 1.0
+    elif kai_day <= 0:
+        decay = 0.7
+    elif kai_day <= 2:
+        decay = 1.0
+    elif kai_day <= 4:
+        decay = 0.75
+    elif kai_day <= 6:
+        decay = 0.5
+    elif kai_day <= 8:
+        decay = 0.3
+    else:
+        decay = 0.15
+    b = str(baba or '良')
     if surface == '芝':
-        if is_course_change:
-            _kai_bias = -0.7   # コース替わり確定 → 前残り強
-        elif kai_day >= 7:
-            _kai_bias = +1.0   # 開催終盤（4週目以降）→ 差し向き強
-        elif kai_day >= 5:
-            _kai_bias = +0.5   # 開催後半（3週目）→ 差し向き
-        elif kai_day >= 3:
-            _kai_bias = -0.25  # 開催第2週 → 前残りやや残る（コース替わり可能性あり）
-        elif kai_day >= 1:
-            _kai_bias = -0.5   # 開催初週（1・2日目）→ 前残り
-        else:
-            _kai_bias = 0.0    # kai_day不明
+        firm = {'良': 1.0, '稍重': 0.6, '重': 0.35, '不良': 0.2}.get(b, 1.0)
+        if cushion is not None:
+            try:
+                c = float(cushion)
+                cm = 1.3 if c >= 12 else 1.15 if c >= 10 else 1.0 if c >= 8 else 0.85 if c >= 7 else 0.7
+                firm *= cm
+            except (TypeError, ValueError):
+                pass
+    else:  # ダート
+        firm = {'良': 0.35, '稍重': 0.7, '重': 1.0, '不良': 1.1}.get(b, 0.5)
+        if moisture is not None:
+            try:
+                m = float(moisture)  # 含水率%（高いほど湿=前有利増幅）
+                mm = 1.3 if m >= 15 else 1.15 if m >= 10 else 1.0 if m >= 5 else 0.85
+                firm *= mm
+            except (TypeError, ValueError):
+                pass
+    strength_heur = _MAX * decay * firm
+    # フェーズ2: 前開催実測とブレンド（平均）。実測が無ければheuristic単独。
+    measured = measure_track_bias(race_date, venue, surface, max_val=_MAX)
+    if measured is not None:
+        strength = 0.5 * (measured + strength_heur)
+        _src = f"blend(実測{measured:.1f}+heur{strength_heur:.1f})"
+    else:
+        strength = strength_heur
+        _src = "heur単独"
+    _KYAKU_W = {'逃げ': 1.0, '先行': 0.8, '差し': 0.0, '追込': 0.0}  # 内前有利のプラス補正のみ（差・追は0、減点しない）
+    out = [strength * _KYAKU_W.get(str(r.get('脚質')), 0.0) for _, r in res.iterrows()]
+    if strength > 0:
+        print(f"  [トラックバイアス] kai_day={kai_day} 替わり={is_course_change} {surface}{b} "
+              f"クッション={cushion} 含水={moisture} decay={decay:.2f} firm={firm:.2f} "
+              f"→ {_src} strength={strength:+.1f}")
+    return pd.Series(out, index=res.index).clip(0.0, _MAX)  # プラス補正のみ 0〜+20
 
-        if _kai_bias != 0.0:
-            # _zone列はこの関数内で res に付与済み（zone 0=逃げ〜4=後方）
-            bias_adj = res['_zone'].map(
-                lambda z: (-_kai_bias if int(z) <= 2 else _kai_bias)
-            )
-            pts = pts + bias_adj
-            print(f"  [②開催週バイアス] surface={surface} kai_day={kai_day} is_course_change={is_course_change} → bias={_kai_bias:+.2f}")
-
-    return pts.clip(-5.0, 5.0)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # メイン処理
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def compute_scores(
     df: pd.DataFrame,
@@ -1616,6 +1744,8 @@ def compute_scores(
     smartrc_data: dict = None,     # SmartRC horses辞書 (load_smartrc_data()の戻り値)
     kai_day: int = 0,              # 開催日次（SmartRC rcodeから取得）
     is_course_change: bool = False, # コース替わり初週フラグ（babaページから取得）
+    cushion: float = None,          # クッション値(芝, トラックバイアス精緻化用)
+    moisture: float = None,         # 含水率%(ダート, トラックバイアス精緻化用)
 ) -> tuple:
     """
     18頭分のスコアを計算。
@@ -1790,7 +1920,7 @@ def compute_scores(
             score = pos * mf * cw
             cs_total += score * rw
             cs_w     += rw
-        class_corrected = cs_total / cs_w if cs_w > 0 else 0.0
+        class_corrected = cs_total / cs_w if cs_w > 0 else np.nan  # 過去走なし→NaN(偏差50中立)
 
         # ── タイム偏差 (A-1 馬場補正込み) ──────────────
         dev_vals, dev_ws = [], []
@@ -1877,7 +2007,7 @@ def compute_scores(
                           if _norm_going_full(r.get('馬場', '')) == baba)
             print(f"    [馬場適性] {h}: {baba}馬場 {_same_n}走 → {_baba_apt_pts:+.2f}pt")
 
-        time_dev   = float(np.average(dev_vals, weights=dev_ws)) if dev_ws else 0.0
+        time_dev   = float(np.average(dev_vals, weights=dev_ws)) if dev_ws else np.nan  # 過去走なし→NaN(偏差50中立)
         n_dev_used = len(dev_vals)
 
         # ── 脚質判定（改善②: 最近2〜3走に重み付け）─────────────────
@@ -2098,6 +2228,8 @@ def compute_scores(
             'タイム偏差利用走数': n_dev_used,
             '平均4角通過順':     avg_4kaku,
             '平均頭数':          (float(sub['頭数'].mean()) if not sub.empty else None),
+            '前走距離':          (int(pd.to_numeric(sub.iloc[0].get('距離'), errors='coerce'))
+                                  if (not sub.empty and pd.notna(pd.to_numeric(sub.iloc[0].get('距離'), errors='coerce'))) else None),
             '脚質':             kyakushitsu,
             '平均上がり3F':      avg_agari,
             '平均コース類似度':  avg_sim,
@@ -2206,8 +2338,8 @@ def compute_scores(
     else:
         pace = f'ミドルペース想定{_competition_note}'
 
-    # 展開pts は枠番確定後（shutuba_df 適用後）に calc_tenkai_pts_all で計算
-    res['展開pts'] = 0.0
+    # コース特徴pts は枠番確定後（shutuba_df 適用後）に calc_tenkai_pts_all で計算
+    res['コース特徴pts'] = 0.0
 
     # ── 補正項目を列名に昇格 ─────────────────────────
     res['斤量pts']      = res['_kinryo_pts']
@@ -2257,25 +2389,31 @@ def compute_scores(
                         continue  # '取消し' 等の非数値は無視
                     res.at[idx, col] = v
 
-    # ⑤ 枠番確定後の計算（展開pts・枠順pts）
+    # ⑤ 枠番確定後の計算（コース特徴pts・枠順pts）
     num_horses = len(res)
 
-    # 展開pts: ゾーン×ペース×混雑×内枠を総合評価（±5pt）
+    # コース特徴pts: コース・距離別バイアス（脚質×枠×距離短縮延長, course_tenkai_bias.json, ±5clip）
     _surface = 'ダート' if 'ダート' in target_course else '芝'
-    res['展開pts'] = calc_tenkai_pts_all(
+    res['コース特徴pts'] = calc_tenkai_pts_all(
         res,
         target_course=target_course,
-        today_pace=today_pace,
         num_horses=num_horses,
         target_dist=target_dist,
-        kai_day=kai_day,
-        is_course_change=is_course_change,
         surface=_surface,
+        baba=baba,
     )
 
     res['枠順pts'] = res.apply(
         lambda r: calc_wakuban_pts(r['馬番'], r['脚質'], target_course, num_horses, r.get('枠番')),
         axis=1
+    )
+
+    # トラックバイアスpts: 開催進行×コース替わり×馬場硬さ による内前有利（±20clip）
+    _tb_venue = (target_course.replace('ダート', '芝').split('芝')[0] if target_course else None)
+    res['トラックバイアスpts'] = calc_track_bias_pts_all(
+        res, kai_day=kai_day, is_course_change=is_course_change,
+        baba=baba, surface=_surface, cushion=cushion, moisture=moisture,
+        race_date=race_date, venue=_tb_venue,
     )
 
     # ── 総合スコア ─────────────────────────────────
@@ -2284,7 +2422,8 @@ def compute_scores(
         fw('最高出力pts')  * res['最高出力pts']
         + fw('クラスpts')   * res['クラスpts']
         + fw('時計pts')     * res['時計pts']
-        + fw('展開pts')     * res['展開pts']
+        + fw('コース特徴pts')     * res['コース特徴pts']
+        + fw('トラックバイアスpts') * res['トラックバイアスpts']
         + fw('斤量pts')     * res['斤量pts']
         + fw('距離pts')     * res['距離pts']
         + fw('コース適性pts') * res['コース適性pts']
@@ -2300,10 +2439,10 @@ def compute_scores(
         + fw('SmartRC評価pts') * res['SmartRC評価pts']  # SmartRC 前走有利不利補正
         + fw('馬場適性pts') * res['馬場適性pts']         # 馬場別成績による適性補正
     )
-    # スコア下限補正: 最低スコアを1.0にシフト（マイナス表示を防ぐ）
+    # スコア下限補正: 最低スコアを0.1にシフト（マイナス表示を防ぐ）
     _min_score = res['総合スコア'].min()
-    if _min_score < 1.0:
-        res['総合スコア'] = res['総合スコア'] - _min_score + 1.0
+    if _min_score < 0.1:
+        res['総合スコア'] = res['総合スコア'] - _min_score + 0.1
 
     # ── C-3b 調教偏差値ベース スコアフロア ─────────────────────────────────
     # 過去走データ不足馬（過去走なし or 走数極少3走以内）に対して、
@@ -2334,27 +2473,6 @@ def compute_scores(
         res['単勝オッズ'] = None
         res['人気'] = None
 
-    # 人気との乖離補正
-    # 1〜3番人気馬がモデルスコア中央値を下回る場合に上方補正。
-    # 出馬表の確定オッズ・人気は取得タイミングによって欠落することがあるため
-    # （欠落時はこの補正が一切適用されなくなってしまう）、常に算出される
-    # SmartRC推定人気順を基準に1-3番人気を判定する。
-    res['人気補正pts'] = 0.0
-    _score_median = res['総合スコア'].median()
-    _bonus_map = {1: 3.0, 2: 2.0, 3: 1.5}
-    for idx, row_s in res.iterrows():
-        try:
-            _smartrc_rank = int(row_s['SmartRC推定人気順'])
-        except (TypeError, ValueError):
-            continue
-        if _smartrc_rank not in _bonus_map:
-            continue
-        model_score = res.at[idx, '総合スコア']
-        if model_score < _score_median:
-            bonus = _bonus_map[_smartrc_rank]
-            res.at[idx, '人気補正pts'] = bonus
-            res.at[idx, '総合スコア']  = model_score + bonus
-
     # ── ④ 偏差値gap収縮補正（過剰評価の是正）────────────────────────────
     # 過去走バックテスト(157R)で、軸の偏差値gapが大きい「抜けた1頭」ほど
     # モデル想定勝率を大きく下回ることが判明（gap≥7帯: 想定37%→実勝率15%）。
@@ -2376,6 +2494,30 @@ def compute_scores(
     res['総合スコア'] = res['総合スコア'].apply(_shrink_dev_score)
     # ────────────────────────────────────────────────────────────────────
 
+    # 人気との乖離補正（④収縮の“後”＝最終調整として適用）
+    # 1〜3番人気馬がモデルスコア中央値を下回る場合に上方補正。
+    # 出馬表の確定オッズ・人気は取得タイミングによって欠落することがあるため
+    # （欠落時はこの補正が一切適用されなくなってしまう）、常に算出される
+    # SmartRC推定人気順を基準に1-3番人気を判定する。
+    res['人気補正pts'] = 0.0
+    _score_median = res['総合スコア'].median()
+    _bonus_map = {1: 3.0, 2: 2.0, 3: 1.5}
+    for idx, row_s in res.iterrows():
+        try:
+            _smartrc_rank = int(row_s['SmartRC推定人気順'])
+        except (TypeError, ValueError):
+            continue
+        if _smartrc_rank not in _bonus_map:
+            continue
+        model_score = res.at[idx, '総合スコア']
+        if model_score < _score_median:
+            bonus = _bonus_map[_smartrc_rank] * fw('人気補正pts')
+            res.at[idx, '人気補正pts'] = bonus
+            res.at[idx, '総合スコア']  = model_score + bonus
+
+    # 表示用スコア（0.1〜100にクランプ）: 生スコアの積み上げをそのまま見せ、上限100/下限0.1で頭打ち・底上げ。
+    # 偏差値・勝率・買い判定は不変の生スコア(総合スコア)を使用（クランプは表示のみ）。
+    res['表示スコア'] = res['総合スコア'].clip(0.1, 100.0).round(1)
     res['順位予想'] = res['総合スコア'].rank(ascending=False, method='min').astype(int)
     res = res.sort_values('総合スコア', ascending=False).reset_index(drop=True)
 
@@ -2428,10 +2570,12 @@ def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None
             '今走斤量':         (float(r['今走斤量']) if r['今走斤量'] is not None and not pd.isna(r['今走斤量']) else None),
             '順位予想':         int(r['順位予想']),
             '総合スコア':       round(float(r['総合スコア']), 1),
+            '表示スコア':       round(float(r.get('表示スコア', 0)), 1),
             '最高出力pts':      round(float(r['最高出力pts']), 1),
             'クラスpts':        round(float(r['クラスpts']), 1),
             '時計pts':          round(float(r['時計pts']), 1),
-            '展開pts':          int(round(float(r['展開pts']))),
+            'コース特徴pts':          round(float(r['コース特徴pts']), 1),
+            'トラックバイアスpts':    round(float(r.get('トラックバイアスpts', 0)), 1),
             '斤量pts':          round(float(r['斤量pts']), 1),
             '距離pts':          round(float(r['距離pts']), 1),
             'コース適性pts':    round(float(r['コース適性pts']), 1),
@@ -2458,6 +2602,7 @@ def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None
             '補正タイム最良':    (round(float(r['補正タイム最良']), 0) if not pd.isna(r['補正タイム最良']) else None),
             '平均上がり3F':     (round(float(r['平均上がり3F']), 1)  if not pd.isna(r['平均上がり3F'])  else None),
             '平均4角通過順':    (round(float(r['平均4角通過順']), 1)  if not pd.isna(r['平均4角通過順'])  else None),
+            '前走距離':         (int(r['前走距離']) if r.get('前走距離') is not None and not pd.isna(r.get('前走距離')) else None),
             '平均コース類似度':  round(float(r['平均コース類似度']), 2),
             'タイム偏差利用走数': int(r['タイム偏差利用走数']),
             '坂路Lap1':         (round(float(r['坂路Lap1']), 2)   if r['坂路Lap1']  is not None and not pd.isna(r['坂路Lap1'])  else None),
@@ -2642,6 +2787,8 @@ if __name__ == '__main__':
     # ── 開催週バイアス用: kai_day / is_course_change を取得 ──────────────
     _kai_day = 0
     _is_course_change = False
+    _cushion = None
+    _moisture = None
     if args.smartrc:
         _kai_day = extract_kai_day(args.smartrc)
         if _kai_day:
@@ -2652,6 +2799,12 @@ if __name__ == '__main__':
                 _baba_obj = json.load(_bf)
             _is_course_change = bool(_baba_obj.get('\u30b3\u30fc\u30b9\u66ff\u308f\u308a\u521d\u9031', False))
             _course_used = _baba_obj.get('\u4f7f\u7528\u30b3\u30fc\u30b9')
+            _cushion = _baba_obj.get('クッション値')
+            _surf_now = 'ダート' if 'ダート' in _target_course else '芝'
+            _moisture = (_baba_obj.get('含水率_ダート') if _surf_now == 'ダート'
+                         else _baba_obj.get('含水率_芝')) or _baba_obj.get('含水率')
+            if _cushion is not None or _moisture is not None:
+                print(f"  [トラックバイアス] babaJSON クッション値={_cushion} 含水率={_moisture}({_surf_now})")
             if _is_course_change:
                 print(f"  [\u2461\u958b\u50ac\u9031] babaJSON \u304b\u3089\u30b3\u30fc\u30b9\u66ff\u308f\u308a\u521d\u9031\u30d5\u30e9\u30b0=True (\u4f7f\u7528\u30b3\u30fc\u30b9:{_course_used})")
             elif _course_used:
@@ -2672,6 +2825,8 @@ if __name__ == '__main__':
         smartrc_data=smartrc_data,
         kai_day=_kai_day,
         is_course_change=_is_course_change,
+        cushion=_cushion,
+        moisture=_moisture,
     )
     meta['race_info'] = _race_info
 
@@ -2683,8 +2838,8 @@ if __name__ == '__main__':
     print(f'[\u5b8c\u4e86] {out_json} \u306b\u4fdd\u5b58\u3057\u307e\u3057\u305f')
 
     # ── scores.csv 出力 ──────────────────────────────────────────
-    _score_cols = ['馬名', '脚質', '順位予想', '総合スコア',
-                   '最高出力pts', 'クラスpts', '時計pts', '展開pts',
+    _score_cols = ['馬名', '脚質', '順位予想', '総合スコア', '表示スコア',
+                   '最高出力pts', 'クラスpts', '時計pts', 'コース特徴pts', 'トラックバイアスpts',
                    '斤量pts', '距離pts', 'コース適性pts', '臨戦pts',
                    '人気補正pts', '騎手pts', '馬体重pts', '継続pts',
                    '着差pts', '枠順pts', '昇級pts', '馬場適性pts',

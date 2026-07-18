@@ -766,7 +766,7 @@ const cornerDS=DATA.map(h=>{
     borderColor:wBg(w),backgroundColor:'transparent',
     borderWidth:h['入線順位']<=3?3:1.2,pointRadius:0,tension:0.25};
 });
-new Chart(cornerCtx,{type:'line',
+if(window.Chart)new Chart(cornerCtx,{type:'line',
   data:{labels:_chartLabels,datasets:cornerDS},
   options:{responsive:true,maintainAspectRatio:false,
     scales:{

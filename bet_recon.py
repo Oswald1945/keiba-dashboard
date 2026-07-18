@@ -99,135 +99,38 @@ def reconstruct(ev):
     W = lambda n: pv[n]
     P2 = lambda n: _placeProb(wp, gi[n], 2)
     P3 = lambda n: _placeProb(wp, gi[n], 3)
-    A = arr[0]['name']
+    A = arr[0]['name']                      # 軸 = スコア(偏差値)1位
     wA = pv[A]
     srcA = float(sc[A]) if sc[A] is not None else 99
-    cand = [n for n in names if n != A]
-    cand.sort(key=lambda n: -pv[n])
-    partners = []
-    cum = wA
-    for n in cand:
-        s2 = _num(sc[n], 99)
-        live = (dv[n] >= 48) or (P2(n) >= 0.30)  # 相手はスコア/複勝率主導。人気だけ(推定≤4番)の低スコア馬は入れない
-        noHope = (dv[n] < 42) and (s2 > 6) and (P3(n) < 0.18)
-        if noHope:
-            continue
-        if len(partners) >= 2 and cum >= 0.82 and not (s2 <= 2):
-            break
-        if live or len(partners) < 2:
-            partners.append(n)
-            cum += pv[n]
-        if len(partners) >= 6:
-            break
-    if len(partners) < 1:
-        partners = cand[:2]
+    devA = dv[A]
+    n_runners = sum(1 for h in ev if h.get('馬番') is not None)
+    # ③-1,2 相手候補: 軸との偏差値差 ≤ 20、上限 min(6, 頭数//3)
+    cand = [x['name'] for x in arr if x['name'] != A and (devA - dv[x['name']]) <= 20.0]
+    cand.sort(key=lambda nm: -dv[nm])
+    cap = min(6, n_runners // 3)
+    partners = cand[:cap]
+    # ③-3 偏差値バンドで列1/2/3（軸との差 ≤3 / ≤10 / ≤20）
+    _B1, _B2 = 3.0, 10.0
+    col1 = ([A] + [nm for nm in partners if (devA - dv[nm]) <= _B1])[:3]
+    col2 = [nm for nm in partners if (devA - dv[nm]) <= _B2]
+    col3 = list(partners)
     contend = [A] + partners
-    _srcA = srcA if srcA < 99 else 99
-    _fav1Rank = 99
-    _fav2Rank = 99
-    _anaH = None
+    # 軸のコース特徴pts
+    kt_axis = None
     for h in ev:
-        ep = _num(h.get('SmartRC推定人気順'), 0)
-        pr = _num(h.get('順位予想'), 0)
-        if ep == 1:
-            _fav1Rank = pr
-        if ep == 2:
-            _fav2Rank = pr
-        if ep >= 5 and pr <= 3 and _anaH is None and pr > 0:
-            _anaH = dict(uma=h['馬番'], ep=ep)
-    _ana = _anaH is not None
-    # 偏差値ベースの混戦判定: 上位4頭が僅差(spread小) かつ 軸が2位に抜けていない(gapA小)＝1強不在
-    _S_BOX = 4.0      # 軸-4位の偏差値差。これ以内＝上位4頭僅差
-    _GAP_LEAD = 2.0   # 軸-2位の偏差値差。これ超＝軸が抜けた1強→混戦ではない(頭固定/見送り側)
-    _dev4 = dv[arr[3]['name']] if len(arr) >= 4 else dv[arr[-1]['name']]
-    spread = dv[A] - _dev4
-    _gapA = dv[A] - dv[arr[1]['name']]
-    miyomi = False
-    boxMode = False
-    if _srcA >= 4:
-        verdict = '中穴軸'
-    elif (_srcA == 2 or _srcA == 3) and (_fav1Rank >= 4 or _ana):
-        miyomi = True
-        verdict = '買い妙味'
-    elif spread <= _S_BOX and _gapA <= _GAP_LEAD:
-        # 人気総流しBOXは妙味なし→見送り。BOX4頭に穴馬(推定5番人気以下)を含み、
-        # かつ推定1・2番人気がともにモデル評価5番手以下のときだけBOX妙味ありとする。
-        _ANA_POP = 5
-        _box_has_ana = any(_num(arr[i].get('src'), 99) >= _ANA_POP
-                           for i in range(min(4, len(arr))))
-        if _box_has_ana and (_fav1Rank >= 5 or _fav2Rank >= 5):
-            boxMode = True
-            verdict = '混戦BOX'
-        else:
-            verdict = '見送り'
-    else:
-        verdict = '見送り'
-    # 妙味精製: 偏差値で相手の切りを判断（明確に離れた相手は実力で切る／僅差混戦は過剰人気を割り切り／根拠弱ければ妙味組めず見送り）
-    if miyomi:
-        _D_CLEAR = 5.0   # 切る候補が残す最強相手より偏差値で5以上低い→実力差で切る
-        _D_CLOSE = 2.0   # 相手間の偏差値レンジ≤2→僅差混戦→過剰人気を割り切り
-        topPop = [n for n in partners if sc[n] is not None and _num(sc[n], 99) <= 3]
-        hasAna = any(sc[n] is not None and _num(sc[n], 99) >= 5 for n in partners)
-        if topPop:
-            cand = min(topPop, key=lambda n: dv[n])   # 人気相手で偏差値最低=切る候補
-            others = [n for n in partners if n != cand]
-            bestOther = max((dv[n] for n in others), default=dv[A])
-            rng = (max(dv[n] for n in partners) - min(dv[n] for n in partners)) if len(partners) >= 2 else 0.0
-            if bestOther - dv[cand] >= _D_CLEAR:
-                partners = [n for n in partners if n != cand]   # 実力差で切り
-                contend = [A] + partners
-            elif rng <= _D_CLOSE:
-                overpop = min(topPop, key=lambda n: _num(sc[n], 99))   # 最人気の相手を割り切り
-                partners = [n for n in partners if n != overpop]
-                contend = [A] + partners
-            else:
-                miyomi = False                          # 切る根拠弱い→妙味組めず
-                verdict = '見送り'
-        elif not hasAna:
-            miyomi = False
-            verdict = '見送り'
-    # 穴妙味（要検討）: 軸=本命でも推定5番人気以降&偏差値58以上の優秀穴がいれば馬連/ワイド/三連複で妙味
-    anaMode = False
-    ana_oppMW = []
-    ana_opp3 = []
-    if not miyomi and not boxMode and verdict == '見送り':
-        _scr = {x['name']: ev[x['idx']].get('スコア') for x in arr}
-        anaPicks = [x['name'] for x in arr
-                    if x['name'] != A and _num(x['src'], 99) >= 5 and x['dev'] >= 58]
-        if anaPicks:
-            anaMode = True
-            verdict = '穴妙味'
-            for _nm in anaPicks:
-                if _nm not in contend:
-                    partners.append(_nm); contend.append(_nm)
-            # 馬連/ワイド相手＝穴のみ
-            ana_oppMW = sorted(um[n] for n in anaPicks)
-            # 三連複相手＝軸以外をスコア降順、連続ギャップ5以上で切る（穴は必ず含める）
-            _cand3 = sorted([n for n in contend if n != A], key=lambda n: -_scr[n])
-            _opp3 = []; _prevS = None
-            for _nm in _cand3:
-                if _prevS is not None and (_prevS - _scr[_nm]) >= 5:
-                    break
-                _opp3.append(_nm); _prevS = _scr[_nm]
-            for _nm in anaPicks:
-                if _nm not in _opp3:
-                    _opp3.append(_nm)
-            ana_opp3 = sorted(um[n] for n in _opp3)
-    col1 = [n for n in contend if n == A or W(n) >= 0.6 * wA]
-    col1.sort(key=lambda n: -W(n))
-    col1 = col1[:3]
-    headFix = (len(col1) == 1)
-    ex = (lambda n: n != A) if headFix else (lambda n: True)
-    col2 = [n for n in contend if ex(n) and P2(n) >= 0.18]
-    col2.sort(key=lambda n: -P2(n))
-    if len(col2) < 2:
-        col2 = sorted([n for n in contend if ex(n)], key=lambda n: -P2(n))[:2]
-    col2 = col2[:5]
-    col3 = sorted([n for n in contend if ex(n)], key=lambda n: -P3(n))
-    # 予想ダッシュボードと同じく、各列は最終的に馬番(若い順)で表示・組成する
-    col1 = sorted(col1, key=lambda n: um[n])
-    col2 = sorted(col2, key=lambda n: um[n])
-    col3 = sorted(col3, key=lambda n: um[n])
+        if h.get('馬名') == A:
+            kt_axis = _num(h.get('コース特徴pts'), None); break
+    # ② 購入推奨ゲート（全条件AND / 推定人気ベース）
+    _pop = lambda nm: _num(sc[nm], 99)
+    _top3 = sum(1 for nm in contend if _pop(nm) in (1, 2, 3))
+    cond1 = _top3 <= 2                                                   # 1-3番人気は最大2頭
+    cond2 = True if _pop(A) not in (1, 2) else all(_pop(nm) not in (1, 2, 3, 4) for nm in partners)  # 軸が1/2番人気なら相手に1-4番人気なし
+    cond3 = (kt_axis is not None and kt_axis > 0)                        # 軸のコース特徴pts>0
+    verdict = '購入推奨' if (len(partners) >= 1 and cond1 and cond2 and cond3) else '購入非推奨'
+    # 表示は馬番順
+    col1 = sorted(col1, key=lambda nm: um[nm])
+    col2 = sorted(col2, key=lambda nm: um[nm])
+    col3 = sorted(col3, key=lambda nm: um[nm])
     # 内訳採算オッズ算定用: 馬番キーの単勝確率・複勝確率・3着順列確率(Harville)
     o3 = {}
     for seq in itertools.permutations(names, 3):
@@ -240,9 +143,9 @@ def reconstruct(ev):
     pv_uma = {um[n]: pv[n] for n in names}
     p3_uma = {um[n]: _placeProb(wp, gi[n], 3) for n in names}
     o3_uma = {tuple(um[n] for n in seq): v for seq, v in o3.items()}
-    return dict(A=A, umA=um[A], wA=wA, srcA=srcA, verdict=verdict, miyomi=miyomi,
-                boxMode=boxMode, anaMode=anaMode, ana_oppMW=ana_oppMW, ana_opp3=ana_opp3,
-                col1=col1, col2=col2, col3=col3, um=um,
+    return dict(A=A, umA=um[A], wA=wA, srcA=srcA, verdict=verdict,
+                col1=col1, col2=col2, col3=col3, um=um, partners=partners,
+                cond=dict(c1=cond1, c2=cond2, c3=cond3), kt_axis=kt_axis,
                 names=names, waku=waku, pv_uma=pv_uma, p3_uma=p3_uma, o3_uma=o3_uma)
 
 
@@ -306,90 +209,24 @@ def eval_race(rec, res_df, payouts):
     s3t = [(_parse_combo(c), a) for c, a in payouts.get('sanrentan', [])]
     umA = rec['umA']
     A = rec['A']
-    top1 = order[0]
     bets = {}
-    if rec['boxMode']:
-        bx = rec['names'][:min(4, len(rec['names']))]
-        bxu = sorted(um[n] for n in bx)
-        hits = [([u], fuku[u]) for u in bxu if u in fuku]
-        bets['複勝BOX'] = (len(bxu), sum(p for _, p in hits), hits)
-        pairs = list(itertools.combinations(bxu, 2))
-        hits = []; ret = 0
-        for c in pairs:
-            for cs, a in wide:
-                if cs == set(c):
-                    hits.append((sorted(c), a)); ret += a
-        bets['ワイドBOX'] = (len(pairs), ret, hits)
-        hits = []; ret = 0
-        for c in pairs:
-            for cs, a in umaren:
-                if cs == set(c):
-                    hits.append((sorted(c), a)); ret += a
-        bets['馬連BOX'] = (len(pairs), ret, hits)
-        tri = list(itertools.combinations(bxu, 3))
-        hits = []; ret = 0
-        for c in tri:
-            for cs, a in s3p:
-                if cs == set(c):
-                    hits.append((sorted(c), a)); ret += a
-        bets['三連複BOX'] = (len(tri), ret, hits)
-        return dict(order=order, bets=bets, box=True, axis_uma=umA,
-                    axis_fin=order.index(umA) + 1 if umA in order else None)
-
-    if rec.get('anaMode'):
-        oppMW = rec['ana_oppMW']; opp3 = rec['ana_opp3']
-        bets = {}
-        hits = []; ret = 0
-        for o in oppMW:
-            for cs, a in umaren:
-                if cs == {umA, o}:
-                    hits.append((sorted([umA, o]), a)); ret += a
-        bets['馬連'] = (len(oppMW), ret, hits)
-        hits = []; ret = 0
-        for o in oppMW:
-            for cs, a in wide:
-                if cs == {umA, o}:
-                    hits.append((sorted([umA, o]), a)); ret += a
-        bets['ワイド'] = (len(oppMW), ret, hits)
-        hits = []; ret = 0
-        for c in itertools.combinations(opp3, 2):
-            for cs, a in s3p:
-                if cs == {umA, c[0], c[1]}:
-                    hits.append((sorted([umA, c[0], c[1]]), a)); ret += a
-        bets['三連複'] = (len(list(itertools.combinations(opp3, 2))), ret, hits)
-        return dict(order=order, bets=bets, box=False, ana=True, axis_uma=umA,
-                    axis_fin=order.index(umA) + 1 if umA in order else None)
-
     col1u = [um[n] for n in rec['col1']]
     col2u = [um[n] for n in rec['col2']]
     col3u = [um[n] for n in rec['col3']]
     uren = [um[n] for n in rec['col2'] if n != A]
     wd = [um[n] for n in rec['col3'] if n != A]
-    # 単勝
-    if umA == top1:
-        bets['単勝'] = (1, tansho.get(umA, 0), [([umA], tansho.get(umA, 0))])
-    else:
-        bets['単勝'] = (1, 0, [])
-    # 複勝
-    if umA in fuku:
-        bets['複勝'] = (1, fuku[umA], [([umA], fuku[umA])])
-    else:
-        bets['複勝'] = (1, 0, [])
-    # 馬連
     hits = []; ret = 0
     for o in uren:
         for cs, a in umaren:
             if cs == {umA, o}:
                 hits.append((sorted([umA, o]), a)); ret += a
     bets['馬連'] = (len(uren), ret, hits)
-    # ワイド
     hits = []; ret = 0
     for o in wd:
         for cs, a in wide:
             if cs == {umA, o}:
                 hits.append((sorted([umA, o]), a)); ret += a
     bets['ワイド'] = (len(wd), ret, hits)
-    # 馬単 col1->col2
     pts = 0; ret = 0; hits = []
     for i in col1u:
         for j in col2u:
@@ -399,14 +236,12 @@ def eval_race(rec, res_df, payouts):
                     if combo == [i, j]:
                         hits.append(([i, j], a)); ret += a
     bets['馬単'] = (pts, ret, hits)
-    # 三連複 軸-相手2頭
     hits = []; ret = 0
     for c in itertools.combinations(wd, 2):
         for cs, a in s3p:
             if cs == {umA, c[0], c[1]}:
                 hits.append((sorted([umA, c[0], c[1]]), a)); ret += a
     bets['三連複'] = (len(list(itertools.combinations(wd, 2))), ret, hits)
-    # 三連単 col1->col2->col3
     pts = 0; ret = 0; hits = []
     for i in col1u:
         for j in col2u:
@@ -422,11 +257,8 @@ def eval_race(rec, res_df, payouts):
 
 
 _VERDICT_STYLE = {
-    '買い妙味': ('#27ae60', '#1a3a28', '#5DCAA5'),
-    '中穴軸': ('#f1c40f', '#3a2e10', '#f1c40f'),
-    '混戦BOX': ('#f1c40f', '#3a2e10', '#f1c40f'),
-    '穴妙味': ('#f1c40f', '#3a2e10', '#f1c40f'),
-    '見送り': ('#e74c3c', '#3a1a1a', '#F09595'),
+    '購入推奨': ('#27ae60', '#1a3a28', '#5DCAA5'),
+    '購入非推奨': ('#e74c3c', '#3a1a1a', '#F09595'),
 }
 _WAKU_BG = {1: '#f4f4f4', 2: '#2b2b2b', 3: '#d63a3a', 4: '#3a66d6',
             5: '#f5d300', 6: '#2b9b46', 7: '#f08a24', 8: '#f2a0c0'}
@@ -476,30 +308,18 @@ def _stack(entries, justify):
 def _forms(rec):
     um = rec['um']
     A = rec['umA']
-    if rec['boxMode']:
-        bxu = sorted(um[n] for n in rec['names'][:min(4, len(rec['names']))])
-        return [('複勝BOX', [bxu], ''), ('ワイドBOX', [bxu], '-'),
-                ('馬連BOX', [bxu], '-'), ('三連複BOX', [bxu], '-')]
-    if rec.get('anaMode'):
-        oppMW = rec['ana_oppMW']; opp3 = rec['ana_opp3']
-        return [('馬連', [[A], oppMW], '-'),
-                ('ワイド', [[A], oppMW], '-'),
-                ('三連複', [[A], opp3], '-')]
     uren = [um[n] for n in rec['col2'] if n != rec['A']]
     wd = [um[n] for n in rec['col3'] if n != rec['A']]
     col1u = [um[n] for n in rec['col1']]
     col2u = [um[n] for n in rec['col2']]
     col3u = [um[n] for n in rec['col3']]
     return [
-        ('単勝', [[A]], ''),
-        ('複勝', [[A]], ''),
         ('馬連', [[A], uren], '-'),
         ('ワイド', [[A], wd], '-'),
         ('馬単', [col1u, col2u], '→'),
         ('三連複', [[A], wd], '-'),
         ('三連単', [col1u, col2u, col3u], '→'),
     ]
-
 
 def render_panel(rec, ev_eval):
     bc, bg, tx = _VERDICT_STYLE.get(rec['verdict'], ('#7f8c8d', '#222', '#bbb'))

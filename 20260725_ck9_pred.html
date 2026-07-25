@@ -3137,10 +3137,14 @@ function renderRows(rows) {
     const waku_b  = h['枠番']
       ? `<span style="display:inline-block;background:${waku_bg_c};color:${waku_fg_c};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">${h['枠番']}枠</span><span style="display:inline-block;background:${waku_bg_c};color:${waku_fg_c};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">${h['馬番'] || '?'}番</span>`
       : '<span style="color:#555">未定</span>';
-    const probPct = ((h._prob || 0) * 100).toFixed(1) + '%';
+    const isLocal = !!h['地方実績のみ'];
+    const probPct = isLocal ? '<span style="color:#95a5a6">参考</span>' : (((h._prob || 0) * 100).toFixed(1) + '%');
     const ev      = h._ev;
     let evStr = '-', evCls = 'ev-neutral', judgement = '-';
-    if (ev !== undefined && ev !== null) {
+    if (isLocal) {
+      // 参考(地方実績のみ): JRA基準の勝率/EV判定は行わず「参考」表示に固定
+      judgement = '📎 参考'; evStr = '-'; evCls = 'ev-neutral';
+    } else if (ev !== undefined && ev !== null) {
       evStr = ev.toFixed(3);
       // EV値のみで判定（大穴・通常共通基準）
       if (ev > 0.05)       { evCls = 'ev-positive'; judgement = h._isDark ? '⚠ 大穴注意' : '◎ 買い'; }
@@ -3173,9 +3177,9 @@ function renderRows(rows) {
     const srcNinkiCell = srcRank != null
       ? `<span style="font-weight:700;color:#f39c12">${srcRank}位</span>`
       : '<span style="color:#555">-</span>';
-    return `<tr>
+    return `<tr style="${isLocal ? 'opacity:.55' : ''}">
       <td>${waku_b}</td>
-      <td style="white-space:nowrap"><b style="font-size:13px">${h['馬名']}</b>${h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}${h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}${h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}</td>
+      <td style="white-space:nowrap"><b style="font-size:13px">${h['馬名']}</b>${isLocal ? '<span style="font-size:9px;background:#607d8b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📎参考(地方)</span>' : ''}${h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}${h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}${h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}</td>
       <td>${h['脚質']}</td>
       <td>${(h['表示スコア']!=null?h['表示スコア']:h['スコア']).toFixed(1)}</td>
       <td>${h['順位予想']}</td>
@@ -3206,7 +3210,8 @@ function renderRows(rows) {
 function computeEV(temp) {
   const scores = EV_DATA.map(h => h['スコア']);
   const maxS   = Math.max(...scores);
-  const exps   = scores.map(s => Math.exp((s - maxS) / temp));
+  // 参考(地方実績のみ)馬はJRA基準と比較不能なため勝率分布から除外(exp=0)。
+  const exps   = scores.map((s, i) => EV_DATA[i]['地方実績のみ'] ? 0 : Math.exp((s - maxS) / temp));
   const sumExp = exps.reduce((a, b) => a + b, 0);
   const rawProbs = exps.map(e => e / sumExp);
 

@@ -3606,7 +3606,13 @@ function renderBets(){
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }
   // info & prob table
   var info=document.getElementById('betAnchorInfo');
-  if(info){ if(boxMode){ var _bx=names.slice(0,Math.min(4,names.length)); info.innerHTML='<b style="color:#f1c40f">軸不在の混戦</b> — 頭固定せず上位'+_bx.length+'頭 '+_bx.map(function(n){return _umaChip(um[n]);}).join(' ')+' をBOX'; } else { info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(1)+'・モデル1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':''); } }
+  if(info){ if(boxMode){ var _bx=names.slice(0,Math.min(4,names.length)); info.innerHTML='<b style="color:#f1c40f">軸不在の混戦</b> — 頭固定せず上位'+_bx.length+'頭 '+_bx.map(function(n){return _umaChip(um[n]);}).join(' ')+' をBOX'; } else {
+      var _scArr=EV_DATA.filter(function(h){return h['馬番']!=null;});
+      var _scTop=_scArr.length?_scArr.reduce(function(a,b){return (b['スコア']>a['スコア'])?b:a;}):null;
+      var _axisNote='';
+      if(_scTop && _scTop['馬名']!==A){ var _sto=_scTop['オッズ']; _axisNote='<div style="font-size:11px;color:#e67e22;margin-top:4px;line-height:1.5">※スコア1位は'+_umaChip(_scTop['馬番'])+' <b>'+_scTop['馬名']+'</b>（'+((_sto!=null&&_sto>0)?_sto+'倍で人気薄':'人気薄')+'）。市場と乖離した人気薄の過剰評価を抑えるため、勝率cap適用で軸は'+_umaChip(um[A])+' <b>'+A+'</b>に調整。</div>'; }
+      info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(1)+'・勝率1位(オッズ勘案) / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':'')+_axisNote;
+    } }
   var pt=document.getElementById('betProbTable');
   if(pt){
     var trh=(anaMode?[A].concat(_anaOpp3):contend).map(function(n){

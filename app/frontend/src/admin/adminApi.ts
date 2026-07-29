@@ -150,6 +150,13 @@ export type GeneratedRace = {
   published_review: string | null
 }
 
+/** サーバーへ反映済みかどうか。available=false は「サーバーに聞けなかった」。 */
+export type AppPublishStatus = {
+  date: string
+  available: boolean
+  races: Record<string, { pred: 'sent' | 'pending' | 'none'; review: 'sent' | 'pending' | 'none' }>
+}
+
 export const adminApi = {
   status: () => get<AdminStatus>('/api/admin/status'),
   generated: (date: string) =>
@@ -170,7 +177,13 @@ export const adminApi = {
   predict: (force: boolean) => post<{ job_id: string }>('/api/admin/predict', { force }),
   fetchResults: (date: string) => post<{ job_id: string }>('/api/admin/fetch-results', { date }),
   review: (targets: RaceTarget[]) => post<{ job_id: string }>('/api/admin/review', { targets }),
+  reviewAuto: () => post<{ job_id: string }>('/api/admin/review-auto'),
+  // GitHub Pages への公開。処理は残してあるが画面からは呼んでいない。
   publish: (raceIds: string[]) => post<{ job_id: string }>('/api/admin/publish', { race_ids: raceIds }),
+  appPublish: (raceIds: string[]) =>
+    post<{ job_id: string }>('/api/admin/app-publish', { race_ids: raceIds }),
+  appPublishStatus: (date: string) =>
+    get<AppPublishStatus>(`/api/admin/app-publish/status?date=${date}`),
   rescore: (dateFrom: string, dateTo: string, outFile = 'factor_rows_p4.jsonl') =>
     post<{ job_id: string }>('/api/admin/rescore', {
       date_from: dateFrom, date_to: dateTo, out_file: outFile,

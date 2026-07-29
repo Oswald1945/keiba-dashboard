@@ -623,6 +623,38 @@ button.badge:hover { filter: brightness(1.08); }
   background: var(--green-pale);
 }
 
+/* ── 管理画面の作業切り替え（予想作成 / 回顧作成） ──────────────
+   全体のタブ(.navbtn)とは別物なので、下線ではなく塗りで区別する。 */
+.flowtabs {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 12px;
+  flex-wrap: wrap;
+}
+
+.flowtab {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 9px 20px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.flowtab.on {
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+  color: #ffffff;
+}
+
+/* 検証タブの上に置く「作り直し」の一群を、集計部分と見た目で分ける */
+.rebuild-block {
+  margin-bottom: 16px;
+}
+
 /* 下部ナビに隠れないよう本文の下に余白を作る */
 .viewhost {
   padding-bottom: calc(64px + env(safe-area-inset-bottom, 0));

@@ -264,9 +264,53 @@ def run_rescore(request: Request, body: RescoreBody):
 
 @router.post('/publish')
 def run_publish(request: Request, body: PublishBody):
-    """確認したものを GitHub Pages へ公開する。"""
+    """確認したものを GitHub Pages へ公開する。
+
+    公開サーバーへの反映は /app-publish に移したので、画面からは呼んでいない。
+    """
     _local_only(request)
     if not body.race_ids:
         raise HTTPException(400, '公開するレースが選ばれていません')
     return _submit(f'公開（{len(body.race_ids)}レース）',
                    lambda job: pipeline.publish(job, body.race_ids))
+
+
+@router.post('/app-publish')
+def run_app_publish(request: Request, body: PublishBody):
+    """確認したものを公開サーバー（アプリ）へ送る。"""
+    _local_only(request)
+    if not body.race_ids:
+        raise HTTPException(400, '公開するレースが選ばれていません')
+    return _submit(f'アプリ公開（{len(body.race_ids)}レース）',
+                   lambda job: pipeline.publish_to_app(job, body.race_ids))
+
+
+@router.get('/app-publish/status')
+def app_publish_status(request: Request, date: str):
+    """その日の各レースが、サーバーに反映済みかどうか。
+
+    同期ツールに聞く（判定の仕方を2箇所に持たないため）。
+    サーバーに繋がらないときは空を返し、画面は「不明」として扱う。
+    """
+    _local_only(request)
+    import json
+    import subprocess
+    import sys
+    r = subprocess.run(
+        [sys.executable, str(pipeline.SYNC_PY), '--status', date],
+        capture_output=True, timeout=120)
+    out = r.stdout.decode('utf-8', 'replace').strip()
+    if r.returncode != 0 or not out:
+        return {'date': date, 'available': False, 'races': {}}
+    try:
+        return {'date': date, 'available': True, 'races': json.loads(out)}
+    except ValueError:
+        return {'date': date, 'available': False, 'races': {}}
+
+
+@router.post('/review-auto')
+def run_review_auto(request: Request):
+    """速報か確定かを自動で判断して、回顧をまとめて作る。"""
+    _local_only(request)
+    return _submit('回顧の作成（速報/確定を自動判定）',
+                   lambda job: pipeline.build_reviews_auto(job))

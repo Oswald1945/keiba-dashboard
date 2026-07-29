@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Collapsible from '../ui/Collapsible'
+import JobLog from '../admin/JobLog'
+import { RescoreSection, UpdateSection } from '../admin/AdminPanel'
 
 type Preset = { key: string; label: string; date_from: string | null; date_to: string | null }
 type SourceInfo = {
@@ -115,6 +117,22 @@ export default function ValidationPanel() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // 検証データの作り直し（管理画面から移した①②）
+  const [jobId, setJobId] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [rebuildError, setRebuildError] = useState<string | null>(null)
+
+  const runJob = async (fn: () => Promise<{ job_id: string }>) => {
+    setRebuildError(null)
+    try {
+      const r = await fn()
+      setJobId(r.job_id)
+      setBusy(true)
+    } catch (e: unknown) {
+      setRebuildError(e instanceof Error ? e.message : '実行できませんでした')
+    }
+  }
+
   useEffect(() => {
     getJson<Range>('/api/validation/range')
       .then((r) => {
@@ -175,6 +193,14 @@ export default function ValidationPanel() {
         <h1>検証</h1>
         <div className="sub">的中精度と妙味を、期間・条件を絞って集計します。</div>
       </header>
+
+      {/* 検証データを作り直す流れ（①更新 → ②作り直し）。集計はその下。 */}
+      <div className="admin rebuild-block">
+        {rebuildError && <div className="note error">{rebuildError}</div>}
+        <JobLog jobId={jobId} onFinished={() => setBusy(false)} />
+        <UpdateSection step="①" busy={busy} onRun={runJob} />
+        <RescoreSection step="②" busy={busy} onRun={runJob} />
+      </div>
 
       <div className="source-row">
         <label className="vf">

@@ -125,9 +125,77 @@ def build_reviews(job: jobs.Job, targets: list, force: bool = True) -> dict:
     return {'returncode': code}
 
 
+def build_reviews_auto(job: jobs.Job) -> dict:
+    """速報か確定かを自分で判断して回顧を作る。
+
+    判断に要る材料は review_status.overview() が既に持っている。
+    ここは「どの順で何を呼ぶか」を決めるだけで、新しい判定は作らない。
+
+      確定が来ている            → そのまま確定の回顧を作る／作り直す
+      当日・前日で確定がまだ     → 速報結果を取り込んでから作る
+      速報のまま・確定も来てない → 何もしない（理由を画面に出す）
+    """
+    from . import jvlink, review_status
+    ov = review_status.overview()
+
+    plan = []
+    for day in ov['pending']:
+        plan.append((day, bool(day.get('needs_realtime')), '未作成'))
+    for day in ov['upgradable']:
+        plan.append((day, False, '速報のまま→確定で作り直し'))
+
+    if not plan:
+        jobs.log(job, '[回顧] 作る対象がありません。')
+        for day in ov['realtime_waiting']:
+            jobs.log(job, f"[回顧] {day['date']}: {day['count']}レースは確定成績がまだ届いていません")
+        return {'built': 0}
+
+    job.steps_total = len(plan)
+    built = 0
+    for i, (day, need_rt, why) in enumerate(plan, 1):
+        if job._cancel:
+            return {'cancelled': True, 'built': built}
+        date = day['date']
+        jobs.log(job, f"[回顧] {date}（{why}・{day['count']}レース）")
+        if need_rt:
+            jobs.log(job, f'[回顧] {date} は確定成績がまだなので、速報結果を取り込みます')
+            jvlink.set_realtime_date(job, date)
+            jvlink.update(job)
+        build_reviews(job, day['races'])
+        built += day['count']
+        job.steps_done = i
+
+    for day in ov['realtime_waiting']:
+        jobs.log(job, f"[回顧] {day['date']}: {day['count']}レースは確定成績がまだ届いていません")
+    return {'built': built}
+
+
 # ── 公開 ─────────────────────────────────────────────────────────
+SYNC_PY = config.APP_DIR / 'tools' / 'sync_to_server.py'
+
+
+def publish_to_app(job: jobs.Job, race_ids: list) -> dict:
+    """確認済みのレースを公開サーバー（アプリ）へ送る。
+
+    送るのは選んだレースの予想HTML・回顧HTML・一覧の元データ。
+    メモの統合と反映確認は同期ツール側が行う。
+    """
+    if not race_ids:
+        raise ValueError('公開するレースが選ばれていません')
+    jobs.log(job, f'[アプリ公開] {len(race_ids)} レースをサーバーへ送ります')
+    code = jobs.run_stream(
+        job, [sys.executable, str(SYNC_PY), '--only', *race_ids], timeout=3600)
+    if code != 0:
+        raise RuntimeError(f'アプリへの公開に失敗しました (code={code})')
+    return {'published': race_ids}
+
+
 def publish(job: jobs.Job, race_ids: list) -> dict:
-    """確認済みのHTMLを GitHub Pages へ公開する。"""
+    """確認済みのHTMLを GitHub Pages へ公開する。
+
+    公開サーバーへの反映は publish_to_app に移したため、画面からは呼んでいない。
+    過去に公開したものを更新したいときのために処理は残してある。
+    """
     if not race_ids:
         raise ValueError('公開するレースが選ばれていません')
     jobs.log(job, f'[公開] {len(race_ids)} レースを公開します')

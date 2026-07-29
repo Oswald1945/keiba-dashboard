@@ -4,6 +4,7 @@ import Collapsible from '../ui/Collapsible'
 import {
   adminApi,
   type AdminStatus,
+  type AppPublishStatus,
   type BabaPreview,
   type GeneratedRace,
   type PredictableGroup,
@@ -18,20 +19,23 @@ const keyOf = (t: RaceTarget) => `${t.date}|${t.jyo}|${t.race_no}`
 // ①〜④は使う頻度が高いので開いた状態、⑤以降は閉じた状態から始める
 const OPEN_BY_DEFAULT = new Set(['①', '②', '③', '④'])
 
-function Section({
+export function Section({
   step,
   title,
   children,
   note,
+  id,
 }: {
   step: string
   title: string
   note?: string
+  /** 開閉の記憶に使う名前。手順番号は流れごとに重複するので、中身で分ける。 */
+  id?: string
   children: React.ReactNode
 }) {
   return (
     <Collapsible
-      id={`admin.${step}`}
+      id={`admin.${id ?? step}`}
       className="admin-section"
       defaultOpen={OPEN_BY_DEFAULT.has(step)}
       title={<><span className="step">{step}</span>{title}</>}
@@ -42,6 +46,9 @@ function Section({
   )
 }
 
+/** 作業の流れ。予想を作るときと回顧を作るときで、使う手順が違う。 */
+type Flow = 'pred' | 'review'
+
 export default function AdminPanel() {
   const [status, setStatus] = useState<AdminStatus | null>(null)
   const [groups, setGroups] = useState<PredictableGroup[]>([])
@@ -49,7 +56,7 @@ export default function AdminPanel() {
   const [jobId, setJobId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [checklistOk, setChecklistOk] = useState(false)
+  const [flow, setFlow] = useState<Flow>('pred')
 
   const reload = useCallback(() => {
     adminApi.status().then(setStatus).catch((e: Error) => setError(e.message))
@@ -135,29 +142,37 @@ export default function AdminPanel() {
         {busy && <div className="ng">実行中のジョブがあります。終わるまで他は押せません。</div>}
       </div>
 
+      <nav className="flowtabs">
+        <button className={flow === 'pred' ? 'flowtab on' : 'flowtab'} onClick={() => setFlow('pred')}>
+          予想作成
+        </button>
+        <button className={flow === 'review' ? 'flowtab on' : 'flowtab'} onClick={() => setFlow('review')}>
+          回顧作成
+        </button>
+      </nav>
+
       <JobLog jobId={jobId} onFinished={() => reload()} />
 
+      {flow === 'review' ? (
+        <>
+          <UpdateSection step="①" busy={busy} onRun={run} />
+          <ReviewAutoSection step="②" reviews={reviews} busy={busy} onRun={run} />
+          <AppPublishSection
+            step="③"
+            dates={(reviews?.pending ?? []).map((d) => d.date)
+              .concat((reviews?.upgradable ?? []).map((d) => d.date))}
+            busy={busy}
+            onRun={run}
+          />
+        </>
+      ) : (
+      <>
       {/* ① 更新 */}
-      <Section step="①" title="データ更新（JV-Link差分）">
-        <div className="checklist">
-          {status?.jvlink.checklist.map((c) => (
-            <div key={c}>・{c}</div>
-          ))}
-          <label className="check">
-            <input type="checkbox" checked={checklistOk} onChange={(e) => setChecklistOk(e.target.checked)} />
-            確認しました
-          </label>
-          <div className="muted">
-            JV-Linkキーの有効化は画面操作のため自動化できません。忘れると RC=-303 で失敗します。
-          </div>
-        </div>
-        <button className="btn primary" disabled={!checklistOk || busy} onClick={() => run(adminApi.update)}>
-          データを更新する
-        </button>
-      </Section>
+      <UpdateSection step="①" busy={busy} onRun={run} />
 
       {/* ② レース選択 */}
       <Section
+        id="pred2"
         step="②"
         title="レースを選ぶ／エクスポート"
         note="結果が確定していない＝これから予想できるレースです。新馬・未勝利は既定で選びません。"
@@ -220,7 +235,7 @@ export default function AdminPanel() {
       {/* ③ 馬場 */}
       <BabaSection dates={groups.map((g) => g.date)} busy={busy} />
 
-      {/* ⑤ 採点・生成 */}
+      {/* ④ 採点・生成 */}
       <Section step="④" title="採点して予想を作る" note="作るだけで、公開はしません。">
         <div className="form-actions">
           <button className="btn primary" disabled={busy} onClick={() => run(() => adminApi.predict(false))}>
@@ -232,23 +247,59 @@ export default function AdminPanel() {
         </div>
       </Section>
 
-      {/* 確認と公開 */}
-      <PublishSection dates={groups.map((g) => g.date)} busy={busy} onRun={run} />
-
-      {/* ⑥⑦ 結果と回顧 */}
-      <ResultSection reviews={reviews} busy={busy} onRun={run} />
-
-      {/* 検証データ */}
-      <RescoreSection busy={busy} onRun={run} />
+      {/* ⑤ 確認してアプリへ公開 */}
+      <AppPublishSection step="⑤" dates={groups.map((g) => g.date)} busy={busy} onRun={run} />
+      </>
+      )}
     </div>
   )
 }
 
-// ── 検証データの作り直し ────────────────────────────────────────
-function RescoreSection({
+// ── データ更新（どの流れでも最初に行う） ──────────────────────────
+export function UpdateSection({
+  step,
   busy,
   onRun,
 }: {
+  step: string
+  busy: boolean
+  onRun: (fn: () => Promise<{ job_id: string }>) => void
+}) {
+  const [checklist, setChecklist] = useState<string[]>([])
+  const [ok, setOk] = useState(false)
+
+  useEffect(() => {
+    adminApi.status().then((s) => setChecklist(s.jvlink.checklist)).catch(() => setChecklist([]))
+  }, [])
+
+  return (
+    <Section step={step} title="データ更新（JV-Link差分）" id="update">
+      <div className="checklist">
+        {checklist.map((c) => (
+          <div key={c}>・{c}</div>
+        ))}
+        <label className="check">
+          <input type="checkbox" checked={ok} onChange={(e) => setOk(e.target.checked)} />
+          確認しました
+        </label>
+        <div className="muted">
+          JV-Linkキーの有効化は画面操作のため自動化できません。忘れると RC=-303 で失敗します。
+        </div>
+      </div>
+      <button className="btn primary" disabled={!ok || busy} onClick={() => onRun(adminApi.update)}>
+        データを更新する
+      </button>
+    </Section>
+  )
+}
+
+// ── 検証データの作り直し（検証タブの上部で使う） ──────────────────
+export function RescoreSection({
+  step,
+  busy,
+  onRun,
+}: {
+  step: string
   busy: boolean
   onRun: (fn: () => Promise<{ job_id: string }>) => void
 }) {
@@ -257,7 +308,8 @@ function RescoreSection({
 
   return (
     <Section
-      step="⑧"
+      step={step}
+      id="rescore"
       title="検証データを作り直す（採点ロジックを変えたとき）"
       note="採点ロジックを変えると、検証タブが読んでいる5年データは古い世代のままになります。ここで現行ロジックで採点し直せます。"
     >
@@ -418,8 +470,118 @@ function BabaSection({ dates, busy }: { dates: string[]; busy: boolean }) {
   )
 }
 
-// ── 確認と公開 ───────────────────────────────────────────────────
-function PublishSection({
+// ── 確認してアプリ（公開サーバー）へ出す ─────────────────────────
+function AppPublishSection({
+  step,
+  dates,
+  busy,
+  onRun,
+}: {
+  step: string
+  dates: string[]
+  busy: boolean
+  onRun: (fn: () => Promise<{ job_id: string }>) => void
+}) {
+  const [date, setDate] = useState(dates[0] ?? '')
+  const [races, setRaces] = useState<GeneratedRace[]>([])
+  const [sync, setSync] = useState<AppPublishStatus | null>(null)
+  const [picked, setPicked] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => { if (!date && dates.length) setDate(dates[0]) }, [dates, date])
+
+  const load = useCallback(() => {
+    if (!date) return
+    setLoading(true)
+    adminApi.generated(date).then((d) => setRaces(d.races)).catch(() => setRaces([]))
+    // サーバーへの問い合わせは1秒ほどかかるので、一覧とは別に取る
+    adminApi.appPublishStatus(date)
+      .then(setSync)
+      .catch(() => setSync(null))
+      .finally(() => setLoading(false))
+  }, [date])
+  useEffect(() => { load() }, [load])
+
+  const toggle = (id: string) =>
+    setPicked((p) => {
+      const n = new Set(p)
+      n.has(id) ? n.delete(id) : n.add(id)
+      return n
+    })
+
+  /** まだサーバーに出していない（または中身が変わった）レース。 */
+  const notYet = races.filter((r) => {
+    const s = sync?.races[r.race_id]
+    if (!s) return true
+    return (r.has_pred && s.pred !== 'sent') || (r.has_review && s.review !== 'sent')
+  })
+
+  return (
+    <Section
+      step={step}
+      id="apppublish"
+      title="中身を確認してからアプリ公開"
+      note="ここを押すまで、招待した方には出ません。リンクを開いて中身を確かめてから選んでください。"
+    >
+      <div className="form-actions">
+        <select className="input" value={date} onChange={(e) => setDate(e.target.value)}>
+          {Array.from(new Set(dates.concat(date ? [date] : []))).sort().reverse().map((d) => (
+            <option key={d} value={d}>{fmtDate(d)}</option>
+          ))}
+        </select>
+        <button className="btn" onClick={load} disabled={loading}>
+          {loading ? '確認中…' : '一覧を更新'}
+        </button>
+        <button className="btn" onClick={() => setPicked(new Set(notYet.map((r) => r.race_id)))}>
+          未公開をすべて選ぶ（{notYet.length}）
+        </button>
+      </div>
+
+      {sync && !sync.available && (
+        <div className="note">
+          サーバーに問い合わせできませんでした。公開済みかどうかは表示されませんが、送ること自体はできます。
+        </div>
+      )}
+
+      <ul className="gen-list">
+        {races.map((r) => {
+          const s = sync?.races[r.race_id]
+          return (
+            <li key={r.race_id} className="gen-item">
+              <label className="check">
+                <input type="checkbox" checked={picked.has(r.race_id)} onChange={() => toggle(r.race_id)} />
+                <b>{r.venue}{r.race_no}R</b> {r.race_name ?? ''}
+              </label>
+              <span className="gen-links">
+                {r.has_pred && (
+                  <a href={`/api/races/${r.race_id}/pred.html`} target="_blank" rel="noreferrer">予想を確認</a>
+                )}
+                {r.has_review && (
+                  <a href={`/api/races/${r.race_id}/review.html`} target="_blank" rel="noreferrer">回顧を確認</a>
+                )}
+                {s?.pred === 'sent' && <span className="badge badge-outline">予想 公開済み</span>}
+                {s?.review === 'sent' && <span className="badge badge-outline">回顧 公開済み</span>}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+      <button className="btn primary" disabled={!picked.size || busy}
+              onClick={() => onRun(() => adminApi.appPublish([...picked]))}>
+        選んだ {picked.size} レースをアプリに公開する
+      </button>
+      <div className="muted">
+        公開先: <a href="https://oz-king-keiba.com" target="_blank" rel="noreferrer">https://oz-king-keiba.com</a>
+        （ログインした方だけが見られます）
+      </div>
+    </Section>
+  )
+}
+
+// ── GitHub Pages への公開 ────────────────────────────────────────
+// アプリ公開に移したため画面には出していない。過去に公開したものを
+// 更新したくなったときのために、処理ごと残してある（adminApi.publish）。
+export function PublishSection({
   dates,
   busy,
   onRun,
@@ -490,86 +652,83 @@ function PublishSection({
   )
 }
 
-// ── ⑥⑦ 結果・回顧 ──────────────────────────────────────────────
-function ResultSection({
+// ── ② 速報/確定を自動判定して回顧を作る ─────────────────────────
+function ReviewAutoSection({
+  step,
   reviews,
   busy,
   onRun,
 }: {
+  step: string
   reviews: ReviewOverview | null
   busy: boolean
   onRun: (fn: () => Promise<{ job_id: string }>) => void
 }) {
   const [results, setResults] = useState<ResultStatus | null>(null)
 
-  if (!reviews) return null
+  const todo = (reviews?.pending_total ?? 0) + (reviews?.upgradable_total ?? 0)
+  const waiting = reviews?.realtime_waiting_total ?? 0
 
   return (
-    <>
-      <Section step="⑥" title="結果を取り込む"
-               note="当日・前日は速報系から取り込みます。対象開催日は自動で設定します。">
-        {reviews.pending.length === 0 && <div className="note">回顧待ちのレースはありません。</div>}
-        {reviews.pending.map((d) => (
-          <div key={d.date} className="pending-row">
-            <b>{fmtDate(d.date)}</b>
-            <span className="muted">{d.count}レースが回顧未作成</span>
-            {d.needs_realtime ? (
-              <>
-                <span className="badge badge-todo">速報の取り込みが必要</span>
-                <button className="btn" disabled={busy} onClick={() => onRun(() => adminApi.fetchResults(d.date))}>
-                  この日の結果を取り込む
-                </button>
-              </>
-            ) : (
-              <span className="muted">確定成績のはずです（①の更新で取り込まれます）</span>
-            )}
-            <button className="btn" onClick={() => adminApi.results(d.date).then(setResults).catch(() => setResults(null))}>
-              確定状況を見る
-            </button>
-            <button className="btn primary" disabled={busy}
-                    onClick={() => onRun(() => adminApi.review(d.races))}>
-              回顧を作る（{d.count}レース）
-            </button>
-          </div>
-        ))}
-        {results && (
-          <div className="result-box">
-            <b>{fmtDate(results.date)}：{results.confirmed} / {results.total} レース確定</b>
-            <div className="result-grid">
-              {results.races.map((r) => (
-                <span key={`${r.venue}${r.race_no}`} className={`result-chip ${r.state}`}>
-                  {r.venue}{r.race_no}R {r.state}
-                  {r.source ? `[${r.source}]` : ''}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </Section>
+    <Section
+      step={step}
+      id="reviewauto"
+      title="速報か確定かを自動で判定して回顧を作る"
+      note="確定成績が届いていれば確定で、まだなら速報結果を取り込んでから作ります。速報で作ったものは、確定が届いた後にもう一度押すと作り直されます。"
+    >
+      {!reviews && <div className="note">状況を確認しています…</div>}
 
-      <Section step="⑦" title="速報で作った回顧を確定情報で作り直す"
-               note="レースラップなど、速報では取れなかった項目が確定成績で埋まります。">
-        {reviews.upgradable_total === 0 && reviews.realtime_waiting_total === 0 && (
-          <div className="note">作り直しが必要な回顧はありません。</div>
-        )}
-        {reviews.upgradable.map((d) => (
-          <div key={d.date} className="pending-row">
-            <b>{fmtDate(d.date)}</b>
-            <span className="muted">{d.count}レースが速報のまま</span>
-            <button className="btn primary" disabled={busy}
-                    onClick={() => onRun(() => adminApi.review(d.races))}>
-              確定情報で作り直す
-            </button>
+      {reviews && todo === 0 && waiting === 0 && (
+        <div className="note">作る対象はありません。</div>
+      )}
+
+      {reviews?.pending.map((d) => (
+        <div key={`p${d.date}`} className="pending-row">
+          <b>{fmtDate(d.date)}</b>
+          <span className="muted">{d.count}レースが回顧未作成</span>
+          {d.needs_realtime
+            ? <span className="badge badge-todo">速報結果を取り込んでから作ります</span>
+            : <span className="muted">確定成績で作ります</span>}
+          <button className="btn" onClick={() => adminApi.results(d.date).then(setResults).catch(() => setResults(null))}>
+            確定状況を見る
+          </button>
+        </div>
+      ))}
+
+      {reviews?.upgradable.map((d) => (
+        <div key={`u${d.date}`} className="pending-row">
+          <b>{fmtDate(d.date)}</b>
+          <span className="muted">{d.count}レースが速報のまま</span>
+          <span className="muted">確定情報で作り直します</span>
+        </div>
+      ))}
+
+      {reviews?.realtime_waiting.map((d) => (
+        <div key={`w${d.date}`} className="pending-row">
+          <b>{fmtDate(d.date)}</b>
+          <span className="muted">{d.count}レースが速報のまま</span>
+          <span className="badge badge-todo">確定成績がまだ届いていません（①の更新後に再確認）</span>
+        </div>
+      ))}
+
+      {results && (
+        <div className="result-box">
+          <b>{fmtDate(results.date)}：{results.confirmed} / {results.total} レース確定</b>
+          <div className="result-grid">
+            {results.races.map((r) => (
+              <span key={`${r.venue}${r.race_no}`} className={`result-chip ${r.state}`}>
+                {r.venue}{r.race_no}R {r.state}
+                {r.source ? `[${r.source}]` : ''}
+              </span>
+            ))}
           </div>
-        ))}
-        {reviews.realtime_waiting.map((d) => (
-          <div key={d.date} className="pending-row">
-            <b>{fmtDate(d.date)}</b>
-            <span className="muted">{d.count}レースが速報のまま</span>
-            <span className="badge badge-todo">確定成績がまだ届いていません（①の更新後に再確認）</span>
-          </div>
-        ))}
-      </Section>
-    </>
+        </div>
+      )}
+
+      <button className="btn primary" disabled={busy || todo === 0}
+              onClick={() => onRun(adminApi.reviewAuto)}>
+        回顧を作る（{todo}レース）
+      </button>
+    </Section>
   )
 }

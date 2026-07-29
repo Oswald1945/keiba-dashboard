@@ -58,11 +58,36 @@ def load_conf() -> dict:
         return {}
 
 
-def root_targets() -> list:
-    """サーバーの設置フォルダ直下へ送るもの。"""
-    out = sorted(config.OUT_DIR.glob('*_pred.html'))
-    out += sorted(config.OUT_DIR.glob('*_review.html'))
-    out += sorted(config.OUT_DIR.glob('horses_data_*.json'))
+def race_files(race_id: str) -> list:
+    """1レース分の、閲覧に要るファイル。
+
+    HTMLの命名は3種類あるので、実際の場所は paths に聞く。
+    """
+    from app.backend.services import paths
+    out = []
+    for p in (paths.pred_html(race_id), paths.review_html(race_id)):
+        if p is not None:
+            out.append(p)
+    h = paths.horses_json(race_id)
+    if h.exists():
+        out.append(h)
+    return out
+
+
+def root_targets(only: list | None = None) -> list:
+    """サーバーの設置フォルダ直下へ送るもの。
+
+    only にレースIDを渡すと、そのレース分だけに絞る（管理画面から
+    「選んだレースを公開する」を押したとき）。馬場は常に送る。
+    """
+    if only:
+        out = []
+        for rid in only:
+            out.extend(race_files(rid))
+    else:
+        out = sorted(config.OUT_DIR.glob('*_pred.html'))
+        out += sorted(config.OUT_DIR.glob('*_review.html'))
+        out += sorted(config.OUT_DIR.glob('horses_data_*.json'))
     if config.BABA_MANUAL_JSON.exists():
         out.append(config.BABA_MANUAL_JSON)
     return out
@@ -230,6 +255,61 @@ def sync_memo(conf: dict, check: bool) -> int:
     return 0
 
 
+def print_status(conf: dict, date: str) -> int:
+    """指定日の各レースが、サーバーに反映済みかどうかをJSONで出す。
+
+    管理画面が「未公開のものを選ぶ」ために使う。
+    送信はしない（読み取りだけ）。
+    """
+    from app.backend.services import catalog, paths
+    remote = remote_stats(conf, '', ['*_pred.html', '*_review.html'])
+
+    def state(p) -> str:
+        if p is None:
+            return 'none'
+        st = p.stat()
+        r = remote.get(p.name)
+        if r is None:
+            return 'pending'
+        return 'sent' if (r[0] == st.st_size and abs(r[1] - int(st.st_mtime)) <= 2) else 'pending'
+
+    out = {}
+    for row in catalog.list_races():
+        if row['date'] != date:
+            continue
+        rid = row['race_id']
+        out[rid] = {'pred': state(paths.pred_html(rid)),
+                    'review': state(paths.review_html(rid))}
+    print(json.dumps(out, ensure_ascii=False))
+    return 0
+
+
+def verify(conf: dict) -> None:
+    """送ったあと、サーバー側で何件見えているかを確認する。
+
+    「送ったつもりで反映されていない」を、その場で気づけるようにする。
+    """
+    path = conf['path'].rstrip('/')
+    script = (
+        f"cd {path} && {path}/.venv/bin/python - <<'PYEOF'\n"
+        "import os, sys\n"
+        "os.environ['KEIBA_PUBLIC'] = '1'\n"
+        f"sys.path.insert(0, '{path}')\n"
+        "from app.backend.services import catalog\n"
+        "rows = catalog.list_races()\n"
+        "print(len(rows), sum(1 for r in rows if r['has_pred']),"
+        " sum(1 for r in rows if r['has_review']))\n"
+        'PYEOF'
+    )
+    r = _ssh(conf, script)
+    parts = r.stdout.decode('utf-8', 'replace').split()
+    if r.returncode != 0 or len(parts) != 3:
+        print('  確認できませんでした（送信自体は完了しています）')
+        return
+    total, pred, review = parts
+    print(f'  サーバーの一覧: {total} レース（予想 {pred} / 回顧 {review}）')
+
+
 def export_kaisai() -> None:
     """開催回・発走時刻の控えを作り直す（実行忘れの防止）。
 
@@ -244,6 +324,10 @@ def export_kaisai() -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument('--check', action='store_true', help='送らずに内容だけ確認する')
+    ap.add_argument('--only', nargs='*', metavar='レースID',
+                    help='指定したレースだけ送る（管理画面の「選んだレースを公開」用）')
+    ap.add_argument('--status', metavar='YYYYMMDD',
+                    help='その日の各レースが反映済みかをJSONで出す（送信しない）')
     args = ap.parse_args()
 
     conf = load_conf()
@@ -252,16 +336,21 @@ def main() -> int:
         print('  {"host": "example.com", "user": "keiba", "path": "/opt/keiba", "port": 22}')
         return 1
 
+    if args.status:
+        return print_status(conf, args.status)
+
     print('■ 開催回・発走時刻の控えを更新')
     if args.check:
         print('  （--check のため実行しません）')
     else:
         export_kaisai()
 
-    files = root_targets()
+    files = root_targets(args.only)
     data = data_targets()
     total = sum(f.stat().st_size for f in files + data) / 1024 / 1024
     print()
+    if args.only:
+        print(f'■ 対象: 選んだ {len(args.only)} レース')
     print(f'■ 送る対象: {len(files) + len(data)} ファイル / {total:.1f} MB')
     print(f'  予想HTML     : {sum(1 for f in files if f.name.endswith("_pred.html"))} 件')
     print(f'  回顧HTML     : {sum(1 for f in files if f.name.endswith("_review.html"))} 件')
@@ -299,6 +388,10 @@ def main() -> int:
     if rc:
         return rc
     print('  完了しました。')
+
+    print()
+    print('■ 反映確認')
+    verify(conf)
     return 0
 
 

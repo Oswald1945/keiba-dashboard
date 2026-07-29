@@ -57,6 +57,12 @@ export default function AdminPanel() {
   const [error, setError] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [flow, setFlow] = useState<Flow>('pred')
+  // ジョブが終わるたびに増やす。⑤のパネルはこれを見て一覧を取り直す
+  // （回顧を作った直後に「未公開0件」のままにならないように）。
+  const [jobsDone, setJobsDone] = useState(0)
+  // 回顧を作り終えると pending / upgradable から消えるので、そのままだと
+  // ③の日付が選べなくなる。この画面を開いている間に見た日付は覚えておく。
+  const [reviewDates, setReviewDates] = useState<string[]>([])
 
   const reload = useCallback(() => {
     adminApi.status().then(setStatus).catch((e: Error) => setError(e.message))
@@ -65,6 +71,13 @@ export default function AdminPanel() {
   }, [])
 
   useEffect(() => { reload() }, [reload])
+
+  useEffect(() => {
+    if (!reviews) return
+    const seen = [...reviews.pending, ...reviews.upgradable, ...reviews.realtime_waiting]
+      .map((d) => d.date)
+    setReviewDates((prev) => Array.from(new Set([...prev, ...seen])).sort().reverse())
+  }, [reviews])
 
   const run = async (fn: () => Promise<{ job_id: string }>) => {
     setError(null)
@@ -151,7 +164,7 @@ export default function AdminPanel() {
         </button>
       </nav>
 
-      <JobLog jobId={jobId} onFinished={() => reload()} />
+      <JobLog jobId={jobId} onFinished={() => { reload(); setJobsDone((n) => n + 1) }} />
 
       {flow === 'review' ? (
         <>
@@ -159,9 +172,9 @@ export default function AdminPanel() {
           <ReviewAutoSection step="②" reviews={reviews} busy={busy} onRun={run} />
           <AppPublishSection
             step="③"
-            dates={(reviews?.pending ?? []).map((d) => d.date)
-              .concat((reviews?.upgradable ?? []).map((d) => d.date))}
+            dates={reviewDates}
             busy={busy}
+            refreshKey={jobsDone}
             onRun={run}
           />
         </>
@@ -248,7 +261,8 @@ export default function AdminPanel() {
       </Section>
 
       {/* ⑤ 確認してアプリへ公開 */}
-      <AppPublishSection step="⑤" dates={groups.map((g) => g.date)} busy={busy} onRun={run} />
+      <AppPublishSection step="⑤" dates={groups.map((g) => g.date)} busy={busy}
+                         refreshKey={jobsDone} onRun={run} />
       </>
       )}
     </div>
@@ -475,11 +489,13 @@ function AppPublishSection({
   step,
   dates,
   busy,
+  refreshKey,
   onRun,
 }: {
   step: string
   dates: string[]
   busy: boolean
+  refreshKey: number
   onRun: (fn: () => Promise<{ job_id: string }>) => void
 }) {
   const [date, setDate] = useState(dates[0] ?? '')
@@ -489,6 +505,10 @@ function AppPublishSection({
   const [loading, setLoading] = useState(false)
 
   useEffect(() => { if (!date && dates.length) setDate(dates[0]) }, [dates, date])
+
+  // 日付を変えたら選択を捨てる。持ち越すと、画面に見えていないレースまで
+  // 「選んだN件」に混ざり、何を公開するのか分からなくなる。
+  useEffect(() => { setPicked(new Set()) }, [date])
 
   const load = useCallback(() => {
     if (!date) return
@@ -500,7 +520,9 @@ function AppPublishSection({
       .catch(() => setSync(null))
       .finally(() => setLoading(false))
   }, [date])
-  useEffect(() => { load() }, [load])
+  // refreshKey はジョブが終わるたびに増える。回顧を作った直後などに
+  // 古い件数が残らないよう、自動で取り直す。
+  useEffect(() => { load() }, [load, refreshKey])
 
   const toggle = (id: string) =>
     setPicked((p) => {
@@ -509,12 +531,24 @@ function AppPublishSection({
       return n
     })
 
+  /** そのレースの予想／回顧がサーバーに出ているか。sync が無ければ null（不明）。 */
+  const stateOf = (r: GeneratedRace, kind: 'pred' | 'review'): boolean | null => {
+    if (!sync?.available) return null
+    const s = sync.races[r.race_id]
+    if (!s) return false
+    return s[kind] === 'sent'
+  }
+
   /** まだサーバーに出していない（または中身が変わった）レース。 */
-  const notYet = races.filter((r) => {
-    const s = sync?.races[r.race_id]
-    if (!s) return true
-    return (r.has_pred && s.pred !== 'sent') || (r.has_review && s.review !== 'sent')
-  })
+  const notYet = races.filter(
+    (r) => (r.has_pred && stateOf(r, 'pred') !== true)
+        || (r.has_review && stateOf(r, 'review') !== true),
+  )
+
+  const havePred = races.filter((r) => r.has_pred)
+  const haveReview = races.filter((r) => r.has_review)
+  const donePred = havePred.filter((r) => stateOf(r, 'pred') === true).length
+  const doneReview = haveReview.filter((r) => stateOf(r, 'review') === true).length
 
   return (
     <Section
@@ -537,15 +571,29 @@ function AppPublishSection({
         </button>
       </div>
 
-      {sync && !sync.available && (
+      {sync && !sync.available ? (
         <div className="note">
           サーバーに問い合わせできませんでした。公開済みかどうかは表示されませんが、送ること自体はできます。
+        </div>
+      ) : (
+        <div className="note">
+          {loading ? (
+            'サーバーに確認しています…'
+          ) : (
+            <>
+              この日 {races.length} レース ／
+              {' '}予想 <b>{donePred}/{havePred.length}</b> 件公開済み ・
+              {' '}回顧 <b>{doneReview}/{haveReview.length}</b> 件公開済み
+              {notYet.length === 0 && races.length > 0 && <b>（すべて反映済み）</b>}
+            </>
+          )}
         </div>
       )}
 
       <ul className="gen-list">
         {races.map((r) => {
-          const s = sync?.races[r.race_id]
+          const predOk = stateOf(r, 'pred')
+          const reviewOk = stateOf(r, 'review')
           return (
             <li key={r.race_id} className="gen-item">
               <label className="check">
@@ -559,8 +607,17 @@ function AppPublishSection({
                 {r.has_review && (
                   <a href={`/api/races/${r.race_id}/review.html`} target="_blank" rel="noreferrer">回顧を確認</a>
                 )}
-                {s?.pred === 'sent' && <span className="badge badge-outline">予想 公開済み</span>}
-                {s?.review === 'sent' && <span className="badge badge-outline">回顧 公開済み</span>}
+                {/* 無印だと「未公開」と「確認できていない」の区別が付かないので、両方出す */}
+                {r.has_pred && predOk !== null && (
+                  <span className={predOk ? 'badge badge-outline' : 'badge badge-todo'}>
+                    予想 {predOk ? '公開済み' : '未公開'}
+                  </span>
+                )}
+                {r.has_review && reviewOk !== null && (
+                  <span className={reviewOk ? 'badge badge-outline' : 'badge badge-todo'}>
+                    回顧 {reviewOk ? '公開済み' : '未公開'}
+                  </span>
+                )}
               </span>
             </li>
           )

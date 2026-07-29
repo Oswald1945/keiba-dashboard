@@ -60,9 +60,6 @@ export default function AdminPanel() {
   // ジョブが終わるたびに増やす。⑤のパネルはこれを見て一覧を取り直す
   // （回顧を作った直後に「未公開0件」のままにならないように）。
   const [jobsDone, setJobsDone] = useState(0)
-  // 回顧を作り終えると pending / upgradable から消えるので、そのままだと
-  // ③の日付が選べなくなる。この画面を開いている間に見た日付は覚えておく。
-  const [reviewDates, setReviewDates] = useState<string[]>([])
 
   const reload = useCallback(() => {
     adminApi.status().then(setStatus).catch((e: Error) => setError(e.message))
@@ -72,12 +69,16 @@ export default function AdminPanel() {
 
   useEffect(() => { reload() }, [reload])
 
-  useEffect(() => {
-    if (!reviews) return
-    const seen = [...reviews.pending, ...reviews.upgradable, ...reviews.realtime_waiting]
-      .map((d) => d.date)
-    setReviewDates((prev) => Array.from(new Set([...prev, ...seen])).sort().reverse())
-  }, [reviews])
+  // ③に既定で見せる日付。候補そのものは「作ってある日」から作るので、
+  // ここは「いま作業している日」を先頭に持ってくるためだけに使う。
+  const reviewDates = useMemo(
+    () => Array.from(new Set([
+      ...(reviews?.pending ?? []).map((d) => d.date),
+      ...(reviews?.upgradable ?? []).map((d) => d.date),
+      ...(reviews?.realtime_waiting ?? []).map((d) => d.date),
+    ])).sort().reverse(),
+    [reviews],
+  )
 
   const run = async (fn: () => Promise<{ job_id: string }>) => {
     setError(null)
@@ -498,13 +499,25 @@ function AppPublishSection({
   refreshKey: number
   onRun: (fn: () => Promise<{ job_id: string }>) => void
 }) {
-  const [date, setDate] = useState(dates[0] ?? '')
+  const [date, setDate] = useState('')
+  const [choices, setChoices] = useState<{ date: string; races: number }[]>([])
   const [races, setRaces] = useState<GeneratedRace[]>([])
   const [sync, setSync] = useState<AppPublishStatus | null>(null)
   const [picked, setPicked] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => { if (!date && dates.length) setDate(dates[0]) }, [dates, date])
+  // 選べる日付は「ダッシュボードを作ってある日」。作業が終わって一覧から
+  // 消えた日も、あとから公開し直せるようにするため。
+  useEffect(() => {
+    adminApi.generatedDates().then((d) => setChoices(d.dates)).catch(() => setChoices([]))
+  }, [refreshKey])
+
+  // 既定は、いま作業している日（回顧待ちなど）。無ければいちばん新しい日。
+  useEffect(() => {
+    if (date) return
+    const first = dates.find((d) => choices.some((c) => c.date === d)) ?? choices[0]?.date
+    if (first) setDate(first)
+  }, [dates, choices, date])
 
   // 日付を変えたら選択を捨てる。持ち越すと、画面に見えていないレースまで
   // 「選んだN件」に混ざり、何を公開するのか分からなくなる。
@@ -559,8 +572,8 @@ function AppPublishSection({
     >
       <div className="form-actions">
         <select className="input" value={date} onChange={(e) => setDate(e.target.value)}>
-          {Array.from(new Set(dates.concat(date ? [date] : []))).sort().reverse().map((d) => (
-            <option key={d} value={d}>{fmtDate(d)}</option>
+          {choices.map((c) => (
+            <option key={c.date} value={c.date}>{fmtDate(c.date)}（{c.races}レース）</option>
           ))}
         </select>
         <button className="btn" onClick={load} disabled={loading}>

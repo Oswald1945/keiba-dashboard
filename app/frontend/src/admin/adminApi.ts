@@ -161,6 +161,8 @@ export const adminApi = {
   status: () => get<AdminStatus>('/api/admin/status'),
   generated: (date: string) =>
     get<{ date: string; races: GeneratedRace[] }>(`/api/admin/generated?date=${date}`),
+  generatedDates: () =>
+    get<{ dates: { date: string; races: number }[] }>('/api/admin/generated/dates'),
   predictable: () => get<{ groups: PredictableGroup[] }>('/api/admin/races/predictable'),
   reviews: () => get<ReviewOverview>('/api/admin/reviews/status'),
   results: (date: string) => get<ResultStatus>(`/api/admin/results/${date}`),

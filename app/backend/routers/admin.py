@@ -285,6 +285,23 @@ def run_app_publish(request: Request, body: PublishBody):
                    lambda job: pipeline.publish_to_app(job, body.race_ids))
 
 
+@router.get('/generated/dates')
+def generated_dates(request: Request):
+    """ダッシュボードを作ってある日付（新しい順）。
+
+    アプリ公開の日付選びに使う。「回顧待ちの日」から作ると、作り終えた
+    とたんに候補から消えて公開できなくなるため、成果物の有無で決める。
+    """
+    _local_only(request)
+    from ..services import catalog
+    counts: dict = {}
+    for r in catalog.list_races():
+        if r.get('has_pred') or r.get('has_review'):
+            counts[r['date']] = counts.get(r['date'], 0) + 1
+    return {'dates': [{'date': d, 'races': counts[d]}
+                      for d in sorted(counts, reverse=True)]}
+
+
 @router.get('/app-publish/status')
 def app_publish_status(request: Request, date: str):
     """その日の各レースが、サーバーに反映済みかどうか。

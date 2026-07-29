@@ -14,6 +14,13 @@ export default function JobLog({
   const boxRef = useRef<HTMLPreElement>(null)
   const finishedRef = useRef(false)
 
+  // 呼び出し側は onFinished={() => reload()} のようにその場で関数を作るので、
+  // 再描画のたびに別物になる。これを監視処理の依存に入れると、
+  //   終了 → onFinished → 一覧を取り直す → 再描画 → 監視やり直し → 終了…
+  // と回り続けてしまう。最新のものを入れ物に持ち、依存からは外す。
+  const onFinishedRef = useRef(onFinished)
+  useEffect(() => { onFinishedRef.current = onFinished }, [onFinished])
+
   useEffect(() => {
     setLines([])
     setJob(null)
@@ -33,7 +40,7 @@ export default function JobLog({
         if (['ok', 'error', 'cancelled'].includes(j.status)) {
           if (!finishedRef.current) {
             finishedRef.current = true
-            onFinished?.(j)
+            onFinishedRef.current?.(j)
           }
           return
         }
@@ -47,7 +54,7 @@ export default function JobLog({
       alive = false
       window.clearTimeout(timer)
     }
-  }, [jobId, onFinished])
+  }, [jobId])
 
   useEffect(() => {
     if (boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight

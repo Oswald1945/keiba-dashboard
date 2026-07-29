@@ -28,6 +28,8 @@ input/
 # Windows
 Thumbs.db
 desktop.ini
+# ショートカット。このPCの絶対パスが入るので置かない。
+*.lnk
 
 # Webアプリ（いつでも作り直せるもの）
 app/frontend/node_modules/

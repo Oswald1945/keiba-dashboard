@@ -147,6 +147,22 @@ def log(job: Job, text: str) -> None:
         job.lines.append(line)
 
 
+def decode_line(raw: bytes) -> str:
+    """子プロセスの1行を文字にする。
+
+    Pythonのスクリプトには PYTHONIOENCODING=utf-8 を渡しているので UTF-8 で読める。
+    ただし JV-Link の更新ツールは .NET 製で、その指定が効かず日本語を cp932 で出す。
+    UTF-8 として読むと化けるので、読めなかったときだけ cp932 で読み直す。
+    どちらでも読めなければ、読める文字だけ残す。
+    """
+    for enc in ('utf-8', 'cp932'):
+        try:
+            return raw.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return raw.decode('utf-8', errors='replace')
+
+
 def run_stream(job: Job, cmd: list, cwd=None, timeout: int | None = None) -> int:
     """子プロセスを起動し、出力を1行ずつ job に流す。戻り値は終了コード。"""
     log(job, f'$ {" ".join(str(c) for c in cmd)}')
@@ -161,7 +177,7 @@ def run_stream(job: Job, cmd: list, cwd=None, timeout: int | None = None) -> int
     deadline = (time.time() + timeout) if timeout else None
     assert proc.stdout is not None
     for raw in proc.stdout:
-        job.lines.append(raw.decode('utf-8', errors='replace').rstrip('\r\n'))
+        job.lines.append(decode_line(raw).rstrip('\r\n'))
         if job._cancel:
             proc.terminate()
             log(job, '[中断] 実行を止めました。')

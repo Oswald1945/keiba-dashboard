@@ -48,6 +48,16 @@ FORCE_PRED   = '--force' in sys.argv  # pred生成済でも強制再生成
 FORCE_REVIEW = '--force' in sys.argv  # review生成済でも強制再生成
 NO_BROWSER   = '--no-browser' in sys.argv  # ブラウザ自動起動を抑制
 REVIEW_MODE  = '--review' in sys.argv   # 回顧のみ生成（予想はスキップ）。無指定は予想のみ生成。
+NO_PUBLISH   = '--no-publish' in sys.argv  # 生成だけしてGitHubへ公開しない（管理UIの「作る」用）
+
+# --publish <race_id> [<race_id> ...]: 生成済みHTMLのうち指定分だけを公開する（管理UIの「公開する」用）。
+# 生成は行わない。--no-publish で作ったものを、中身を確認してから公開するために使う。
+PUBLISH_IDS = []
+if '--publish' in sys.argv:
+    for _a in sys.argv[sys.argv.index('--publish') + 1:]:
+        if _a.startswith('--'):
+            break
+        PUBLISH_IDS.append(_a)
 
 # --regen <YYYYMMDD>: done/ から該当日付の入力を input/ に戻し、強制再生成する（馬場をbaba_manual.jsonで直した後の作り直し用）
 REGEN_DATE = None
@@ -212,6 +222,9 @@ def _read_surface(shutuba_path):
     return None
 
 # 会場コード → 場所名マッピング（大文字化してから参照）
+# jv_export.JYO_ROMAJI が付けるコードと、過去に使われた別表記の両方を受ける。
+# NK=中山（新潟は NG）。ここを取り違えると会場が丸ごと入れ替わるので注意。
+# 対応が取れているかは app/tests/test_venue_codes.py が毎回検査する。
 _VENUE_CODE_MAP = {
     # JRA
     'TK': '東京', 'TO': '東京', 'T': '東京',
@@ -219,11 +232,11 @@ _VENUE_CODE_MAP = {
     'HN': '阪神', 'HS': '阪神',
     'KT': '京都', 'KY': '京都',
     'CK': '中京', 'CC': '中京',
-    'NK': '新潟', 'NG': '新潟', 'NI': '新潟',
+    'NK': '中山', 'NG': '新潟', 'NI': '新潟',
     'HK': '函館', 'HD': '函館',
     'SM': '札幌', 'SP': '札幌',
     'FK': '福島', 'FS': '福島',
-    'KO': '小倉', 'KK': '小倉',
+    'KO': '小倉', 'KK': '小倉', 'OK': '小倉',
     # 地方競馬（NAR）
     'OI': '大井', 'KW': '川崎', 'SK': '船橋', 'FB': '船橋',
     'UW': '浦和', 'UR': '浦和',
@@ -244,36 +257,36 @@ def extract_venue_from_race_id(race_id: str) -> str | None:
 def update_memo_from_review(html_path: pathlib.Path) -> int:
     """回顧HTMLから次走注目馬を抽出して memo_horses.json に追記する。戻り値は追加頭数。"""
     MEMO_JSON = SCRIPT_DIR / 'memo_horses.json'
-    PLACE_MAP = {
-        'CK': '中京', 'TK': '東京', 'HN': '阪神', 'NK': '新潟',
-        'KT': '京都', 'KY': '京都', 'CB': '中山', 'HK': '函館',
-        'SM': '札幌', 'FK': '福島', 'OI': '大井', 'KW': '川崎',
-        'HS': '浦和', 'SK': '船橋',
-    }
+    # 会場コードの変換は _VENUE_CODE_MAP に一本化する。
+    # 以前はここに独自の表を持っていたため、sp/fs/hd/kk/ng が変換されず
+    # メモ馬の会場が「sp11R」のようにコードのまま保存されていた（74件）。
+    # さらに NK を新潟、HS を浦和と取り違えていた。
+    PLACE_MAP = _VENUE_CODE_MAP
     try:
         html = html_path.read_text(encoding='utf-8', errors='ignore')
         names = re.findall(r'<div class="pickup-name"><b>([^<]+)</b></div>', html)
         if not names:
             return 0
-        # レース情報をtitleタグから抽出
-        m_title = re.search(
-            r'<title>レース回顧\s+(.+?)(\d+)R\s+([^<]*?)\s+(\d{4}/\d{2}/\d{2})</title>', html
-        )
+        # 会場・R・日付はファイル名（race_id）から取る。ここが一番確実。
+        stem = html_path.stem
+        m_fn = re.match(r'(\d{4})(\d{2})(\d{2})_([A-Za-z]+?)(\d+)(?:_(.+?))?_review$', stem)
+        if not m_fn:
+            return 0
+        y, mo, d = m_fn.group(1), m_fn.group(2), m_fn.group(3)
+        place    = PLACE_MAP.get(m_fn.group(4).upper(), m_fn.group(4))
+        rnum     = int(m_fn.group(5))
+        date_str = f'{y}/{mo}/{d}'
+
+        # レース名はタイトルの真ん中から取る。
+        #   「レース回顧 フェブラリーＳ 2026/02/22」 -> フェブラリーＳ
+        #   「レース回顧 東京5R 1勝 2026/05/10」     -> 名前なし（会場+R が入っているだけ）
+        # 以前はファイル名から取っていたため「G1_FeburariiS」のようなローマ字が入っていた。
+        rname = ''
+        m_title = re.search(r'<title>レース回顧\s+(.+?)\s+(\d{4}/\d{2}/\d{2})</title>', html)
         if m_title:
-            place    = m_title.group(1).strip()
-            rnum     = int(m_title.group(2))
-            rname    = m_title.group(3).strip()
-            date_str = m_title.group(4)
-        else:
-            stem = html_path.stem
-            m_fn = re.match(r'(\d{4})(\d{2})(\d{2})_([A-Za-z]+?)(\d+)(?:_(.+?))?_review$', stem)
-            if not m_fn:
-                return 0
-            y, mo, d = m_fn.group(1), m_fn.group(2), m_fn.group(3)
-            place    = PLACE_MAP.get(m_fn.group(4).upper(), m_fn.group(4))
-            rnum     = int(m_fn.group(5))
-            rname    = m_fn.group(6) or ''
-            date_str = f'{y}/{mo}/{d}'
+            _mid = m_title.group(1).strip()
+            if not re.match(r'^\S*?\d+R(\s|$)', _mid):
+                rname = _mid
         # 既存データ読み込み
         existing = []
         if MEMO_JSON.exists():
@@ -320,10 +333,10 @@ def publish_batch_to_github(html_paths: list) -> list:
             lock_file.unlink()
             print('[share] index.lock を削除しました')
         git = ['git', '-C', str(SCRIPT_DIR)]
-        memo_json = SCRIPT_DIR / 'memo_horses.json'
+        # memo_horses.json は公開しない。
+        # リポジトリが公開設定のため、コミットすると誰でも中身を読めてしまう。
+        # 削除しても過去のコミットには残るので、そもそも入れない。
         files_to_add = [str(p) for p in html_paths]
-        if memo_json.exists():
-            files_to_add.append(str(memo_json))
         subprocess.run(git + ['add'] + files_to_add, check=True)
         _stem0 = html_paths[0].stem
         _kind = 'review' if _stem0.endswith('_review') else 'pred'
@@ -661,10 +674,57 @@ def process_race(race_id, files) -> pathlib.Path | None:
     return new_pred_html if generated_pred and not DRY_RUN else None
 
 
+def publish_only(race_ids: list) -> int:
+    """生成済みHTMLのうち指定レース分だけを公開する（生成はしない）。
+
+    管理UIの「作る」→中身を確認→「公開する」の後半に対応。
+    """
+    targets = []
+    missing = []
+    for rid in race_ids:
+        found = [p for p in (OUT_DIR / f'{rid}_pred.html', OUT_DIR / f'{rid}_review.html')
+                 if p.exists()]
+        if found:
+            targets += found
+        else:
+            missing.append(rid)
+    if missing:
+        print(f'  [publish] HTMLが見つからないレース: {", ".join(missing)}')
+    if not targets:
+        print('  [publish] 公開できるHTMLがありません。先に生成してください。')
+        return 1
+
+    print(f'[share] {len(targets)}件のHTMLを GitHub に公開中...')
+    urls = publish_batch_to_github(targets)
+    if not urls:
+        print('[share] push 失敗 → ローカルHTMLで確認してください')
+        return 1
+
+    entries: dict[str, str] = {}
+    if SHARE_URL_LOG.exists():
+        for line in SHARE_URL_LOG.read_text(encoding='utf-8').splitlines():
+            parts = line.split('\t')
+            if len(parts) == 2:
+                entries[parts[0]] = parts[1]
+    for html, url in zip(targets, urls):
+        entries[html.stem] = url
+    with open(SHARE_URL_LOG, 'w', encoding='utf-8') as lg:
+        for k, v in sorted(entries.items()):
+            lg.write(f'{k}\t{v}\n')
+    print(f'[share] 公開完了: {len(urls)}件')
+    for url in urls:
+        print(f'  {url}')
+    return 0
+
+
 def main():
     print('=== run_new.py ===')
     if DRY_RUN:
         print('  (--dry mode)')
+
+    if PUBLISH_IDS:
+        # 公開のみモード（生成はしない）
+        raise SystemExit(publish_only(PUBLISH_IDS))
 
     if not INPUT_DIR.exists():
         print(f'input/ が見つかりません')
@@ -697,7 +757,7 @@ def main():
             print(f'  [ERROR] {race_id}: {e}')
 
     # 新規生成HTMLを一括push
-    if new_htmls and not DRY_RUN:
+    if new_htmls and not DRY_RUN and not NO_PUBLISH:
         print(f'\n[share] {len(new_htmls)}件のHTMLを GitHub に一括公開中...')
         urls = publish_batch_to_github(new_htmls)
         if urls:
@@ -723,7 +783,7 @@ def main():
             print('[share] push 失敗 → ローカルHTMLで確認してください')
 
     # 回顧HTMLを一括push（予想と同様に末尾で1回。個別pushによる反映遅延を回避）
-    if _REVIEW_SHARE_QUEUE and not DRY_RUN:
+    if _REVIEW_SHARE_QUEUE and not DRY_RUN and not NO_PUBLISH:
         print(f'\n[share] 回顧 {len(_REVIEW_SHARE_QUEUE)}件のHTMLを GitHub に一括公開中...')
         _rurls = publish_batch_to_github(_REVIEW_SHARE_QUEUE)
         if _rurls:
@@ -743,6 +803,11 @@ def main():
                 print(f'  {_u}')
         else:
             print('[share] 回顧の push 失敗 → ローカルHTMLで確認してください')
+
+    if NO_PUBLISH and (new_htmls or _REVIEW_SHARE_QUEUE) and not DRY_RUN:
+        _n = len(new_htmls) + len(_REVIEW_SHARE_QUEUE)
+        print(f'\n[share] --no-publish のため公開していません（生成 {_n}件）。')
+        print('        公開するには: python run_new.py --publish <race_id> ...')
 
     if _BABA_ALERTS:
         print('\n' + '=' * 64)

@@ -1,0 +1,32 @@
+{
+  "race_id": "20260524_kt9",
+  "date": "20260524",
+  "venue": "京都",
+  "baba": "良",
+  "race_class": "2勝",
+  "surface": "芝",
+  "inputs": {
+    "過去走": "過去走_20260524_kt9.csv",
+    "出馬表": "出馬表_20260524_kt9.csv",
+    "坂路": "坂路_20260524_kt9.csv",
+    "ウッド": "ウッド_20260524_kt9.csv",
+    "レース結果": "レース結果_20260524_kt9.csv"
+  },
+  "traits": {
+    "has_local_only": false,
+    "has_smartrc": true,
+    "has_result": true,
+    "missing_training": false,
+    "wide_top_odds": true
+  },
+  "smartrc": "smartrc_20260524_kt9.json",
+  "baba_json": "baba_20260524_kt9.json",
+  "track_bias_sources": {
+    "レース結果_20260523_kt10.csv": "a5032c208dbe6b3a32357a5a6c5ba2cd8da30d96fde0caa78450c96d8694f7e5",
+    "レース結果_20260523_kt11.csv": "506c8b47251653e6a22781f5708b7e5622809406b329fa7219e14fde2224729a",
+    "レース結果_20260523_kt12.csv": "f6fc9b106879fac9846f53ad606f10869d57a826f223dab3c67f27fe40f218f0",
+    "レース結果_20260523_kt7.csv": "ae7bc37d5eee135e2cfe9b8e96916857e8439c0b4417f985eb3161fc5c875384",
+    "レース結果_20260523_kt9.csv": "ea583f63170514f57582c7db7e9659e0ce7236b03370693b64cd6293f231aeb3"
+  },
+  "effective_memo_sha256": "ffeec3338eb9a7cba102fa5d3b671143f12d293ffe9711f7d331e06d7bfedbff"
+}

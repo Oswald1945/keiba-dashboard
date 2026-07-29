@@ -201,11 +201,21 @@ def _load_html(path, encoding='cp932'):
     lap_l = next((l for l in lines if l.startswith('LAP')), '')
     pas_l = next((l for l in lines if l.startswith('通過') and '上り' in l), '')
     meta['通過ラップ表記'] = lap_l.replace('LAP', '').strip()
-    m3 = re.search(r'通過\s*([\d.]+)-([\d.]+)-([\d.]+)', pas_l)
-    meta['通過3F'] = _num(m3.group(1)) if m3 else (float(res['Ave-3F'].dropna().iloc[0]) if 'Ave-3F' in res and res['Ave-3F'].notna().any() else None)
-    ag = re.search(r'上り\s*([\d.]+)-([\d.]+)-([\d.]+)', pas_l)
-    meta['上り3F'] = _num(ag.group(3)) if ag else None
-    meta['上りラップ表記'] = (ag.group(0).replace('上り', '').strip() if ag else '')
+    # 「通過」は短い順(3F-4F-5F-6F)、「上り」は長い順(6F-5F-4F-3F)で並ぶ。
+    # 個数はレースにより3つ組と4つ組があるため、位置ではなく端で取る。
+    #   通過3F = 先頭（いちばん短い＝3F）
+    #   上り3F = 末尾（いちばん短い＝3F）
+    # 以前は上りの「3つ目」を取っており、4つ組のレース(167件中156件)では
+    # 4F の値を 3F として扱っていた。race.db の HaronTimeL3 と照合して確認済み。
+    m3 = re.search(r'通過\s*([\d.]+(?:-[\d.]+)*)', pas_l)
+    _pass_vals = [_num(x) for x in m3.group(1).split('-')] if m3 else []
+    meta['通過3F'] = (_pass_vals[0] if _pass_vals
+                      else (float(res['Ave-3F'].dropna().iloc[0])
+                            if 'Ave-3F' in res and res['Ave-3F'].notna().any() else None))
+    ag = re.search(r'上り\s*([\d.]+(?:-[\d.]+)*)', pas_l)
+    _ago_vals = [_num(x) for x in ag.group(1).split('-')] if ag else []
+    meta['上り3F'] = _ago_vals[-1] if _ago_vals else None
+    meta['上りラップ表記'] = (ag.group(1).strip() if ag else '')
     # 派生
     if meta.get('通過3F') is not None and meta.get('上り3F') is not None:
         meta['前後3F差'] = round(meta['通過3F'] - meta['上り3F'], 1)
@@ -216,13 +226,23 @@ def _load_html(path, encoding='cp932'):
         meta['上り3F'] = meta['最速上3F']
     if meta.get('通過3F') is None:
         meta['通過3F'] = meta['上り3F']
-    # レースPCI: 前半3F/後半(上り)3F の比から算出（<50=前傾ハイ / >50=後傾スロー）
+    # レースPCI: TARGET が各馬に出している PCI をそのまま使う（1着馬の値）。
+    # 自前の式（50×前半3F÷後半3F）は TARGET の値を再現できない。
+    # 1コーナーまでが短いコースでは最初の区間が200m未満になり、
+    # 区間距離を考慮している TARGET 側の算出と合わなくなるため、
+    # 独自計算はやめて TARGET の値に合わせる。取得できないときだけ従来式。
     try:
-        _f3, _l3 = meta.get('通過3F'), meta.get('上り3F')
-        if _f3 and _l3 and _l3 > 0:
-            meta['レースPCI'] = round(50.0 * float(_f3) / float(_l3), 1)
+        _pci_src = None
+        if 'PCI' in res.columns and '入線順位' in res.columns:
+            _pci_col = pd.to_numeric(res.sort_values('入線順位')['PCI'], errors='coerce').dropna()
+            if not _pci_col.empty:
+                _pci_src = float(_pci_col.iloc[0])
+        if _pci_src is not None:
+            meta['レースPCI'] = round(_pci_src, 1)
         else:
-            meta['レースPCI'] = float(res.sort_values('入線順位').iloc[0]['PCI'])
+            _f3, _l3 = meta.get('通過3F'), meta.get('上り3F')
+            meta['レースPCI'] = (round(50.0 * float(_f3) / float(_l3), 1)
+                                 if (_f3 and _l3 and _l3 > 0) else 50.0)
     except Exception:
         meta['レースPCI'] = 50.0
 
@@ -302,8 +322,36 @@ def load_result(path, racedata=None):
         meta = _read_df(racedata).iloc[0]
     else:
         _raw = _read_df(path, header=None)
-        meta = pd.Series(_raw.iloc[1].values, index=_raw.iloc[0].values)
+        # dtype=object 必須: pandas 3.0 は全要素が文字列の行を str 型と推論するため、
+        # 後段の meta['最速上3F'] = float(...) 等の数値代入が TypeError になる。
+        # pandas 2系では object 型だったので動いていた。値そのものは変わらない。
+        meta = pd.Series(_raw.iloc[1].values, index=_raw.iloc[0].values, dtype=object)
         res = _read_df(path, header=2)
+
+    # ── ペース指標の整備 ──
+    # 最速上3F は各馬の上り3Fから常に算出（速報でも取得可）。
+    # 通過3F/上り3F（レースラップ由来）はメタに実値があればそのまま、無ければ NaN=取得不可
+    # とし、偽の値で埋めない。前後3F差・レースPCI は前後半が揃うときのみ算出。
+    def _has(k):
+        return (k in meta.index) and pd.notna(meta.get(k)) and str(meta.get(k)).strip() != ''
+    def _mset(k, v):
+        if (k not in meta.index) or pd.isna(meta.get(k)):
+            meta[k] = v
+    _up = pd.to_numeric(res['上り3F'], errors='coerce') if '上り3F' in res.columns else None
+    meta['最速上3F'] = float(_up.dropna().min()) if (_up is not None and _up.notna().any()) else float('nan')
+    _f3 = pd.to_numeric(meta.get('通過3F'), errors='coerce') if _has('通過3F') else float('nan')
+    _l3 = pd.to_numeric(meta.get('上り3F'), errors='coerce') if _has('上り3F') else float('nan')
+    meta['通過3F'] = _f3
+    meta['上り3F'] = _l3
+    if pd.notna(_f3) and pd.notna(_l3) and float(_l3) > 0:
+        meta['前後3F差'] = round(float(_f3) - float(_l3), 1)
+        meta['レースPCI'] = round(50.0 * float(_f3) / float(_l3), 1)
+    else:
+        meta['前後3F差'] = float('nan')
+        meta['レースPCI'] = float('nan')
+    _mset('通過ラップ表記', '')
+    _mset('上りラップ表記', '')
+    _mset('結果ソース', '')
     return res, meta, {}
 
 

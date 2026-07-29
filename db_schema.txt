@@ -1,0 +1,201 @@
+=== race.db inspection ===
+DB path: C:\Users\r-ito\JVLinkToSQLite\race.db
+DB size (MB): 2105.9
+
+=== tables (24) with row counts ===
+  NL_BN_BANUSI                 8723
+  NL_BR_BREEDER                10765
+  NL_BT_KEITO                  92
+  NL_CH_CHOKYOSI               1476
+  NL_CS_COURSE                 119
+  NL_DM_INFO                   52157
+  NL_HC_HANRO                  7322068
+  NL_HN_HANSYOKU               30095
+  NL_HR_PAY                    52157
+  NL_HS_SALE                   53479
+  NL_HY_BAMEIORIGIN            178107
+  NL_JG_JOGAIBA                827141
+  NL_KS_KISYU                  1561
+  NL_RA_RACE                   97416
+  NL_RC_RECORD                 2138
+  NL_SE_RACE_UMA               1188051
+  NL_SK_SANKU                  110379
+  NL_TK_TOKUUMA                948
+  NL_TK_TokuUmaInfo            16284
+  NL_TM_INFO                   50249
+  NL_UM_UMA                    213623
+  NL_WC_WOOD                   755168
+  NL_YS_SCHEDULE               4633
+  SY_PROC_FILES                4585
+
+### NL_HC_HANRO (rows=7322068) ###
+-- columns (14) --
+  headRecordSpec           TEXT
+  headDataKubun            TEXT
+  headMakeDate             TEXT
+  TresenKubun              TEXT
+  ChokyoDate               TEXT
+  ChokyoTime               TEXT
+  KettoNum                 TEXT
+  HaronTime4               TEXT
+  LapTime4                 TEXT
+  HaronTime3               TEXT
+  LapTime3                 TEXT
+  HaronTime2               TEXT
+  LapTime2                 TEXT
+  LapTime1                 TEXT
+-- sample rows (up to 2) --
+  [row 0]
+    headRecordSpec           = HC
+    headDataKubun            = 1
+    headMakeDate             = 20250801
+    TresenKubun              = 0
+    ChokyoDate               = 20250715
+    ChokyoTime               = 0742
+    KettoNum                 = 2017100360
+    HaronTime4               = 0658
+    LapTime4                 = 172
+    HaronTime3               = 0486
+    LapTime3                 = 175
+    HaronTime2               = 0311
+    LapTime2                 = 160
+    LapTime1                 = 151
+  [row 1]
+    headRecordSpec           = HC
+    headDataKubun            = 1
+    headMakeDate             = 20250801
+    TresenKubun              = 0
+    ChokyoDate               = 20250715
+    ChokyoTime               = 0501
+    KettoNum                 = 2017104238
+    HaronTime4               = 0685
+    LapTime4                 = 181
+    HaronTime3               = 0504
+    LapTime3                 = 179
+    HaronTime2               = 0325
+    LapTime2                 = 164
+    LapTime1                 = 161
+
+### NL_WC_WOOD (rows=755168) ###
+-- columns (29) --
+  headRecordSpec           TEXT
+  headDataKubun            TEXT
+  headMakeDate             TEXT
+  TresenKubun              TEXT
+  ChokyoDate               TEXT
+  ChokyoTime               TEXT
+  KettoNum                 TEXT
+  Course                   TEXT
+  BabaAround               TEXT
+  reserved                 TEXT
+  HaronTime10              TEXT
+  LapTime10                TEXT
+  HaronTime9               TEXT
+  LapTime9                 TEXT
+  HaronTime8               TEXT
+  LapTime8                 TEXT
+  HaronTime7               TEXT
+  LapTime7                 TEXT
+  HaronTime6               TEXT
+  LapTime6                 TEXT
+  HaronTime5               TEXT
+  LapTime5                 TEXT
+  HaronTime4               TEXT
+  LapTime4                 TEXT
+  HaronTime3               TEXT
+  LapTime3                 TEXT
+  HaronTime2               TEXT
+  LapTime2                 TEXT
+  LapTime1                 TEXT
+-- sample rows (up to 2) --
+  [row 0]
+    headRecordSpec           = WC
+    headDataKubun            = 1
+    headMakeDate             = 20250801
+    TresenKubun              = 0
+    ChokyoDate               = 20250715
+    ChokyoTime               = 0730
+    KettoNum                 = 2018103341
+    Course                   = 3
+    BabaAround               = 1
+    reserved                 = 0
+    HaronTime10              = 0000
+    LapTime10                = 000
+    HaronTime9               = 0000
+    LapTime9                 = 000
+    HaronTime8               = 0000
+    LapTime8                 = 000
+    HaronTime7               = 0000
+    LapTime7                 = 000
+    HaronTime6               = 0000
+    LapTime6                 = 000
+    HaronTime5               = 0000
+    LapTime5                 = 000
+    HaronTime4               = 0708
+    LapTime4                 = 184
+    HaronTime3               = 0524
+    LapTime3                 = 177
+    HaronTime2               = 0347
+    LapTime2                 = 175
+    LapTime1                 = 172
+  [row 1]
+    headRecordSpec           = WC
+    headDataKubun            = 1
+    headMakeDate             = 20250801
+    TresenKubun              = 0
+    ChokyoDate               = 20250715
+    ChokyoTime               = 0518
+    KettoNum                 = 2019100657
+    Course                   = 3
+    BabaAround               = 1
+    reserved                 = 0
+    HaronTime10              = 0000
+    LapTime10                = 000
+    HaronTime9               = 0000
+    LapTime9                 = 000
+    HaronTime8               = 0000
+    LapTime8                 = 000
+    HaronTime7               = 0000
+    LapTime7                 = 000
+    HaronTime6               = 0000
+    LapTime6                 = 000
+    HaronTime5               = 0000
+    LapTime5                 = 000
+    HaronTime4               = 0679
+    LapTime4                 = 189
+    HaronTime3               = 0490
+    LapTime3                 = 174
+    HaronTime2               = 0316
+    LapTime2                 = 159
+    LapTime1                 = 157
+
+### NL_CS_COURSE (rows=119) ###
+-- columns (8) --
+  headRecordSpec           TEXT
+  headDataKubun            TEXT
+  headMakeDate             TEXT
+  JyoCD                    TEXT
+  Kyori                    TEXT
+  TrackCD                  TEXT
+  KaishuDate               TEXT
+  CourseEx                 TEXT
+-- sample rows (up to 2) --
+  [row 0]
+    headRecordSpec           = CS
+    headDataKubun            = 1
+    headMakeDate             = 20240805
+    JyoCD                    = 01
+    Kyori                    = 1000
+    TrackCD                  = 17
+    KaishuDate               = 19900609
+    CourseEx                 = スタート地点は向正面の真ん中付近｡最初の３コーナーまでは約２００ｍ｡札幌競馬場の芝コースは高低差が０.６ｍと小さく､全周にわたりほぼ平坦｡また､コース全体が丸みを帯びており､コーナーが大回りで直線部分が短いという特徴がある｡よって､３～４コ...(truncated)
+  [row 1]
+    headRecordSpec           = CS
+    headDataKubun            = 1
+    headMakeDate             = 20240805
+    JyoCD                    = 01
+    Kyori                    = 1000
+    TrackCD                  = 24
+    KaishuDate               = 19890610
+    CourseEx                 = スタート地点は向正面左､２コーナー出口付近｡３コーナーまでの距離は約２８０ｍ｡札幌のダートコースは高低差がほとんどないのが特徴｡ローカルの競馬場は､一般的に平坦コースと言われているが､実際にはコース全体で高低差が少しある｡その中でも札幌のダ...(truncated)
+

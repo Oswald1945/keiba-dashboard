@@ -1,0 +1,5 @@
+# Webアプリ用の追加依存（既存パイプラインの requirements.txt とは別）
+# 導入: python -m pip install -r app/requirements.txt
+fastapi
+uvicorn[standard]
+pytest

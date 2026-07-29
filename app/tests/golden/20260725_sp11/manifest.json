@@ -1,0 +1,27 @@
+{
+  "race_id": "20260725_sp11",
+  "date": "20260725",
+  "venue": "札幌",
+  "baba": "良",
+  "race_class": "3勝",
+  "surface": "芝",
+  "inputs": {
+    "過去走": "過去走_20260725_sp11.csv",
+    "出馬表": "出馬表_20260725_sp11.csv",
+    "坂路": "坂路_20260725_sp11.csv",
+    "ウッド": "ウッド_20260725_sp11.csv",
+    "レース結果": "レース結果_20260725_sp11.csv"
+  },
+  "traits": {
+    "has_local_only": false,
+    "has_smartrc": true,
+    "has_result": true,
+    "missing_training": false,
+    "wide_top_odds": true
+  },
+  "smartrc": "smartrc_20260725_sp11.json",
+  "baba_json": "baba_20260725_sp11.json",
+  "haraimodoshi": "haraimodoshi_20260725_sp11.json",
+  "track_bias_sources": {},
+  "effective_memo_sha256": "f41de20e2a0215c1949f913d5ca7493582606d35b897ac1c901e4811d38f072f"
+}

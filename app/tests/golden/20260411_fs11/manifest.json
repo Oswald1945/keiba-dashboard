@@ -1,0 +1,24 @@
+{
+  "race_id": "20260411_fs11",
+  "date": "20260411",
+  "venue": "福島",
+  "baba": "良",
+  "race_class": "ｵｰﾌﾟﾝ",
+  "surface": "ダート",
+  "inputs": {
+    "過去走": "過去走_20260411_fs11.csv",
+    "出馬表": "出馬表_20260411_fs11.csv",
+    "坂路": "坂路_20260411_fs11.csv",
+    "ウッド": "ウッド_20260411_fs11.csv"
+  },
+  "traits": {
+    "has_local_only": false,
+    "has_smartrc": true,
+    "has_result": false,
+    "missing_training": false,
+    "wide_top_odds": true
+  },
+  "smartrc": "smartrc_20260411_fs11.json",
+  "track_bias_sources": {},
+  "effective_memo_sha256": "07473db7b7e3bd5651678a21d8adae166a1f9634740de1a35d25a86a321041b9"
+}

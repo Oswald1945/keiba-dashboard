@@ -122,8 +122,9 @@ def reconstruct(ev):
     # ③-3 偏差値バンドで列1/2/3（軸との差 ≤3 / ≤10 / ≤20）
     _B1, _B2 = 3.0, 10.0
     col1 = ([A] + [nm for nm in partners if (devA - dv[nm]) <= _B1])[:3]
-    col2 = [A] + [nm for nm in partners if (devA - dv[nm]) <= _B2]   # 軸も2着列に（頭固定でない）
-    col3 = [A] + list(partners)                                       # 軸も3着列に
+    _head_fixed = (len(col1) == 1)   # 1頭軸(軸が1着固定)なら2/3着列に軸を含めない
+    col2 = ([] if _head_fixed else [A]) + [nm for nm in partners if (devA - dv[nm]) <= _B2]
+    col3 = ([] if _head_fixed else [A]) + list(partners)
     contend = [A] + partners
     # 軸のコース特徴pts
     kt_axis = None
@@ -266,16 +267,30 @@ def eval_race(rec, res_df, payouts):
                         if combo == [i, j, k]:
                             hits.append(([i, j, k], a)); ret += a
     bets['三連単'] = (pts, ret, hits)
-    return dict(order=order, bets=bets, box=False, axis_uma=umA,
+    # そのレースで実際に当たった組と配当（買い目が外れていても表示したいので別に持つ）
+    def _first(lst, ordered=False):
+        if not lst:
+            return None
+        combo, amount = lst[0]
+        return (list(combo) if ordered else sorted(combo)), amount
+
+    payline = {
+        '馬連': _first(umaren),
+        'ワイド': _first(wide),
+        '馬単': _first(umatan, ordered=True),
+        '三連複': _first(s3p),
+        '三連単': _first(s3t, ordered=True),
+    }
+    return dict(order=order, bets=bets, box=False, axis_uma=umA, payline=payline,
                 axis_fin=order.index(umA) + 1 if umA in order else None)
 
 
 _VERDICT_STYLE = {
-    '購入推奨': ('#27ae60', '#1a3a28', '#5DCAA5'),
-    '購入非推奨': ('#e74c3c', '#3a1a1a', '#F09595'),
+    '購入推奨': ('#0a7d3c', '#e3f2ea', '#0a5c34'),
+    '購入非推奨': ('#d9865a', '#fdeee6', '#8a4520'),
 }
-_WAKU_BG = {1: '#f4f4f4', 2: '#2b2b2b', 3: '#d63a3a', 4: '#3a66d6',
-            5: '#f5d300', 6: '#2b9b46', 7: '#f08a24', 8: '#f2a0c0'}
+_WAKU_BG = {1: '#ffffff', 2: '#555555', 3: '#ee3333', 4: '#4488ff',
+            5: '#dddd00', 6: '#22bb22', 7: '#ff8822', 8: '#ffaacc'}
 _WAKU_FG = {1: '#000', 2: '#fff', 3: '#fff', 4: '#fff',
             5: '#000', 6: '#fff', 7: '#000', 8: '#000'}
 
@@ -285,24 +300,35 @@ def _chip(u, waku):
     bg = _WAKU_BG.get(w, '#5a6776')
     fg = _WAKU_FG.get(w, '#fff')
     return (f'<span style="display:inline-flex;align-items:center;justify-content:center;'
-            f'width:20px;height:20px;border-radius:50%;background:{bg};color:{fg};'
+            f'width:22px;height:22px;border-radius:50%;border:1px solid #8aa79a;background:{bg};color:{fg};box-sizing:border-box;padding-top:1px;'
             f'font-weight:700;font-size:11px;margin:1px;box-shadow:0 0 0 1px rgba(255,255,255,0.15)">{u}</span>')
+
+
+def _podium_html(order, waku):
+    """実際の1〜3着を馬番バッジで並べる。回顧で最初に知りたい情報なので目立たせる。"""
+    out = []
+    for i, u in enumerate(order[:3], start=1):
+        out.append(
+            f'<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px">'
+            f'<span style="font-size:11px;font-weight:700;color:#004c2c">{i}着</span>'
+            f'{_chip(u, waku)}</span>')
+    return ''.join(out)
 
 
 def _sep_html(sep):
     if sep == '-':
-        return '<span style="margin:0 3px;color:#9ab">-</span>'
+        return '<span style="margin:0 3px;color:#4d5a53">-</span>'
     if sep == '→':
-        return '<span style="margin:0 3px;color:#9ab">&rarr;</span>'
+        return '<span style="margin:0 3px;color:#4d5a53">&rarr;</span>'
     return ''
 
 
 def _cols_html(cols, sep, waku):
     parts = []
     for col in cols:
-        parts.append('<span style="display:inline-flex;flex-wrap:wrap;align-items:center">'
+        parts.append('<span style="display:inline-flex;flex-wrap:nowrap;align-items:center">'
                      + ''.join(_chip(u, waku) for u in col) + '</span>')
-    return ('<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap">'
+    return ('<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:nowrap">'
             + _sep_html(sep).join(parts) + '</span>')
 
 
@@ -313,7 +339,7 @@ def _combo_chips(combo, sep, waku):
 def _stack(entries, justify):
     """的中馬券ごとのサブ行を縦に積む(各行 高さ揃え)。"""
     if not entries:
-        entries = ['<span style="color:#7a8694">&mdash;</span>']
+        entries = ['<span style="color:#4d5a53">&mdash;</span>']
     return ''.join(
         f'<div style="min-height:26px;display:flex;align-items:center;justify-content:{justify}">{e}</div>'
         for e in entries)
@@ -336,7 +362,7 @@ def _forms(rec):
     ]
 
 def render_panel(rec, ev_eval):
-    bc, bg, tx = _VERDICT_STYLE.get(rec['verdict'], ('#7f8c8d', '#222', '#bbb'))
+    bc, bg, tx = _VERDICT_STYLE.get(rec['verdict'], ('#8aa79a', '#eef4f1', '#2b2b2b'))
     waku = rec.get('waku', {})
     pv_uma = rec.get('pv_uma', {})
     o3_uma = rec.get('o3_uma', {})
@@ -346,6 +372,19 @@ def render_panel(rec, ev_eval):
     order = ev_eval['order']
     rows = ''
     vmid = 'vertical-align:middle;'
+    # 確定オッズは「推奨した券種」に関係なく全券種ぶん出す（結果として何が当たったかを見るため）
+    _SEP_OF = {'馬連': '-', 'ワイド': '-', '馬単': '→', '三連複': '-', '三連単': '→'}
+    kakutei_rows = []
+    for _bt, _sep in _SEP_OF.items():
+        _pl = (ev_eval.get('payline') or {}).get(_bt)
+        if not _pl:
+            continue
+        _pc, _pa = _pl
+        kakutei_rows.append(
+            f'<span style="display:inline-flex;align-items:center;gap:5px;margin-right:14px">'
+            f'<span style="font-size:11px;color:#4d5a53;white-space:nowrap">{_bt}</span>'
+            f'{_combo_chips(_pc, _sep, waku)}'
+            f'<b style="color:#0a5c34;white-space:nowrap">{_pa / 100:,.1f}倍</b></span>')
     for bt, cols, sep in _forms(rec):
         if bt not in ev_eval['bets']:
             continue
@@ -355,8 +394,8 @@ def render_panel(rec, ev_eval):
         cost = pts * 100
         hit = total_ret > 0
         roi = (total_ret / cost * 100) if cost else 0
-        mark = '<span style="color:#5DCAA5">&#9711;</span>' if hit else '<span style="color:#7a8694">&times;</span>'
-        roi_c = '#5DCAA5' if roi >= 100 else ('#bdc3c7' if roi > 0 else '#7a8694')
+        mark = '<span style="color:#0a7d3c">&#9711;</span>' if hit else '<span style="color:#4d5a53">&times;</span>'
+        roi_c = '#0a7d3c' if roi >= 100 else ('#b06000' if roi > 0 else '#4d5a53')
         # 的中馬券ごとのサブ行
         fm_e, pay_e, be_e, ev_e = [], [], [], []
         for combo, payout in hitlist:
@@ -364,9 +403,9 @@ def render_panel(rec, ev_eval):
             pay_e.append(f'&yen;{payout:,}')
             Pc = _combo_prob(bt, combo, pv_uma, o3_uma, p3_uma)
             be = (1.0 / Pc) if Pc and Pc > 0 else None
-            be_e.append(f'<span style="color:#f1c40f">{be:.1f}倍</span>' if be else '<span style="color:#7a8694">&mdash;</span>')
+            be_e.append(f'<span style="color:#8a6d1f">{be:.1f}倍</span>' if be else '<span style="color:#4d5a53">&mdash;</span>')
             if be and (payout / 100.0) >= be:
-                ev_e.append('<span style="color:#5DCAA5;font-weight:700">&#9678; 期待値プラス</span>')
+                ev_e.append('<span style="color:#0a7d3c;font-weight:700">&#9678; 期待値プラス</span>')
             else:
                 ev_e.append('<span style="color:#e67e22;font-weight:700">&#9651; 期待値マイナス</span>')
         rows += (f'<tr>'
@@ -386,14 +425,25 @@ def render_panel(rec, ev_eval):
   <h2>&#127915; 券種別 結果照合</h2>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
     <span style="background:{bg};color:{tx};border:1px solid {bc};border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700">予想時判定: {rec['verdict']}</span>
-    <span style="font-size:12px;color:#9fb3c8">軸 {rec['umA']}番 &rarr; <b style="color:#e0e0e0">{fin_str}</b>（推定{rec['srcA']:.0f}番人気）</span>
-    <span style="font-size:11px;color:#7f8c8d;margin-left:auto">着順 {'-'.join(str(x) for x in order[:3])}…</span>
+    <span style="font-size:12px;color:#4d5a53">軸 {rec['umA']}番 &rarr; <b style="color:#2b2b2b">{fin_str}</b>（推定{rec['srcA']:.0f}番人気）</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;
+              padding:8px 12px;background:#eef4f1;border-radius:8px">
+    <span style="font-size:12px;font-weight:700;color:#004c2c">結果</span>
+    {_podium_html(order, waku)}
+  </div>
+  <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:10px;
+              padding:8px 12px;background:#eef4f1;border-radius:8px">
+    <span style="font-size:12px;font-weight:700;color:#004c2c;margin-right:6px">確定オッズ</span>
+    {''.join(kakutei_rows) if kakutei_rows else '<span style="color:#4d5a53">&mdash;</span>'}
   </div>
   <div style="overflow-x:auto"><table>
     <thead><tr><th>券種</th><th>推奨フォーメーション</th><th style="text-align:right">点数</th><th style="text-align:center">的中</th><th>的中フォーメーション</th><th style="text-align:right">確定配当(100円)</th><th style="text-align:right">回収率</th><th style="text-align:right">採算オッズ</th><th style="text-align:center">期待値</th></tr></thead>
     <tbody>{rows}</tbody>
   </table></div>
-  <div class="note">予想ダッシュボードが提案する各券種フォーメーションを、この結果の確定配当で照合（各組1点ずつ）。{note} 採算オッズ＝1÷その買い目の的中率（内訳の個別採算オッズ）。的中馬券ごとに確定配当が採算オッズを上回れば期待値プラス。回収率はフォーメーション全体（総払戻÷総投資）。馬番バッジの色は枠番カラー。</div>
+  <details class="note-fold"><summary>この表の見方</summary>
+  <div class="note">予想ダッシュボードが提案する各券種フォーメーションを、この結果の確定配当で照合（各組1点ずつ）。{note} 採算オッズ＝1÷その買い目の的中率（内訳の個別採算オッズ）。的中馬券ごとに確定配当が採算オッズを上回れば期待値プラス。回収率はフォーメーション全体（総払戻÷総投資）。「確定（オッズ）」はそのレースで実際に当たった組と確定オッズ。馬番バッジの色は枠番カラー。</div>
+  </details>
 </div>'''
 
 

@@ -347,13 +347,7 @@
   <div class="shutuba-banner">
       ✅ 出馬表データ反映済み（枠番・馬番・騎手・斤量・オッズが最新です）
     </div>
-  <div class="shutuba-banner" style="background:linear-gradient(135deg,#1a3a6b 0%,#2c5282 100%);color:#fff;border-left:4px solid #f1c40f;margin-bottom:8px">
-      🌤 <b>推定馬場状態</b>（京都）：
-      芝 <b style="color:#27ae60;font-size:15px">良</b>
-      ／ダート <b style="color:#27ae60;font-size:15px">良</b>
-      
-      <span style="font-size:10px;color:#bdc3c7;margin-left:12px">（情報取得失敗のためデフォルト(良)）</span>
-    </div>
+  
 
   <div class="section">
     <h2>🏆 上位3頭 予想</h2>
@@ -383,19 +377,20 @@
   <!-- 期待値シミュレーター -->
   <div class="section">
     <h2>💰 期待値シミュレーター</h2>
-    <!-- レース推奨度バナー -->
+    <!-- 1行目: 市場乖離バナー（妙味判定のみ） -->
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;
-                padding:10px 16px;margin-bottom:14px;border-radius:8px;
+                padding:10px 16px;margin-bottom:8px;border-radius:8px;
                 background:#3a2e10;border:1px solid #f39c12;">
       <span style="font-size:15px;font-weight:900;color:#f39c12;
                    padding:3px 14px;border-radius:5px;border:2px solid #f39c12;">
         🟡 要検討
       </span>
       <span style="color:#ccc;font-size:12px;">SmartRC推定から3順位上の乖離あり（中穴の可能性）</span>
-      
-      <span style="margin-left:14px;padding:3px 10px;background:#2c3e50;border-radius:4px;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">マトラコーニッシュ</b>（予想3位 / 想定6番人気 / 乖離+3 / 単勝19.6倍）</span>
     </div>
-    <div class="temp-slider">
+    <!-- 2行目: 注目馬 / 本命馬自信あり バッジエリア（該当なければ非表示） -->
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 16px;margin-bottom:8px;border-radius:8px;background:#1e2d3d;border:1px solid #2e4055;"><span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:6px;background:#2c3e50;border:1px solid #f39c12;font-size:12px;">⭐ 本命馬自信あり: <b style="color:#f1c40f">リンクスティップ</b><span style="color:#f39c12;font-weight:700">(偏差値67)</span></span><span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:6px;background:#2c3e50;border:1px solid #3498db;font-size:12px;">💎 注目馬: <b style="color:#f1c40f">マトラコーニッシュ</b><span style="color:#aaa;">（予想3位 / 想定6番人気 / 乖離+3 / 単勝19.6倍）</span></span></div>
+    <!-- 3行目: モデル信頼度スライダー -->
+    <div class="temp-slider" style="margin-bottom:14px;">
       <label style="font-weight:600">モデル信頼度</label>
       <span style="color:#7f8c8d;font-size:11px">本命重視</span>
       <input type="range" id="tempSlider" min="5" max="50" step="1" value="20">

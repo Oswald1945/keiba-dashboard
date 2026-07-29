@@ -148,6 +148,10 @@ CLASS_RANK = {
     '未勝利': 2, '新馬': 1, '不明': 0,
 }
 
+# JRA10場の場所名。過去走の『場所』がこれ以外＝地方競馬(NAR)。
+# 採点はJRA走のみ（地方の格を過大評価しないため）。地方走は参考として過去走に表示する。
+JRA_PLACE_NAMES = {"札幌", "函館", "福島", "新潟", "東京", "中山", "中京", "京都", "阪神", "小倉"}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # A-4  コース特性データベース  (JRA 全開催場・全主要距離対応)
 # 凡例: 直線=最終直線長(m), 1C距離=スタートから1コーナーまでの距離(m)
@@ -299,6 +303,32 @@ def recency_weight(rank: int) -> float:
 # ─────────────────────────────────────────────────────────────────────────────
 # 最高出力pts 用ヘルパー（TGX列＋時間減衰）
 # ─────────────────────────────────────────────────────────────────────────────
+
+# P1改善(2026-07): 最高出力pts の絶対水準成分
+# 独自補正タイムは 100=基準(良馬場・基準勝ちタイム)。従来はレース内相対zスコアのみで、
+# 「弱メンバー内の1番手」も満点になり絶対的な速さの情報が欠落していた（距離ptsのTGX≥95が
+# 示した絶対信号）。相対devに母集団基準の絶対devをブレンドして取り込む。
+HP_ABS_MEAN = 100.0   # 独自補正タイムの基準（100=基準勝ちタイム相当）
+HP_ABS_STD  = 15.0    # 絶対dev用の母集団σ（実測較正2026-07: 平均100.5/σ14.8 → 15）
+HP_REL_MIX  = 1.0     # 相対dev比率（1.0=従来の純相対=P1ロールバック / <1.0で絶対ブレンド有効）
+# ※P1検証結果(2026-07): 線形の絶対devブレンドはレース内順位を変えない(rank保存)ため軸選択に
+#   ほぼ無効と判明。HP_REL_MIX=1.0でロールバック。将来は非線形(閾値)版を検討する場合に土台流用。
+HP_ABS_CLIP = (70.0, 135.0)   # 絶対dev用の補正タイム最良クリップ（データ不良min4/max149対策）
+
+# P3改善(2026-07): 上がりptsのペース補正
+# 生の平均上がり3Fは展開汚染（スロー=全馬速い）。過去走CSVの「相対上がり」（各過去走レースの
+# 全馬平均との差、負=速い）で偏差化し、ペース/距離/馬場を中立化した末脚を評価する。
+# True=相対上がり優先（旧40列CSVは自動で生上がりにフォールバック）。Falseで従来完全復帰。
+AGARI_PACE_ADJ = True
+
+# P4改善(2026-07): コース適性ptsを「成績重み付き」へ
+# 旧ロジックは類似度だけを平均し、その馬の好走を見ていなかった（似たコースを走った経験だけで加点）。
+# 新ロジックは各過去走の好走度 class_score を、今走との類似度×格×新しさで重み付け平均する。
+COURSE_APT_PERF  = True          # True=成績重み付き(新) / False=類似度のみ(旧・ロールバック)
+COURSE_APT_REF   = 0.5           # 好走度の中立基準（中位≈0.5）
+COURSE_APT_SCALE = 20.0          # apt→pts 変換スケール（apt0.7→+4pt）
+COURSE_APT_MIN_EXPOSURE = 0.5    # 似たコース露出(Σ sim×recency)の最小値。未満は中立(0pt)
+
 
 def get_tgx_col(surface: str, dist_m: float) -> str:
     """今走の芝/ダ・距離からTGX列名を返す"""
@@ -1140,19 +1170,39 @@ def calc_course_apt_pts(
     if len(sub) == 0:
         return 0.0, 0.5
 
-    total_w, total_sw = 0.0, 0.0
+    total_w, total_sw = 0.0, 0.0        # 表示用 平均コース類似度
+    perf_num, perf_den = 0.0, 0.0       # P4本体: 類似度×格×新しさ 重み付き好走度
+    sim_sum = 0.0                       # 似たコース露出量（フォールバック判定用）
     for i, row in sub.iterrows():
         ck  = row['course_key']
         sim = course_similarity(ck, today_key)
         cn  = row['class_norm']
         cw  = CLASS_WEIGHTS.get(cn, 0.6)
         rw  = recency_weight(i + 1)
-        w   = cw * rw
-        total_sw += sim * w
-        total_w  += w
+        total_sw += sim * cw * rw
+        total_w  += cw * rw
+        try:
+            perf = class_score(row['確定着順'], row['頭数'])
+        except Exception:
+            perf = None
+        if perf is not None and not (isinstance(perf, float) and np.isnan(perf)):
+            w = sim * cw * rw
+            perf_num += perf * w
+            perf_den += w
+            sim_sum  += sim * rw
 
     avg_sim = total_sw / total_w if total_w > 0 else ref
-    pts = float(np.clip((avg_sim - ref) * scale, -10.0, 10.0))
+
+    if not COURSE_APT_PERF:
+        # 旧ロジック（類似度のみ・ロールバック用）
+        pts = float(np.clip((avg_sim - ref) * scale, -10.0, 10.0))
+        return pts, round(avg_sim, 3)
+
+    # P4: 似たコース経験がほぼ無い馬は中立(0pt)にしてノイズ回避
+    if perf_den <= 0 or sim_sum < COURSE_APT_MIN_EXPOSURE:
+        return 0.0, round(avg_sim, 3)
+    apt = perf_num / perf_den   # 似たコースでの格・新しさ重み付き平均好走度(0〜1)
+    pts = float(np.clip((apt - COURSE_APT_REF) * COURSE_APT_SCALE, -10.0, 10.0))
     return pts, round(avg_sim, 3)
 
 
@@ -1753,6 +1803,10 @@ def compute_scores(
     """
     df = df.copy()
     df['class_norm'] = df['クラス名'].apply(normalize_class)
+    # 採点用クラス: 地方戦(場所がJRA10場以外)は格を最低クラス(未勝利相当)に丸める。
+    # 地方のクラス表記(OP/G等)をJRA格として過大評価しないため。表示は元のclass_normを使用。
+    _is_local_row = ~df['場所'].apply(lambda p: str(p).strip() in JRA_PLACE_NAMES)
+    df['class_norm_eff'] = df['class_norm'].where(~_is_local_row, '未勝利')
     df['date_int']   = (df['年'].astype(int) * 10000
                         + df['月'].astype(int) * 100
                         + df['日'].astype(int))
@@ -1875,9 +1929,23 @@ def compute_scores(
     past_races_map: dict = {}  # horse_name → list of race dicts (B-2用)
 
     for h in horses:
-        sub = (df[df['馬名'] == h]
-               .sort_values('date_int', ascending=False)
-               .reset_index(drop=True))
+        sub_all = (df[df['馬名'] == h]
+                   .sort_values('date_int', ascending=False)
+                   .reset_index(drop=True))
+        # 地方判別: 場所がJRA10場名でない＝地方(NAR)
+        if sub_all.empty:
+            sub = sub_all; is_local_only = False
+            _sub_local = sub_all
+        else:
+            _jra_mask = sub_all['場所'].apply(lambda p: str(p).strip() in JRA_PLACE_NAMES)
+            _sub_jra = sub_all[_jra_mask].reset_index(drop=True)
+            _sub_local = sub_all[~_jra_mask].reset_index(drop=True)
+            if len(_sub_jra) > 0:
+                # JRA歴あり → JRA走のみで採点（地方の格を過大評価しない）
+                sub = _sub_jra; is_local_only = False
+            else:
+                # 地方実績のみ → 地方走で採点し「参考」として扱う
+                sub = sub_all; is_local_only = True
         n_races = len(sub)
 
         # ── 最高出力 (TGX条件別＋時間減衰) ──────────────
@@ -1897,7 +1965,7 @@ def compute_scores(
         cs_total, cs_w = 0.0, 0.0
         for i, row in sub.iterrows():
             rw    = recency_weight(i + 1)
-            cw    = CLASS_WEIGHTS.get(row['class_norm'], 0.6)
+            cw    = CLASS_WEIGHTS.get(row['class_norm_eff'], 0.6)  # 地方戦は未勝利相当に丸めた格
             pos   = class_score(row['確定着順'], row['頭数'])
             # 着差係数: 1着ならボーナス、大差負けなら減衰
             try:
@@ -1996,7 +2064,25 @@ def compute_scores(
                 'クラス倍率':   CLASS_WEIGHTS.get(cn, 0.6),
                 '近接度':       recency_weight(i + 1),
                 '時計使用':     used_in_dev,
+                '地方':         (str(row['場所']).strip() not in JRA_PLACE_NAMES),
             })
+
+        # JRA歴ありの馬は、地方走を『参考』として過去走一覧に追記（採点対象外）
+        if not is_local_only and not _sub_local.empty:
+            for _, lr in _sub_local.iterrows():
+                try:
+                    _y4 = to_year4(lr['年']); _ld = f"{_y4}-{int(lr['月']):02d}-{int(lr['日']):02d}"
+                except Exception:
+                    _ld = '-'
+                past_race_list.append({
+                    '日付': _ld, '場所': str(lr['場所']),
+                    'コース': lr.get('course_key', ''), 'クラス': lr.get('class_norm', ''),
+                    '着順': (int(lr['確定着順']) if not pd.isna(lr['確定着順']) else None),
+                    '頭数': (int(lr['頭数']) if not pd.isna(lr['頭数']) else None),
+                    '上がり3F': (round(float(lr['上がり3Fタイム']), 1) if not pd.isna(lr['上がり3Fタイム']) else None),
+                    '騎手': str(lr['騎手']), '地方': True,
+                })
+            past_race_list.sort(key=lambda _r: (_r.get('日付') or ''), reverse=True)
 
         past_races_map[h] = past_race_list
 
@@ -2025,6 +2111,12 @@ def compute_scores(
 
         # ── 上がり3F ─────────────────────────────────
         avg_agari = sub['上がり3Fタイム'].mean()
+        # P3: ペース補正末脚（相対上がり=各過去走レースの全馬平均との差、負=速い）
+        if '相対上がり' in sub.columns:
+            _rel = pd.to_numeric(sub['相対上がり'], errors='coerce')
+            avg_rel_agari = _rel.mean() if _rel.notna().any() else np.nan
+        else:
+            avg_rel_agari = np.nan
 
         # ── A-2 斤量補正 ──────────────────────────────
         today_w = None
@@ -2068,7 +2160,7 @@ def compute_scores(
         shokyu_pts = 0.0
         if today_class_rank > 0 and not sub.empty:
             try:
-                prev_cn   = sub.iloc[0]['class_norm']
+                prev_cn   = sub.iloc[0]['class_norm_eff']  # 地方戦は未勝利相当
                 prev_rank = CLASS_RANK.get(prev_cn, 0)
                 steps_up  = today_class_rank - prev_rank
                 if steps_up == 1:
@@ -2088,7 +2180,7 @@ def compute_scores(
         class_adapt_pts = 0.0
         if today_class_rank > 0 and not sub.empty:
             try:
-                _same_up = sub[sub['class_norm'].apply(
+                _same_up = sub[sub['class_norm_eff'].apply(
                     lambda c: CLASS_RANK.get(c, 0) >= today_class_rank
                 )].head(5)
                 _base_w = [3.0, 2.0, 1.0, 0.5, 0.5]
@@ -2221,6 +2313,7 @@ def compute_scores(
             '父馬名':           _chichi,
             '母の父馬名':        _hahachichi,
             '過去走なし':        no_past_data,
+            '地方実績のみ':      is_local_only,
             '出走数':           n_races,
             '補正タイム最良':    best_hosei,
             'クラス補正着順':    class_corrected,
@@ -2232,6 +2325,7 @@ def compute_scores(
                                   if (not sub.empty and pd.notna(pd.to_numeric(sub.iloc[0].get('距離'), errors='coerce'))) else None),
             '脚質':             kyakushitsu,
             '平均上がり3F':      avg_agari,
+            '平均相対上がり':    avg_rel_agari,   # P3: ペース中立末脚
             '平均コース類似度':  avg_sim,
             '_kinryo_pts':     kinryo_pts,
             '_kyori_pts':      kyori_pts,
@@ -2275,19 +2369,30 @@ def compute_scores(
         _tgx_s = float(np.std(_tgx_valid))
     else:
         _tgx_m, _tgx_s = 0.0, 0.0
-    if _tgx_s == 0:
-        res['最高出力_dev'] = [50.0] * len(_tgx_raw)
-    else:
-        res['最高出力_dev'] = [
-            50.0 if (v is None or (isinstance(v, float) and np.isnan(v)))
-            else float((v - _tgx_m) / _tgx_s * 10 + 50)
-            for v in _tgx_raw
-        ]
+    # P1: 相対dev(レース内z) と 絶対dev(母集団基準) をブレンド。
+    #     σ=0(全馬同値)のレースは相対を50固定にし、絶対devのみで差をつける。
+    def _dev_rel(v):
+        return float((v - _tgx_m) / _tgx_s * 10 + 50) if _tgx_s > 0 else 50.0
+
+    def _dev_abs(v):
+        vc = min(HP_ABS_CLIP[1], max(HP_ABS_CLIP[0], float(v)))   # 外れ値クリップ
+        return float((vc - HP_ABS_MEAN) / HP_ABS_STD * 10 + 50)
+
+    res['最高出力_dev'] = [
+        50.0 if (v is None or (isinstance(v, float) and np.isnan(v)))
+        else HP_REL_MIX * _dev_rel(v) + (1.0 - HP_REL_MIX) * _dev_abs(v)
+        for v in _tgx_raw
+    ]
     res['クラス_dev']   = deviation_score(res['クラス補正着順'].tolist())
     res['時計_dev']     = deviation_score(res['タイム偏差秒'].tolist())
 
     # 上がり3F平均偏差値: 小さい（速い）ほど高スコア → 値を反転してdeviation_score
-    _agari_raw = res['平均上がり3F'].tolist()
+    # P3: ペース補正が有効かつ相対上がりがあれば、相対上がり（フィールド平均との差）で偏差化。
+    #     無ければ従来の生・平均上がり3Fにフォールバック。
+    if AGARI_PACE_ADJ and '平均相対上がり' in res.columns and res['平均相対上がり'].notna().any():
+        _agari_raw = res['平均相対上がり'].tolist()
+    else:
+        _agari_raw = res['平均上がり3F'].tolist()
     _agari_neg = [-v if (v is not None and not (isinstance(v, float) and np.isnan(v))) else np.nan
                   for v in _agari_raw]
     res['上がり_dev'] = deviation_score(_agari_neg)
@@ -2518,8 +2623,17 @@ def compute_scores(
     # 表示用スコア（0.1〜100にクランプ）: 生スコアの積み上げをそのまま見せ、上限100/下限0.1で頭打ち・底上げ。
     # 偏差値・勝率・買い判定は不変の生スコア(総合スコア)を使用（クランプは表示のみ）。
     res['表示スコア'] = res['総合スコア'].clip(0.1, 100.0).round(1)
-    res['順位予想'] = res['総合スコア'].rank(ascending=False, method='min').astype(int)
-    res = res.sort_values('総合スコア', ascending=False).reset_index(drop=True)
+    # 順位予想: 参考(地方実績のみ)馬はJRA採点馬と比較不能なため競争順位から外し、
+    # JRA採点馬(1..k)の後ろに回す(k+1..)。これで参考馬が「予想2位」等を占めるのを防ぐ。
+    if '地方実績のみ' in res.columns:
+        _loc_m = res['地方実績のみ'].fillna(False).astype(bool)
+    else:
+        _loc_m = pd.Series(False, index=res.index)
+    _n_jra    = int((~_loc_m).sum())
+    _rank_jra = res.loc[~_loc_m, '総合スコア'].rank(ascending=False, method='min')
+    _rank_loc = res.loc[_loc_m, '総合スコア'].rank(ascending=False, method='min') + _n_jra
+    res['順位予想'] = pd.concat([_rank_jra, _rank_loc]).reindex(res.index).astype(int)
+    res = res.sort_values('順位予想', ascending=True).reset_index(drop=True)
 
     # SmartRC 展開補完: テン/上がりパターンのサマリーを収集
     _src_ten  = {}  # ten_pat  → 馬名リスト
@@ -2561,6 +2675,7 @@ def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None
             '母の父馬名':       str(r['母の父馬名']),
             '出走数':          int(r['出走数']),
             '過去走なし':       bool(r.get('過去走なし', False)),
+            '地方実績のみ':     bool(r.get('地方実績のみ', False)),
             '枠番':            (int(r['枠番'])  if r['枠番']  is not None and not pd.isna(r['枠番'])  else None),
             '馬番':            (int(r['馬番'])  if r['馬番']  is not None and not pd.isna(r['馬番'])  else None),
             '人気':            (int(r['人気'])  if r['人気']  is not None and not pd.isna(r['人気'])  else None),
@@ -2626,7 +2741,8 @@ if __name__ == '__main__':
             '斤量','頭数','枠番','馬番','確定着順','着差タイム',
             '人気','単勝オッズ','走破タイム秒','タイムS','補正タイム',
             '通過順1角','通過順2角','通過順3角','通過順4角',
-            '上がり3Fタイム','馬体重','父馬名','母馬名','母の父馬名','PCI']
+            '上がり3Fタイム','馬体重','父馬名','母馬名','母の父馬名','PCI',
+            '相対上がり']   # P3: 各過去走レースの全馬平均上がりとの差(負=速い)。旧40列CSVは自動でNaN扱い。
 
     ap = argparse.ArgumentParser()
     import os as _os
@@ -2704,7 +2820,16 @@ if __name__ == '__main__':
         else:
             return pd.read_excel(path, **kwargs)
 
-    df = _read_df(args.excel, header=None, names=COLS)
+    # 過去走読み込み（40列旧CSV/41列新CSV 両対応で堅牢化）
+    df = _read_df(args.excel, header=None)
+    _nc = df.shape[1]
+    if _nc >= len(COLS):
+        df = df.iloc[:, :len(COLS)]
+        df.columns = COLS
+    else:
+        df.columns = COLS[:_nc]
+        for _c in COLS[_nc:]:
+            df[_c] = np.nan   # 旧CSVに無い列（相対上がり等）はNaN→フォールバック
     with open(args.course, encoding='utf-8') as f:
         course_times = json.load(f)
 

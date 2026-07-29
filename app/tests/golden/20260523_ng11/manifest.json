@@ -1,0 +1,26 @@
+{
+  "race_id": "20260523_ng11",
+  "date": "20260523",
+  "venue": "新潟",
+  "baba": "良",
+  "race_class": "2勝",
+  "surface": "芝",
+  "inputs": {
+    "過去走": "過去走_20260523_ng11.csv",
+    "出馬表": "出馬表_20260523_ng11.csv",
+    "坂路": "坂路_20260523_ng11.csv",
+    "ウッド": "ウッド_20260523_ng11.csv",
+    "レース結果": "レース結果_20260523_ng11.csv"
+  },
+  "traits": {
+    "has_local_only": false,
+    "has_smartrc": true,
+    "has_result": true,
+    "missing_training": false,
+    "wide_top_odds": true
+  },
+  "smartrc": "smartrc_20260523_ng11.json",
+  "baba_json": "baba_20260523_ng11.json",
+  "track_bias_sources": {},
+  "effective_memo_sha256": "115bb0293af88e056f5e6b19ddafed96106a69e589c86cb87dba269f7fe34542"
+}

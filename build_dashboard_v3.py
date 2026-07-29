@@ -139,16 +139,16 @@ if args.out is None:
 # ── ヘルパー ──────────────────────────────────────────────────
 def leg_color(leg):
     return {
-        '逃げ': '#e74c3c', '先行': '#f39c12',
-        '差し': '#3498db', '追込': '#9b59b6', '不明': '#95a5a6',
-    }.get(leg, '#95a5a6')
+        '逃げ': '#c0392b', '先行': '#b06000',
+        '差し': '#2471a3', '追込': '#9b59b6', '不明': '#4d5a53',
+    }.get(leg, '#4d5a53')
 
 def class_label(s):
-    if s >= 60: return ('S', '#e74c3c')
-    if s >= 50: return ('A', '#f39c12')
+    if s >= 60: return ('S', '#c0392b')
+    if s >= 50: return ('A', '#b06000')
     if s >= 40: return ('B', '#3498db')
     if s >= 30: return ('C', '#16a085')
-    return ('D', '#7f8c8d')
+    return ('D', '#4d5a53')
 
 def fmt(v, digits=1, suffix=''):
     if v is None: return '-'
@@ -176,10 +176,11 @@ def bonus_bar(val, max_abs):
 
 # ── 枠番カラー ────────────────────────────────────────────────
 WAKU_BG = {
-    1: '#FFFFFF', 2: '#666666', 3: '#FF4444', 4: '#4488FF',
-    5: '#DDDD00', 6: '#22BB22', 7: '#FF8822', 8: '#e91e8c',
+    1: '#ffffff', 2: '#555555', 3: '#ee3333', 4: '#4488ff',
+    5: '#dddd00', 6: '#22bb22', 7: '#ff8822', 8: '#ffaacc',
 }
-WAKU_FG = {1:'#111', 2:'#fff', 3:'#fff', 4:'#fff', 5:'#111', 6:'#fff', 7:'#fff', 8:'#fff'}
+# JRAの枠番色に合わせる。橙(7枠)・桃(8枠)は黒文字。白文字だと読めない。
+WAKU_FG = {1:'#111', 2:'#fff', 3:'#fff', 4:'#fff', 5:'#111', 6:'#fff', 7:'#111', 8:'#111'}
 
 def waku_html_fn(waku, bango):
     if waku and isinstance(waku, int):
@@ -187,8 +188,9 @@ def waku_html_fn(waku, bango):
         _fg = WAKU_FG.get(waku, '#fff')
         wh = (f'<span class="waku-badge" '
               f'style="background:{_bg};color:{_fg};">{waku}枠</span>')
-        bh = (f'<span class="bango-badge" '
-              f'style="background:{_bg};color:{_fg};">{fmt_int(bango)}番</span>'
+        # 馬番は丸なので「番」は入れず数字だけにする（円に収まらないため）
+        bh = (f'<span class="bango-badge" title="{fmt_int(bango)}番" '
+              f'style="background:{_bg};color:{_fg};">{fmt_int(bango)}</span>'
               if bango else '')
     else:
         wh = '<span class="waku-badge" style="background:#666;color:#fff;">未定</span>'
@@ -234,10 +236,15 @@ def build_past_races_table(past_races: list, horse_id: str) -> str:
         else:
             pci_str = '-'
 
+        _local = bool(r.get('地方'))
+        _ba_disp = str(r.get("場所", "-"))
+        if _local:
+            _ba_disp = ('<span style="font-size:9px;background:#6b7280;color:#fff;'
+                        'padding:0 4px;border-radius:3px;margin-right:3px">地方</span>' + _ba_disp)
         rows += (
-            f'<tr>'
+            f'<tr style="{"opacity:.55" if _local else ""}" title="{"地方競馬(採点対象外・参考)" if _local else ""}">'
             f'<td>{r.get("日付", "-")}</td>'
-            f'<td>{r.get("場所", "-")}</td>'
+            f'<td>{_ba_disp}</td>'
             f'<td><span class="course-tag">{r.get("コース", "-")}</span></td>'
             f'<td>{r.get("クラス", "-")}</td>'
             f'<td class="center"><b>{pos_str}</b></td>'
@@ -316,6 +323,9 @@ for idx, h in enumerate(horses):
     leg    = h['脚質']
     odds   = h.get('単勝オッズ')
     pop    = h.get('人気')
+    # 予想時点では市場オッズ・人気が入らないことがあるので、
+    # 詳細カードには SmartRC の想定人気を出す。
+    src_pop = h.get('SmartRC推定人気順')
     n      = h['出走数']
     name   = h['馬名']
     waku   = h.get('枠番')
@@ -373,7 +383,7 @@ for idx, h in enumerate(horses):
     past_rows   = h.get('past_races', [])
     drill_html  = build_past_races_table(past_rows, horse_id)
     no_past     = h.get('過去走なし', False)
-    ref_badge   = ('<span class="adj-badge" style="background:#7f8c8d;font-size:10px;">参考スコア</span>'
+    ref_badge   = ('<span class="adj-badge" style="background:#4d5a53;font-size:10px;">参考スコア</span>'
                    if no_past else '')
 
     # メモ馬バッジ
@@ -414,12 +424,20 @@ for idx, h in enumerate(horses):
         '<span title="SmartRC推定人気が下位・モデルスコア3位以内・適性系プラス"'
         ' style="display:inline-flex;align-items:center;gap:3px;'
         'padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;'
-        'background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff;'
+        'background:linear-gradient(135deg,#c0392b,#c0392b);color:#fff;'
         'box-shadow:0 0 6px rgba(231,76,60,0.5);white-space:nowrap;">'
         '🎯 注目穴馬'
         f'<span style="font-size:9px;font-weight:400;opacity:0.85;margin-left:2px">'
         f'(SmartRC{_sr_int}番人気/適性{_apt_sum:+.1f}pt)</span></span>'
     ) if _is_ana else ''
+
+    # 参考(地方のみ)バッジ: JRA未経験でスコアが地方成績からの参考値
+    _local_badge = (
+        '<span title="地方実績のみ（JRA未経験）。スコアは地方成績からの参考値です"'
+        ' style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:4px;'
+        'font-size:11px;font-weight:700;background:#607d8b;color:#fff;white-space:nowrap;">'
+        '📎 参考(地方のみ)</span>'
+    ) if h.get('地方実績のみ') else ''
 
     horse_cards += f'''
 <div class="horse-card rank-{min(rank,4)}" data-rank="{rank}" data-leg="{leg}">
@@ -434,6 +452,7 @@ for idx, h in enumerate(horses):
       {ref_badge}{_trust_badge(h)}{adj_badges}
       {_memo_badge}
       {_ana_badge}
+      {_local_badge}
       <span class="meta-info">{h["性別"]}{h["年齢"]} / {h["騎手"]} / {n}走</span>
       <button class="drill-btn" onclick="toggleDrill('{horse_id}', this)">📋 過去走</button>
     </div>
@@ -441,21 +460,21 @@ for idx, h in enumerate(horses):
       <div class="total-score">
         <span class="big-num">{disp_score:.1f}</span>
         <span class="small-label">スコア</span>
-        <div style="margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:9px;color:#aaa;letter-spacing:1px">評価ランク</span><span style="font-size:20px;font-weight:900;letter-spacing:2px;padding:1px 14px;border-radius:5px;background:{color};color:#fff;line-height:1.3">{label}</span></div>
-        <span class="small-label" style="margin-top:2px;font-size:10px;color:#f1c40f;font-weight:700">偏差値 {dev_score}</span>
-        <span class="small-label" style="margin-top:4px;font-size:10px;color:#7f8c8d">
-          単勝 {fmt(odds,1)}倍<br>({fmt_int(pop)}人気)
-        </span>
+        <div style="margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px">
+          <span style="font-size:15px;font-weight:900;letter-spacing:1px;padding:0 8px;border-radius:4px;background:{color};color:#fff;line-height:1.5">{label}</span>
+          <span style="font-size:10px;color:#00674a;font-weight:700">偏差{dev_score}</span>
+        </div>
+        <span class="small-label" style="margin-top:2px;font-size:10px;color:#4d5a53">想定{fmt_int(src_pop)}番人気</span>
       </div>
       <div class="score-bars">
         <div class="bar-row">
           <label>最高出力</label>
-          <div class="bar"><div class="fill" style="width:{p1:.0f}%;background:#e74c3c"></div></div>
+          <div class="bar"><div class="fill" style="width:{p1:.0f}%;background:#c0392b"></div></div>
           <span class="val">{h["最高出力pts"]:.1f}/35</span>
         </div>
         <div class="bar-row">
           <label>クラス補正</label>
-          <div class="bar"><div class="fill" style="width:{p2:.0f}%;background:#f39c12"></div></div>
+          <div class="bar"><div class="fill" style="width:{p2:.0f}%;background:#b06000"></div></div>
           <span class="val">{h["クラスpts"]:.1f}/25</span>
         </div>
         <div class="bar-row">
@@ -523,7 +542,7 @@ for idx, h in enumerate(horses):
       <span>父: {h["父馬名"]}</span>
       <span>母父: {h["母の父馬名"]}</span>
       <span>時計データ: {h["タイム偏差利用走数"]}/{n}走</span>
-      {f'<span style="color:#aaa">🏋️ {train_str}</span>' if train_str else ''}
+      {f'<span style="color:#4d5a53">🏋️ {train_str}</span>' if train_str else ''}
     </div>
     {drill_html}
   </div>
@@ -580,12 +599,14 @@ for h in horses:
         _wbg = WAKU_BG.get(int(waku_b), '#888')
         _wfg = WAKU_FG.get(int(waku_b), '#fff')
         num_str = (
-            f'<span style="display:inline-block;background:{_wbg};color:{_wfg};'
-            f'font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">'
+            f'<span style="display:inline-flex;align-items:center;justify-content:center;line-height:1;background:{_wbg};color:{_wfg};'
+            f'font-weight:700;font-size:11px;height:22px;padding:0 6px;border-radius:3px;margin-right:3px;box-sizing:border-box;padding-top:1px;'
+            f'border:1px solid #8aa79a;">'      # 1枠は白なので枠線が無いと白地に溶ける
             f'{waku_b}枠</span>'
-            f'<span style="display:inline-block;background:{_wbg};color:{_wfg};'
-            f'font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">'
-            f'{fmt_int(bango_b)}番</span>'
+            f'<span style="display:inline-flex;align-items:center;justify-content:center;line-height:1;background:{_wbg};color:{_wfg};'
+            f'font-weight:700;font-size:11px;width:22px;height:22px;border-radius:50%;box-sizing:border-box;padding-top:1px;'
+            f'border:1px solid #8aa79a;">'
+            f'{fmt_int(bango_b)}</span>'
         )
     else:
         num_str = '<span style="color:#555">未定</span>'
@@ -610,12 +631,12 @@ for h in horses:
 
     # SmartRC推定人気列
     src_rank  = h.get('SmartRC推定人気順')
-    src_ninki_cell = (f'<td style="text-align:center;white-space:nowrap"><b style="color:#f39c12">{src_rank}位</b></td>'
+    src_ninki_cell = (f'<td style="text-align:center;white-space:nowrap"><b style="color:#b06000">{src_rank}位</b></td>'
                       if src_rank is not None else '<td style="text-align:center;color:#555">-</td>')
 
     # SmartRC前走評価列 (A/B/C/D/E)
     _sr_hyoka = h.get('SmartRC評価')  # A/B/C/D/E or None
-    _SR_COLOR = {'A': '#27ae60', 'B': '#2ecc71', 'C': '#7f8c8d', 'D': '#e67e22', 'E': '#e74c3c'}
+    _SR_COLOR = {'A': '#0a7d3c', 'B': '#0a7d3c', 'C': '#4d5a53', 'D': '#b06000', 'E': '#c0392b'}
     _SR_LABEL = {'A': 'A 不利', 'B': 'B 不利', 'C': 'C 中立', 'D': 'D 有利', 'E': 'E 有利'}
     if _sr_hyoka and _sr_hyoka in _SR_COLOR:
         _sc = _SR_COLOR[_sr_hyoka]
@@ -643,7 +664,7 @@ for h in horses:
         f'<td style="white-space:nowrap">{num_str}</td>'
         f'<td><b>{h["馬名"]}</b>{badges}</td>'
         f'<td>{h["脚質"]}</td>'
-        f'<td style="white-space:nowrap"><b>{h["表示スコア"]:.1f}</b><br><span style="font-size:10px;color:#f1c40f;font-weight:700">偏差{_dev_t}</span></td>'
+        f'<td style="white-space:nowrap"><b>{h["表示スコア"]:.1f}</b><br><span style="font-size:10px;color:#00674a;font-weight:700">偏差{_dev_t}</span></td>'
         f'<td>{fmt(h.get("単勝オッズ"), 1)}倍 ({fmt_int(h.get("人気"))}人気)</td>'
         f'{src_ninki_cell}'
         f'{sr_eval_cell}'
@@ -665,13 +686,13 @@ else:
     </div>'''
 
 # ── 馬場状態バナー ─────────────────────────────────────────────────
-_baba_color_map = {'良': '#27ae60', '稍重': '#e67e22', '重': '#c0392b', '不良': '#8e44ad'}
+_baba_color_map = {'良': '#0a7d3c', '稍重': '#b06000', '重': '#c0392b', '不良': '#8e44ad'}
 _est_shiba = _baba_info.get('推定馬場_芝')
 _est_dart  = _baba_info.get('推定馬場_ダート')
 _baba_venue = _baba_info.get('場所', '')
 if _est_shiba:
-    _shiba_color = _baba_color_map.get(_est_shiba, '#ecf0f1')
-    _dart_color  = _baba_color_map.get(_est_dart,  '#ecf0f1')
+    _shiba_color = _baba_color_map.get(_est_shiba, '#2b2b2b')
+    _dart_color  = _baba_color_map.get(_est_dart,  '#2b2b2b')
     _cur_shiba   = _baba_info.get('現在馬場_芝')
     _cur_dart    = _baba_info.get('現在馬場_ダート')
     _cushion_str = (f'　クッション値: {_baba_info["クッション値"]}' if _baba_info.get('クッション値') else '')
@@ -680,18 +701,18 @@ if _est_shiba:
     _wx_str      = (f'　天候: {_wx}' if _wx else '')
     _status      = _baba_info.get('取得状態', '')
     _badge_map   = {'手動': ('#16a085', '手動指定'), '確定': ('#2980b9', '自動取得'),
-                    '要確認': ('#e67e22', '要確認'), '失敗': ('#c0392b', '取得失敗')}
-    _bcol, _blabel = _badge_map.get(_status, ('#7f8c8d', _status or '—'))
+                    '要確認': ('#b06000', '要確認'), '失敗': ('#c0392b', '取得失敗')}
+    _bcol, _blabel = _badge_map.get(_status, ('#4d5a53', _status or '—'))
     _badge       = f'<span style="background:{_bcol};color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:8px">{_blabel}</span>'
     _venue_str   = (f'（{_baba_venue}）' if _baba_venue else '')
     _chg = ''
     if (_cur_shiba and _cur_shiba != _est_shiba) or (_cur_dart and _cur_dart != _est_dart):
-        _chg = (f'<span style="font-size:10px;color:#f1c40f;margin-left:8px">'
+        _chg = (f'<span style="font-size:10px;color:#00674a;margin-left:8px">'
                 f'当日悪化見込み（現在 芝{_cur_shiba}／ダ{_cur_dart}）</span>')
     _konkyo_str  = _baba_info.get('推定根拠', '')
-    _konkyo_span = (f'<span style="font-size:10px;color:#bdc3c7;margin-left:12px">（{_konkyo_str}）</span>'
+    _konkyo_span = (f'<span style="font-size:10px;color:#4d5a53;margin-left:12px">（{_konkyo_str}）</span>'
                     if _konkyo_str else '')
-    baba_banner = f'''<div class="shutuba-banner" style="background:linear-gradient(135deg,#1a3a6b 0%,#2c5282 100%);color:#fff;border-left:4px solid #f1c40f;margin-bottom:8px">
+    baba_banner = f'''<div class="shutuba-banner" style="background:linear-gradient(135deg,#1a3a6b 0%,#2c5282 100%);color:#fff;border-left:4px solid #00674a;margin-bottom:8px">
       🌤 <b>当日推定馬場</b>{_venue_str}{_badge}：
       芝 <b style="color:{_shiba_color};font-size:15px">{_est_shiba}</b>
       ／ダート <b style="color:{_dart_color};font-size:15px">{_est_dart}</b>
@@ -729,6 +750,7 @@ ev_data_json = json.dumps([
             h.get('SmartRC推定人気順') is not None
             and int(h.get('SmartRC推定人気順')) >= -(-len(horses) * 7 // 10)  # 推定人気下位30%(ceil(n*0.7))
         ),
+        '地方実績のみ':      bool(h.get('地方実績のみ')),   # 参考馬(JRA未経験)。軸候補から除外する
     }
     for h in horses
     if not h.get('過去走なし', False)
@@ -788,7 +810,7 @@ _jishin_flag = (_pred1_dev >= 68) and not _pred1_is_fav
 
 # ── 推奨度バナー初期値（旧・妙味判定は廃止 2026-07。JS renderBets が 購入推奨/非推奨 に上書き）──
 _rec_badge  = ''
-_rec_color  = '#7f8c8d'
+_rec_color  = '#4d5a53'
 _rec_bg     = '#222'
 _rec_reason = ''
 
@@ -800,11 +822,11 @@ if _jishin_flag:
     _sub = ' / '.join(filter(None, [_dev_str, _lead_str]))
     _jishin_html = (
         f'<span style="display:inline-flex;align-items:center;gap:6px;'
-        f'padding:5px 14px;border-radius:6px;background:#2c3e50;'
-        f'border:1px solid #f39c12;font-size:12px;">'
+        f'padding:5px 14px;border-radius:6px;background:#dde8e2;'
+        f'border:1px solid #b06000;font-size:12px;">'
         f'⭐ 本命馬自信あり: '
-        f'<b style="color:#f1c40f">{_pred1_name}</b>'
-        f'<span style="color:#f39c12;font-weight:700">({_sub})</span>'
+        f'<b style="color:#00674a">{_pred1_name}</b>'
+        f'<span style="color:#b06000;font-weight:700">({_sub})</span>'
         f'</span>'
     )
 
@@ -815,11 +837,11 @@ if _best_val and _best_val['乖離'] >= 2:
                  if _best_val.get('オッズ') else '-')
     _best_html = (
         f'<span style="display:inline-flex;align-items:center;gap:6px;'
-        f'padding:5px 14px;border-radius:6px;background:#2c3e50;'
-        f'border:1px solid #3498db;font-size:12px;">'
+        f'padding:5px 14px;border-radius:6px;background:#dde8e2;white-space:nowrap;'
+        f'border:1px solid #2471a3;font-size:12px;">'
         f'💎 注目馬: '
-        f'<b style="color:#f1c40f">{_best_val["馬名"]}</b>'
-        f'<span style="color:#aaa;">（予想{_best_val["予想順位"]}位 / 想定{_best_val["SmartRC推定"]}番人気'
+        f'<b style="color:#00674a">{_best_val["馬名"]}</b>'
+        f'<span class="badge-detail" style="color:#4d5a53;">（予想{_best_val["予想順位"]}位 / 想定{_best_val["SmartRC推定"]}番人気'
         f' / 乖離+{_best_val["乖離"]} / 単勝{_odds_str}）</span>'
         f'</span>'
     )
@@ -843,13 +865,13 @@ _danger_list.sort()
 _danger_html = ''
 if _danger_list:
     _ditems = ' / '.join(
-        f'<b style="color:#f1c40f">{_nm}</b>'
-        f'<span style="color:#aaa;">（想定{_sr}番人気 / 予想{_pr}位）</span>'
+        f'<b style="color:#00674a">{_nm}</b>'
+        f'<span class="badge-detail" style="color:#4d5a53;">（想定{_sr}番人気 / 予想{_pr}位）</span>'
         for _sr, _pr, _nm in _danger_list)
     _danger_html = (
         f'<span style="display:inline-flex;align-items:center;gap:6px;'
-        f'padding:5px 14px;border-radius:6px;background:#2c3e50;'
-        f'border:1px solid #e74c3c;font-size:12px;">'
+        f'padding:5px 14px;border-radius:6px;background:#dde8e2;white-space:nowrap;'
+        f'border:1px solid #c0392b;font-size:12px;">'
         f'⚠️ 危険な人気馬: {_ditems}</span>'
     )
 
@@ -859,7 +881,7 @@ if _jishin_html or _best_html or _danger_html:
     _badge_area_html = (
         f'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;'
         f'padding:10px 16px;margin-bottom:8px;border-radius:8px;'
-        f'background:#1e2d3d;border:1px solid #2e4055;">'
+        f'background:#eef4f1;border:1px solid #b4c9be;">'
         f'{_jishin_html}'
         f'{_best_html}'
         f'{_danger_html}'
@@ -886,7 +908,7 @@ _comp_fields = [
     ('枠順pts',       '枠順',     '#9edae5'),  # ライトシアン
     ('昇級pts',       '昇級',     '#c5b0d5'),  # ラベンダー
     ('クラス適応pts',  'クラス適応', '#1abc9c'),  # ターコイズ
-    ('SmartRC評価pts',  'SmartRC評価', '#f39c12'),  # アンバー
+    ('SmartRC評価pts',  'SmartRC評価', '#b06000'),  # アンバー
     ('馬場適性pts',       '馬場適性',   '#16a085'),  # エメラルド
 ]
 _chart_horses = sorted(horses, key=lambda h: h['順位予想'])
@@ -898,6 +920,19 @@ _chart_datasets = [
 ]
 score_chart_json = json.dumps(
     {'labels': _chart_labels, 'datasets': _chart_datasets}, ensure_ascii=False)
+
+# 積み上げチャートの色凡例。18頭立てだとチャート内の凡例が場所を取りすぎるので、
+# スマホではチャートの凡例を消し、代わりにこの折り畳みを出す。
+_stack_legend_html = (
+    '<details class="note-fold stack-legend"><summary>色の凡例（16項目）</summary>'
+    '<div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;'
+    'color:#4d5a53;padding:6px 0">'
+    + ''.join(
+        f'<span style="display:inline-flex;align-items:center;gap:5px">'
+        f'<span style="width:10px;height:10px;border-radius:2px;'
+        f'border:1px solid #8aa79a;background:{col}"></span>{lbl}</span>'
+        for _fld, lbl, col in _comp_fields)
+    + '</div></details>')
 
 
 # ── 補正項目別ランキングデータ ────────────────────────────────────
@@ -931,7 +966,7 @@ _paces  = [('high','ハイペース'), ('mid','ミドルペース'), ('low','ス
 
 def _matrix_cell(horses_list, pace_key, style):
     favor = _pace_favor[pace_key].get(style, 0)
-    color = '#2ecc71' if favor > 0 else '#e74c3c' if favor < 0 else '#7f8c8d'
+    color = '#0a7d3c' if favor > 0 else '#c0392b' if favor < 0 else '#4d5a53'
     icon  = '◎ 有利' if favor > 0 else '△ 不利' if favor < 0 else '± 普通'
     hs = [(h['馬名'], int(h.get('馬番') or 0), int(h.get('枠番') or 0)) for h in horses_list if h['脚質'] == style]
     _chips = []
@@ -940,52 +975,52 @@ def _matrix_cell(horses_list, pace_key, style):
         _fg = WAKU_FG.get(_wk, '#fff')
         _chips.append(
             f'<span style="display:inline-flex;align-items:center;gap:3px;'
-            f'background:rgba(255,255,255,0.1);border-radius:4px;padding:2px 6px;margin:2px;font-size:11px">'
+            f'background:#b4c9be;border-radius:4px;padding:2px 6px;margin:2px;font-size:11px">'
             f'<span style="background:{_bg};color:{_fg};border-radius:50%;'
             f'width:16px;height:16px;display:inline-flex;align-items:center;'
             f'justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">{_u or "?"}</span>'
             f'{_n}</span>'
         )
     name_html = ''.join(_chips) if _chips else '<span style="color:#555;font-size:11px">該当なし</span>'
-    highlight = 'border:2px solid #f1c40f;' if pace_key == _today_pace else ''
+    highlight = 'border:2px solid #00674a;' if pace_key == _today_pace else ''
     return (
-        f'<td style="padding:8px;vertical-align:top;border:1px solid #2c3e50;{highlight}">'
+        f'<td style="padding:8px;vertical-align:top;border:1px solid #dde8e2;{highlight}">'
         f'<div style="color:{color};font-weight:700;font-size:12px;margin-bottom:4px">{icon}</div>'
         f'{name_html}</td>'
     )
 
 _matrix_rows = ''
 for style in _styles:
-    style_color = {'逃げ':'#e74c3c','先行':'#f39c12','差し':'#3498db','追込':'#9b59b6'}.get(style,'#888')
+    style_color = {'逃げ':'#c0392b','先行':'#b06000','差し':'#2471a3','追込':'#9b59b6'}.get(style,'#888')
     _matrix_rows += (
         f'<tr><td style="padding:8px;font-weight:700;color:{style_color};'
-        f'border:1px solid #2c3e50;white-space:nowrap">{style}</td>'
+        f'border:1px solid #dde8e2;white-space:nowrap">{style}</td>'
     )
     for pk, _ in _paces:
         _matrix_rows += _matrix_cell(horses, pk, style)
     _matrix_rows += '</tr>'
 
 _pace_headers = ''.join(
-    f'<th style="padding:8px;background:#243447;color:{"#f1c40f" if pk == _today_pace else "#7f8c8d"};'
-    f'border:1px solid #2c3e50">{"★ " if pk == _today_pace else ""}{pn}</th>'
+    f'<th style="padding:8px;background:#d3e6dd;color:{"#00674a" if pk == _today_pace else "#4d5a53"};'
+    f'border:1px solid #dde8e2">{"★ " if pk == _today_pace else ""}{pn}</th>'
     for pk, pn in _paces
 )
 _matrix_html = f'''<div class="section" id="section-matrix">
   <h2>🗂 展開マトリクス（脚質 × ペース）</h2>
-  <div style="font-size:12px;color:#bdc3c7;margin-bottom:10px">
-    当レースの想定ペース: <b style="color:#f1c40f">{"★ " + dict(_paces)[_today_pace]}</b> —
+  <div style="font-size:12px;color:#4d5a53;margin-bottom:10px">
+    当レースの想定ペース: <b style="color:#00674a">{"★ " + dict(_paces)[_today_pace]}</b> —
     ★印の列が今回の展開で有利な脚質グループです。
   </div>
   <div style="overflow-x:auto">
   <table style="border-collapse:collapse;width:100%;font-size:12px">
     <thead><tr>
-      <th style="padding:8px;background:#243447;border:1px solid #2c3e50;color:#7f8c8d">脚質</th>
+      <th style="padding:8px;background:#d3e6dd;border:1px solid #dde8e2;color:#4d5a53">脚質</th>
       {_pace_headers}
     </tr></thead>
     <tbody>{_matrix_rows}</tbody>
   </table>
   </div>
-  <div style="font-size:11px;color:#7f8c8d;margin-top:8px">
+  <div style="font-size:11px;color:#4d5a53;margin-top:8px">
     ◎ 有利 = このペース展開で脚質的に優位 / △ 不利 = ペース的に逆風 / ± 普通 = 中立
   </div>
 </div>'''
@@ -1024,41 +1059,50 @@ _aga_top3  = sorted(_aga_ranks_disp, key=lambda x: x[0])[:3]
 _ten_competition = sum(1 for r, _, _ in _ten_ranks_disp if r <= 3)
 
 def _speed_badge(rank, name):
-    colors = {1:'#e74c3c',2:'#e67e22',3:'#f1c40f'}
-    c = colors.get(rank, '#7f8c8d')
+    colors = {1:'#c0392b',2:'#b06000',3:'#00674a'}
+    c = colors.get(rank, '#4d5a53')
     return (f'<span style="background:{c};color:#fff;border-radius:3px;'
             f'padding:1px 5px;font-size:10px;font-weight:700;margin:1px">'
             f'{rank}位 {name}</span>')
 
-_ten_html = ''.join(_speed_badge(r, n) for r, n, _ in _ten_top3) if _ten_top3 else '<span style="color:#7f8c8d;font-size:11px">データなし</span>'
-_aga_html = ''.join(_speed_badge(r, n) for r, n, _ in _aga_top3) if _aga_top3 else '<span style="color:#7f8c8d;font-size:11px">データなし</span>'
-_competition_label = (f'<span style="color:#e74c3c;font-weight:700">速度競合({_ten_competition}頭)あり</span>'
+_ten_html = ''.join(_speed_badge(r, n) for r, n, _ in _ten_top3) if _ten_top3 else '<span style="color:#4d5a53;font-size:11px">データなし</span>'
+_aga_html = ''.join(_speed_badge(r, n) for r, n, _ in _aga_top3) if _aga_top3 else '<span style="color:#4d5a53;font-size:11px">データなし</span>'
+_competition_label = (f'<span style="color:#c0392b;font-weight:700">速度競合({_ten_competition}頭)あり</span>'
                       if _ten_competition >= 2 else
-                      '<span style="color:#bdc3c7">速度競合なし</span>')
+                      '<span style="color:#4d5a53">速度競合なし</span>')
 
 _formation_html = f'''<div class="section" id="section-formation">
   <h2>🐎 展開予想 — 序盤/中盤/終盤の隊列イメージ</h2>
-  <div style="font-size:12px;color:#bdc3c7;margin-bottom:8px">
+  <details class="note-fold"><summary>この図の見方・枠番色</summary>
+  <div style="font-size:12px;color:#4d5a53;margin-bottom:8px">
     脚質・SmartRCテン/上がり速度順位・枠番・想定ペースをもとに位置取りを推定します。
     チップ色は<b>枠番色</b>。
     <span style="display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap;margin-left:6px;vertical-align:middle">
-      <span style="background:#eeeeee;color:#222;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">1枠</span>
-      <span style="background:#2d2d2d;color:#fff;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">2枠</span>
-      <span style="background:#c0392b;color:#fff;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">3枠</span>
-      <span style="background:#1a5276;color:#fff;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">4枠</span>
-      <span style="background:#d4ac0d;color:#222;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">5枠</span>
-      <span style="background:#1e8449;color:#fff;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">6枠</span>
-      <span style="background:#ca6f1e;color:#fff;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">7枠</span>
-      <span style="background:#e91e8c;color:#fff;border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700">8枠</span>
+      <span style="background:#ffffff;color:#222;border:1px solid #8aa79a;border-radius:3px;padding:2px 6px;font-size:9px;font-weight:700;line-height:1;display:inline-block">1枠</span>
+      <span style="background:#555555;color:#fff;border-radius:3px;padding:2px 6px;font-size:9px;font-weight:700;line-height:1;display:inline-block">2枠</span>
+      <span style="background:#ee3333;color:#fff;border-radius:3px;padding:2px 6px;font-size:9px;font-weight:700;line-height:1;display:inline-block">3枠</span>
+      <span style="background:#4488ff;color:#fff;border-radius:3px;padding:2px 6px;font-size:9px;font-weight:700;line-height:1;display:inline-block">4枠</span>
+      <span style="background:#dddd00;color:#222;border-radius:3px;padding:2px 6px;font-size:9px;font-weight:700;line-height:1;display:inline-block">5枠</span>
+      <span style="background:#22bb22;color:#fff;border-radius:3px;padding:2px 6px;font-size:9px;font-weight:700;line-height:1;display:inline-block">6枠</span>
+      <span style="background:#ff8822;color:#222;border-radius:3px;padding:2px 6px;font-size:9px;font-weight:700;line-height:1;display:inline-block">7枠</span>
+      <span style="background:#ffaacc;color:#222;border-radius:3px;padding:2px 6px;font-size:9px;font-weight:700;line-height:1;display:inline-block">8枠</span>
     </span>
-    <span style="color:#7f8c8d;font-size:11px;margin-left:6px">（SmartRC速度データ未取得時は脚質のみで推定）</span>
+    <span style="color:#4d5a53;font-size:11px;margin-left:6px">（SmartRC速度データ未取得時は脚質のみで推定）</span>
   </div>
-  <div style="font-size:11px;color:#bdc3c7;margin-bottom:6px;line-height:1.8">
-    <span style="color:#3498db;font-weight:700">⚡テン速度 TOP3：</span>{_ten_html}
-    &nbsp;|&nbsp;
-    <span style="color:#e74c3c;font-weight:700">🏁上がり速度 TOP3：</span>{_aga_html}
-    &nbsp;|&nbsp; {_competition_label}
+  </details>
+  <!-- テン／上がりは2つの枠を横に並べる。
+       PCは枠の中も横1行、スマホは枠の中を縦に積んで一目で全部見えるようにする。 -->
+  <div class="speed-top3">
+    <div class="speed-box speed-ten">
+      <span class="speed-head">⚡ テン速度 TOP3</span>
+      <span class="speed-items">{_ten_html}</span>
+    </div>
+    <div class="speed-box speed-aga">
+      <span class="speed-head">🏁 上がり速度 TOP3</span>
+      <span class="speed-items">{_aga_html}</span>
+    </div>
   </div>
+  <div style="font-size:11px;margin-bottom:8px">{_competition_label}</div>
   <div id="formation-panels" style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;align-items:stretch"></div>
 </div>
 
@@ -1073,14 +1117,14 @@ _formation_html = f'''<div class="section" id="section-formation">
   const KYAKU_BASE = {{'逃げ':0.0,'先行':1.0,'差し':2.0,'追込':3.0}};
 
   // 枠番色 (index=枠番 1-8)
-  const WAKU_BG   = ['','#eeeeee','#2d2d2d','#c0392b','#1a5276','#d4ac0d','#1e8449','#ca6f1e','#e91e8c'];
-  const WAKU_FG   = ['','#222222','#ffffff','#ffffff','#ffffff','#222222','#ffffff','#ffffff','#ffffff'];
+  const WAKU_BG   = ['','#ffffff','#555555','#ee3333','#4488ff','#dddd00','#22bb22','#ff8822','#ffaacc'];
+  const WAKU_FG   = ['','#222222','#ffffff','#ffffff','#ffffff','#222222','#ffffff','#222222','#222222'];
 
   // ゾーン境界・ラベル・色
   const ZONE_CUTS   = [0.875, 1.875, 2.5];
   const ZONE_LABELS = ['先頭','先行','差し','追込'];
-  const ZONE_COLORS = ['#e74c3c','#f39c12','#3498db','#9b59b6'];
-  const ZONE_RGBA   = ['231,76,60','243,156,18','52,152,219','155,89,182'];
+  const ZONE_COLORS = ['#c0392b','#b06000','#2471a3','#9b59b6'];
+  const ZONE_RGBA   = ['231,76,60','176,96,0','52,152,219','155,89,182'];
 
   function clamp(v,lo,hi){{return Math.max(lo,Math.min(hi,v));}}
 
@@ -1164,8 +1208,8 @@ _formation_html = f'''<div class="section" id="section-formation">
   const _tip = document.createElement('div');
   _tip.style.cssText = [
     'position:fixed;display:none;z-index:9999;pointer-events:none;',
-    'background:#0f1923;border:1px solid #f1c40f;border-radius:8px;',
-    'padding:8px 12px;font-size:12px;color:#e0e0e0;',
+    'background:#eef4f1;border:1px solid #00674a;border-radius:8px;',
+    'padding:8px 12px;font-size:12px;color:#2b2b2b;',
     'box-shadow:0 4px 16px rgba(0,0,0,0.6);line-height:1.7;white-space:nowrap;'
   ].join('');
   document.body.appendChild(_tip);
@@ -1199,17 +1243,17 @@ _formation_html = f'''<div class="section" id="section-formation">
     wrap.style.cssText = 'flex:1;min-width:280px;max-width:420px';
 
     const titleEl = document.createElement('div');
-    titleEl.style.cssText = 'text-align:center;font-weight:700;font-size:14px;color:#f1c40f;margin-bottom:3px';
+    titleEl.style.cssText = 'text-align:center;font-weight:700;font-size:14px;color:#00674a;margin-bottom:3px';
     titleEl.textContent = ph.label;
     wrap.appendChild(titleEl);
 
     const subEl = document.createElement('div');
-    subEl.style.cssText = 'text-align:center;font-size:10px;color:#7f8c8d;margin-bottom:6px';
+    subEl.style.cssText = 'text-align:center;font-size:10px;color:#4d5a53;margin-bottom:6px';
     subEl.textContent = ph.desc;
     wrap.appendChild(subEl);
 
     const board = document.createElement('div');
-    board.style.cssText = 'background:#1a252f;border:1px solid #2c3e50;border-radius:8px;padding:8px;';
+    board.style.cssText = 'background:#f4f8f6;border:1px solid #b4c9be;border-radius:8px;padding:8px;';
 
     const goalLbl = document.createElement('div');
     goalLbl.style.cssText = 'text-align:center;font-size:10px;color:#556;margin-bottom:4px';
@@ -1253,11 +1297,11 @@ _formation_html = f'''<div class="section" id="section-formation">
           const fg   = WAKU_FG[waku] || '#fff';
           const chip = document.createElement('div');
           const _tipLines = [
-            `<b style='color:#f1c40f'>${{h.name}}</b>`,
+            `<b style='color:#00674a'>${{h.name}}</b>`,
             `${{h.kyaku}} &nbsp;|&nbsp; ${{h.waku}}枠 ${{h.uma}}番`,
           ];
           _tipLines.push(`テン速度順位: <b style='color:#3498db'>${{h.ten_r != null ? h.ten_r + '位' : '---'}}</b>`);
-          _tipLines.push(`上がり速度順位: <b style='color:#e74c3c'>${{h.aga_r != null ? h.aga_r + '位' : '---'}}</b>`);
+          _tipLines.push(`上がり速度順位: <b style='color:#c0392b'>${{h.aga_r != null ? h.aga_r + '位' : '---'}}</b>`);
           const _tipHtml = _tipLines.join('<br>');
           chip.addEventListener('mouseenter', e => _showTip(e, _tipHtml));
           chip.addEventListener('mousemove',  e => _moveTip(e));
@@ -1267,7 +1311,7 @@ _formation_html = f'''<div class="section" id="section-formation">
             'border-radius:50%;width:26px;height:26px;',
             'display:flex;align-items:center;justify-content:center;',
             'font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;',
-            'box-shadow:0 0 0 1px rgba(255,255,255,0.25);',
+            'box-shadow:0 0 0 1px #8aa79a;',
           ].join('');
           chip.textContent = h.uma != null ? h.uma : '?';
           chips.appendChild(chip);
@@ -1305,72 +1349,76 @@ html = f'''<!DOCTYPE html>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{
-    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
-                 "Yu Gothic", Meiryo, -apple-system, BlinkMacSystemFont,
-                 "Segoe UI", sans-serif;
+    font-family: "Hiragino Sans", "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", メイリオ, Meiryo, "Yu Gothic UI", "ＭＳ Ｐゴシック", sans-serif;
     font-size: 14px;
     line-height: 1.5;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    color: #e0e0e0;
+    background: #dde8e2;
+    color: #2b2b2b;
     padding: 24px;
     min-height: 100vh;
   }}
   .container {{ max-width: 1360px; margin: 0 auto; }}
 
   header {{
-    background: rgba(255,255,255,0.06);
+    background: #ffffff;
     backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 28px 32px;
     margin-bottom: 16px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid #b4c9be;
   }}
-  h1 {{ font-size: 28px; color: #f1c40f; margin-bottom: 8px; letter-spacing: 1px; }}
-  .subtitle {{ font-size: 14px; color: #95a5a6; }}
+  h1 {{ font-size: 28px; color: #00674a; margin-bottom: 8px; letter-spacing: 1px; }}
+  .subtitle {{ font-size: 14px; color: #4d5a53; }}
   .summary-bar {{
-    display: grid; grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 16px; margin-top: 20px;
   }}
   .summary-item {{
-    background: rgba(255,255,255,0.05);
+    background: #eef4f1;
     padding: 16px; border-radius: 10px; text-align: center;
   }}
   .summary-value {{
-    font-size: 26px; font-weight: bold; color: #f39c12;
-    word-break: break-all; line-height: 1.2;
+    font-size: 26px; font-weight: bold; color: #b06000;
+    /* break-all は「ビタミンドロ／ップ」のように語の途中で切れるので使わない。
+       日本語の禁則処理に任せ、はみ出す長い馬名は .small/.xsmall で字を小さくする。 */
+    word-break: normal; overflow-wrap: anywhere; line-height: 1.2;
   }}
   .summary-value.small {{ font-size: 16px; }}
   .summary-value.xsmall {{ font-size: 13px; }}
-  .summary-label {{ font-size: 12px; color: #bdc3c7; margin-top: 4px; }}
+  .summary-label {{ font-size: 12px; color: #4d5a53; margin-top: 4px; }}
 
   .shutuba-banner {{
-    background: rgba(39,174,96,0.15);
-    border: 1px solid rgba(39,174,96,0.4);
+    background: #e3f2ea;
+    border: 1px solid #0a7d3c;
     border-radius: 10px; padding: 12px 20px;
-    margin-bottom: 16px; font-size: 14px; color: #a9dfbf;
+    margin-bottom: 16px; font-size: 14px; color: #0a5c34;
   }}
   .shutuba-banner.warning {{
-    background: rgba(241,196,15,0.1);
-    border-color: rgba(241,196,15,0.4); color: #f9e79f;
+    background: rgba(0,103,74,0.08);
+    border-color: rgba(0,103,74,0.40); color: #7a5c00;
   }}
 
   .section {{
-    background: rgba(255,255,255,0.06);
+    background: #ffffff;
     border-radius: 16px; padding: 28px;
     margin-bottom: 24px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid #b4c9be;
   }}
+  /* パネル見出しは濃緑の帯。レース一覧（アプリ側）・回顧と同じ見た目に揃える。
+     白いパネル・淡緑の小ブロック・濃緑の見出しで明暗の3段階を作る。 */
   .section h2 {{
-    color: #f1c40f; font-size: 20px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid rgba(241,196,15,0.3);
-    padding-bottom: 8px;
+    color: #ffffff; font-size: 18px;
+    background: #004c2c;
+    margin: -28px -28px 20px;
+    padding: 12px 16px;
+    border-radius: 16px 16px 0 0;
   }}
   details.section > summary {{ list-style: none; cursor: pointer; outline: none; }}
   details.section > summary::-webkit-details-marker {{ display: none; }}
   details.section > summary > h2 {{ margin-bottom: 0; }}
   details.section[open] > summary > h2 {{ margin-bottom: 20px; }}
-  details.section > summary > h2::before {{ content: '▶ '; font-size: 13px; color:#f1c40f; vertical-align: middle; }}
+  details.section[open] > summary > h2 {{ margin-bottom: 20px; }}
+  details.section > summary > h2::before {{ content: '▶ '; font-size: 13px; color:#00674a; vertical-align: middle; }}
   details.section[open] > summary > h2::before {{ content: '▼ '; }}
 
   .podium {{
@@ -1378,19 +1426,19 @@ html = f'''<!DOCTYPE html>
     gap: 20px; margin-bottom: 24px;
   }}
   .podium-card {{
-    background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-    border: 2px solid rgba(241,196,15,0.4);
+    background: linear-gradient(160deg, #d6e3dc, rgba(255,255,255,0.02));
+    border: 2px solid rgba(0,103,74,0.40);
     border-radius: 14px; padding: 20px; text-align: center;
     transition: transform 0.2s;
   }}
   .podium-card:hover {{ transform: translateY(-4px); }}
-  .podium-card.first  {{ border-color: #f1c40f; box-shadow: 0 8px 24px rgba(241,196,15,0.3); }}
-  .podium-card.second {{ border-color: #bdc3c7; }}
+  .podium-card.first  {{ border-color: #00674a; box-shadow: 0 8px 24px rgba(0,103,74,0.30); }}
+  .podium-card.second {{ border-color: #4d5a53; }}
   .podium-card.third  {{ border-color: #cd7f32; }}
   .podium-mark  {{ font-size: 48px; line-height: 1; margin-bottom: 8px; }}
-  .podium-name  {{ font-size: 22px; font-weight: bold; color: #fff; margin-bottom: 6px; }}
-  .podium-info  {{ font-size: 13px; color: #bdc3c7; margin-bottom: 10px; }}
-  .podium-score {{ font-size: 30px; font-weight: bold; color: #f39c12; }}
+  .podium-name  {{ font-size: 22px; font-weight: bold; color: #004c2c; margin-bottom: 6px; }}
+  .podium-info  {{ font-size: 13px; color: #4d5a53; margin-bottom: 10px; }}
+  .podium-score {{ font-size: 30px; font-weight: bold; color: #b06000; }}
 
   .leg-grid {{ display: grid; gap: 10px; }}
   .leg-item {{
@@ -1398,53 +1446,84 @@ html = f'''<!DOCTYPE html>
     align-items: center; gap: 12px; font-size: 14px;
   }}
   .leg-color {{ width: 16px; height: 16px; border-radius: 4px; }}
-  .leg-count {{ color: #95a5a6; }}
-  .leg-bar {{ height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }}
+  .leg-count {{ color: #4d5a53; }}
+  .leg-bar {{ height: 8px; background: #d6e3dc; border-radius: 4px; overflow: hidden; }}
   .leg-fill {{ height: 100%; transition: width 0.4s; }}
 
   .pace-box {{
     background: rgba(231,76,60,0.15);
-    border-left: 4px solid #e74c3c;
+    border-left: 4px solid #c0392b;
     padding: 16px 20px; border-radius: 8px; margin-bottom: 20px;
   }}
-  .pace-title {{ font-size: 18px; color: #e74c3c; font-weight: bold; margin-bottom: 6px; }}
+  .pace-title {{ font-size: 18px; color: #c0392b; font-weight: bold; margin-bottom: 6px; }}
 
   /* ── EV シミュレーター ── */
-  .ev-tab {{ background:#2c3e50; border:1px solid #4a5f72; color:#bdc3c7;
+  .ev-tab {{ background:#dde8e2; border:1px solid #4a5f72; color:#4d5a53;
              padding:6px 18px; border-radius:6px 6px 0 0; cursor:pointer; font-size:13px; font-weight:600; }}
-  .ev-tab.active {{ background:#f1c40f; color:#1a1a2e; border-color:#f1c40f; }}
-  .ev-tab:hover:not(.active) {{ background:#3d5166; }}
+  .ev-tab.active {{ background:#00674a; color:#ffffff; border-color:#00674a; }}
+  .ev-tab:hover:not(.active) {{ background:#d3e6dd; }}
   #evHead th {{ cursor:pointer; user-select:none; white-space:nowrap; }}
-  #evHead th:hover {{ background:#3d5166; }}
+  #evHead th:hover {{ background:#d3e6dd; }}
+  /* ── 展開予想のテン／上がり TOP3 ──
+     2枠を横に並べる。PCは枠の中も横1行、スマホは枠の中を縦に積む。 */
+  .speed-top3 {{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    margin-bottom: 6px; font-size: 11px; color: #4d5a53;
+  }}
+  .speed-box {{
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px; background: #eef4f1; border-radius: 6px;
+  }}
+  .speed-ten {{ border-left: 3px solid #2471a3; }}
+  .speed-aga {{ border-left: 3px solid #c0392b; }}
+  .speed-ten .speed-head {{ color: #2471a3; }}
+  .speed-aga .speed-head {{ color: #c0392b; }}
+  .speed-head {{ font-weight: 700; white-space: nowrap; }}
+  .speed-items {{ display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }}
+
+  /* 長い説明文・凡例は折り畳んでおく。読みたいときだけ開く。 */
+  .note-fold {{ margin-top: 6px; }}
+  .note-fold > summary {{
+    cursor: pointer; color: #4d5a53; font-size: 12px;
+    padding: 6px 0; list-style: none; user-select: none;
+  }}
+  .note-fold > summary::-webkit-details-marker {{ display: none; }}
+  .note-fold > summary::before {{ content: '▸ '; }}
+  .note-fold[open] > summary::before {{ content: '▾ '; }}
+  .note-fold > summary:hover {{ color: #00674a; }}
+
   .ev-table-wrap {{ overflow-x: auto; }}
   .ev-table {{ width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }}
+  /* 全出走馬一覧。11列あるので横スクロールさせる（幅は指定で持つ） */
+  .all-marks {{ min-width: 560px; }}
+  .all-marks td, .all-marks th {{ white-space: nowrap; }}
   .ev-table th, .ev-table td {{
     padding: 5px 8px; text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid #d6e3dc;
   }}
-  .ev-table th {{ background: rgba(255,255,255,0.05); color: #f1c40f; }}
-  .ev-table tr:hover {{ background: rgba(255,255,255,0.04); }}
-  .ev-positive {{ color: #2ecc71; font-weight: bold; }}
-  .ev-negative {{ color: #e74c3c; }}
-  .ev-neutral  {{ color: #95a5a6; }}
+  .ev-table th {{ background: #eef4f1; color: #00674a; }}
+  .ev-table tr:hover {{ background: #f4f8f6; }}
+  .ev-positive {{ color: #0a7d3c; font-weight: bold; }}
+  .ev-negative {{ color: #c0392b; }}
+  .ev-neutral  {{ color: #4d5a53; }}
   .ev-bar {{ height: 6px; border-radius: 3px; margin: 2px auto; max-width: 80px; }}
-  .prob-note {{ font-size: 11px; color: #7f8c8d; margin-top: 12px; }}
+  .prob-note {{ font-size: 11px; color: #4d5a53; margin-top: 12px; }}
   .temp-slider {{ display:flex; align-items:center; gap:12px; margin-bottom:14px; font-size:13px; }}
-  .temp-slider input {{ width:120px; accent-color:#f1c40f; }}
+  .temp-slider input {{ width:120px; accent-color:#00674a; }}
 
   /* ── 馬カード ── */
   .horses-grid {{ display: grid; gap: 16px; }}
   .horse-card {{
-    background: rgba(255,255,255,0.04);
+    background: #f4f8f6;
     border-radius: 12px; padding: 20px;
     display: grid; grid-template-columns: 80px 1fr;
     gap: 20px;
-    border-left: 4px solid rgba(255,255,255,0.1);
+    border-left: 4px solid #b4c9be;
     transition: background 0.2s;
   }}
-  .horse-card:hover {{ background: rgba(255,255,255,0.07); }}
-  .horse-card.rank-1 {{ border-left-color: #f1c40f; background: rgba(241,196,15,0.08); }}
-  .horse-card.rank-2 {{ border-left-color: #bdc3c7; background: rgba(189,195,199,0.06); }}
+  .horse-card:hover {{ background: #eef4f1; }}
+  .horse-card.rank-1 {{ border-left-color: #00674a; background: rgba(241,196,15,0.08); }}
+  .horse-card.rank-2 {{ border-left-color: #4d5a53; background: rgba(189,195,199,0.06); }}
   .horse-card.rank-3 {{ border-left-color: #cd7f32; background: rgba(205,127,50,0.06); }}
 
   .rank-badge {{
@@ -1460,19 +1539,22 @@ html = f'''<!DOCTYPE html>
     display: flex; align-items: center;
     gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
   }}
-  .horse-header h3 {{ font-size: 20px; color: #fff; }}
+  .horse-header h3 {{ font-size: 20px; color: #2b2b2b; }}
 
   .waku-badge {{
     display: inline-flex; align-items: center; justify-content: center;
-    width: 38px; height: 26px;
+    box-sizing: border-box; padding-top: 1px;   /* 数字の字面は行の中心より0.5px上にくるので下げる */
+    width: 38px; height: 26px; line-height: 1;
     border-radius: 5px; font-size: 12px; font-weight: bold;
-    border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;
+    border: 1px solid #8aa79a; flex-shrink: 0;
   }}
+  /* 馬番は丸。枠番(四角)と形で見分けられるようにする。 */
   .bango-badge {{
     display: inline-flex; align-items: center; justify-content: center;
-    width: 38px; height: 26px;
-    border-radius: 5px; font-size: 12px; font-weight: bold;
-    border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;
+    box-sizing: border-box; padding-top: 1px;   /* 数字の字面は行の中心より0.5px上にくるので下げる */
+    width: 26px; height: 26px; line-height: 1;
+    border-radius: 50%; font-size: 12px; font-weight: bold;
+    border: 1px solid #8aa79a; flex-shrink: 0;
   }}
   .leg-badge {{
     padding: 3px 10px; border-radius: 12px;
@@ -1482,12 +1564,12 @@ html = f'''<!DOCTYPE html>
     padding: 2px 8px; border-radius: 10px;
     font-size: 11px; color: #fff; font-weight: bold; opacity: 0.9;
   }}
-  .meta-info {{ font-size: 12px; color: #95a5a6; margin-left: auto; }}
+  .meta-info {{ font-size: 12px; color: #4d5a53; margin-left: auto; }}
 
   .drill-btn {{
     background: rgba(241,196,15,0.15);
-    border: 1px solid rgba(241,196,15,0.4);
-    color: #f1c40f; border-radius: 8px;
+    border: 1px solid rgba(0,103,74,0.40);
+    color: #00674a; border-radius: 8px;
     padding: 4px 12px; font-size: 12px; cursor: pointer;
     transition: background 0.2s; flex-shrink: 0;
   }}
@@ -1499,24 +1581,24 @@ html = f'''<!DOCTYPE html>
     gap: 16px; margin-bottom: 12px;
   }}
   .total-score {{
-    background: rgba(0,0,0,0.3);
+    background: #eef4f1;
     border-radius: 10px; padding: 12px; text-align: center;
     display: flex; flex-direction: column; justify-content: center;
   }}
-  .big-num    {{ font-size: 32px; font-weight: bold; color: #f1c40f; line-height: 1; }}
-  .small-label {{ font-size: 11px; color: #7f8c8d; margin-top: 4px; }}
+  .big-num    {{ font-size: 32px; font-weight: bold; color: #00674a; line-height: 1; }}
+  .small-label {{ font-size: 11px; color: #4d5a53; margin-top: 4px; }}
 
   .score-bars {{ display: grid; gap: 4px; }}
   .bar-row {{
     display: grid; grid-template-columns: 76px 1fr 68px;
     align-items: center; gap: 8px; font-size: 12px;
   }}
-  .bar-row label {{ color: #bdc3c7; }}
+  .bar-row label {{ color: #4d5a53; }}
   .adj-row {{ opacity: 0.85; }}
-  .adj-row label {{ font-size: 11px; color: #95a5a6; }}
+  .adj-row label {{ font-size: 11px; color: #4d5a53; }}
 
   .bar {{
-    height: 8px; background: rgba(255,255,255,0.08);
+    height: 8px; background: #d6e3dc;
     border-radius: 4px; overflow: hidden; position: relative;
   }}
   .bar.bipolar {{
@@ -1524,73 +1606,73 @@ html = f'''<!DOCTYPE html>
       rgba(231,76,60,0.15) 50%, rgba(46,204,113,0.15) 50%);
   }}
   .bar.bipolar .fill {{ position: absolute; height: 100%; }}
-  .bar.bipolar .fill.plus  {{ left: 50%; background: #2ecc71; }}
-  .bar.bipolar .fill.minus {{ right: 50%; background: #e74c3c; }}
+  .bar.bipolar .fill.plus  {{ left: 50%; background: #0a7d3c; }}
+  .bar.bipolar .fill.minus {{ right: 50%; background: #c0392b; }}
   .fill {{ height: 100%; transition: width 0.5s; }}
-  .val  {{ color: #95a5a6; font-size: 11px; text-align: right; }}
+  .val  {{ color: #4d5a53; font-size: 11px; text-align: right; }}
 
   .extra-info {{
     display: flex; flex-wrap: wrap; gap: 14px;
-    font-size: 12px; color: #95a5a6;
-    padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 12px; color: #4d5a53;
+    padding-top: 10px; border-top: 1px solid #ffffff;
   }}
-  .extra-info b {{ color: #ecf0f1; }}
+  .extra-info b {{ color: #2b2b2b; }}
 
   /* ── 過去走ドリルダウン ── */
   .drilldown-wrap {{
     margin-top: 16px;
-    background: rgba(0,0,0,0.25);
+    background: #ffffff;
     border-radius: 10px; padding: 16px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid #b4c9be;
   }}
   .drilldown-header {{
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 10px; font-size: 14px; font-weight: bold; color: #f1c40f;
+    margin-bottom: 10px; font-size: 14px; font-weight: bold; color: #00674a;
     flex-wrap: wrap; gap: 8px;
   }}
-  .drill-legend {{ font-size: 11px; font-weight: normal; color: #95a5a6; }}
+  .drill-legend {{ font-size: 11px; font-weight: normal; color: #4d5a53; }}
   .drill-legend span {{ margin: 0 2px; }}
 
   .past-table {{ width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }}
   .past-table th, .past-table td {{
-    padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 6px 8px; border-bottom: 1px solid #dde8e2;
   }}
-  .past-table th {{ background: rgba(255,255,255,0.04); color: #bdc3c7; font-weight: 600; }}
-  .past-table tr:hover {{ background: rgba(255,255,255,0.04); }}
+  .past-table th {{ background: #f4f8f6; color: #4d5a53; font-weight: 600; }}
+  .past-table tr:hover {{ background: #f4f8f6; }}
   .past-table td.center {{ text-align: center; }}
 
   .course-tag {{
-    background: rgba(52,152,219,0.2);
+    background: #d6e9f5; color: #154360;
     border-radius: 4px; padding: 1px 5px; font-size: 11px;
   }}
-  .td-pos  {{ color: #2ecc71; font-weight: bold; }}
-  .td-neg  {{ color: #e74c3c; font-weight: bold; }}
-  .sim-hi  {{ color: #2ecc71; font-weight: bold; }}
-  .sim-mid {{ color: #f39c12; }}
-  .sim-lo  {{ color: #e74c3c; }}
-  .pci-hi  {{ color: #e74c3c; }}
-  .pci-lo  {{ color: #3498db; }}
-  .no-data {{ color: #95a5a6; font-style: italic; font-size: 13px; padding: 8px; }}
+  .td-pos  {{ color: #0a7d3c; font-weight: bold; }}
+  .td-neg  {{ color: #c0392b; font-weight: bold; }}
+  .sim-hi  {{ color: #0a7d3c; font-weight: bold; }}
+  .sim-mid {{ color: #b06000; }}
+  .sim-lo  {{ color: #c0392b; }}
+  .pci-hi  {{ color: #c0392b; }}
+  .pci-lo  {{ color: #2471a3; }}
+  .no-data {{ color: #4d5a53; font-style: italic; font-size: 13px; padding: 8px; }}
 
   /* ── 印テーブル ── */
   table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
-  th, td {{ padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }}
-  th {{ background: rgba(255,255,255,0.05); color: #f1c40f; font-weight: 600; }}
+  th, td {{ padding: 10px; text-align: left; border-bottom: 1px solid #d6e3dc; }}
+  th {{ background: #eef4f1; color: #00674a; font-weight: 600; }}
   .mini-badge {{
     display: inline-block; padding: 1px 6px; border-radius: 8px;
     font-size: 10px; font-weight: bold; color: #fff; margin-left: 4px;
   }}
   .mini-badge.red    {{ background: #c0392b; }}
-  .mini-badge.green  {{ background: #27ae60; }}
+  .mini-badge.green  {{ background: #0a7d3c; }}
   .mini-badge.purple {{ background: #8e44ad; }}
   .mini-badge.blue   {{ background: #2980b9; }}
   .mini-badge.orange {{ background: #e67e22; }}
 
   .buy-list {{ display: grid; gap: 10px; }}
   .buy-item {{
-    background: rgba(255,255,255,0.04);
+    background: #f4f8f6;
     padding: 14px 18px; border-radius: 10px;
-    border-left: 3px solid #f39c12;
+    border-left: 3px solid #b06000;
   }}
 
 
@@ -1598,17 +1680,17 @@ html = f'''<!DOCTYPE html>
     display: flex; gap: 14px; flex-wrap: wrap;
     margin-top: 12px; font-size: 12px;
   }}
-  .adj-legend-item {{ display: flex; align-items: center; gap: 6px; color: #bdc3c7; }}
+  .adj-legend-item {{ display: flex; align-items: center; gap: 6px; color: #4d5a53; }}
   .adj-dot {{ width: 10px; height: 10px; border-radius: 50%; }}
 
   .trust-badge {{ display:inline-block;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;margin-left:4px;vertical-align:middle; }}
-  .trust-hi   {{ background:#1a5276;color:#85c1e9; }}
-  .trust-mid  {{ background:#1e8449;color:#a9dfbf; }}
-  .trust-lo   {{ background:#7d6608;color:#f9e79f; }}
-  .trust-none {{ background:#4a235a;color:#d7bde2; }}
+  .trust-hi   {{ background:#d6e9f5;color:#154360; }}
+  .trust-mid  {{ background:#e3f2ea;color:#0a5c34; }}
+  .trust-lo   {{ background:#fff8e6;color:#7a5c00; }}
+  .trust-none {{ background:#ece3f0;color:#4a235a; }}
   .chart-wrap-xl {{ position:relative;height:460px;margin-bottom:8px; }}
   footer {{
-    text-align: center; padding: 20px; color: #7f8c8d; font-size: 12px; }}
+    text-align: center; padding: 20px; color: #4d5a53; font-size: 12px; }}
 
   @media (max-width: 768px) {{
     body {{ padding: 12px; }}
@@ -1616,6 +1698,118 @@ html = f'''<!DOCTYPE html>
     .podium {{ grid-template-columns: 1fr; }}
     .horse-card {{ grid-template-columns: 60px 1fr; gap: 12px; padding: 14px; }}
     .score-row {{ grid-template-columns: 1fr; }}
+  }}
+
+  /* ── スマホ対応: 表は必ず自分の枠の中で横スクロールさせる ── */
+  .ev-table-wrap, #betProbTable, #betAnchorInfo {{
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }}
+  @media (max-width: 768px) {{
+    body {{ padding: 8px; }}
+    header {{ padding: 16px; border-radius: 12px; }}
+    h1 {{ font-size: 20px; }}
+    .section {{ padding: 14px; border-radius: 12px; }}
+    .section h2 {{ font-size: 15px; margin: -14px -14px 12px; padding: 10px 12px;
+                   border-radius: 12px 12px 0 0; }}
+    details.section > summary > h2 {{ margin-bottom: -14px; }}
+    details.section[open] > summary > h2 {{ margin-bottom: 12px; }}
+    .ev-table {{ font-size: 11px; }}
+    .ev-table th, .ev-table td {{ padding: 4px 6px; }}
+    .past-table {{ font-size: 11px; }}
+    .past-table th, .past-table td {{ padding: 4px 6px; }}
+    /* 横スクロールしても「どの行か」が分かるよう先頭列を固定する */
+    .ev-table th:first-child, .ev-table td:first-child {{
+      position: sticky; left: 0; background: #ffffff; z-index: 2;
+    }}
+    .ev-table thead th:first-child {{ background: #eef4f1; }}
+
+    /* ── 上位3頭は全出走馬一覧と内容が重なり、縦に800px以上使うので出さない ── */
+    .podium-section {{ display: none; }}
+
+    /* 展開予想は折り畳まず、全出走馬一覧の直後に置く（並べ替えない）。 */
+
+    /* ── 展開予想のTOP3: 枠は横並びのまま、中身を縦に積む ── */
+    .speed-top3 {{ gap: 6px; }}
+    .speed-box {{ flex-direction: column; align-items: flex-start; gap: 4px; padding: 6px 8px; }}
+    .speed-items {{ flex-direction: column; align-items: flex-start; gap: 3px; }}
+
+    /* ── 過去走詳細: パネルを崩さず、表だけを横スクロールさせる ──
+       grid/flex の子は既定で縮まないので min-width:0 を明示する。 */
+    .horse-card, .horse-main, .drilldown-wrap {{ min-width: 0; }}
+    .drilldown-wrap {{ padding: 10px; }}
+    .drilldown-wrap > div[style*="overflow-x"] {{ min-width: 0; max-width: 100%; }}
+    .past-table {{ font-size: 10px; }}
+    .past-table th, .past-table td {{ padding: 4px 5px; }}
+
+    /* ── 期待値シミュレーター: 固定するのは枠-番の1列だけ ──
+       馬名まで固定すると残り幅が狭くなり、かえって読みにくかった。
+       「5枠」＋丸い馬番が入りきる幅を確保しないと隣の列に重なる。 */
+    #evTable th:nth-child(1), #evTable td:nth-child(1) {{
+      width: 76px; min-width: 76px; max-width: 76px;
+      padding-left: 3px; padding-right: 3px;
+      overflow: hidden;
+    }}
+    #evTable th:nth-child(2), #evTable td:nth-child(2) {{
+      font-size: 11px; text-align: left;
+    }}
+
+    /* ── バッジの括弧書き（注目馬・危険な人気馬・確率表の注記）は場所を取るので隠す ── */
+    .badge-detail {{ display: none; }}
+
+    /* ── 買い目提案 ──
+       馬番＋馬名の1列目を左に固定し、残りを横スクロールさせる。
+       固定列は馬番バッジ(22px)＋馬名が切れない幅を確保する。 */
+    #betProbTable table {{ font-size: 11px; }}
+    #betProbTable table th:first-child, #betProbTable table td:first-child {{
+      position: sticky; left: 0; z-index: 2; background: #ffffff;
+      min-width: 118px; text-align: left; padding-left: 4px;
+    }}
+    #betProbTable table thead th:first-child {{ background: #eef4f1; }}
+    #betAnchorInfo {{ font-size: 12px; }}
+    #betBody td, #betHead th {{ white-space: nowrap; font-size: 11px; }}
+    #betBody td:nth-child(2) span {{ vertical-align: middle; }}
+
+    /* ── 全出走馬一覧: 11列は入らないので補助列を隠す ──
+       残すのは 枠-番／馬名／スコア／市場評価／推定人気。
+       市場評価（オッズ）は予想時点で入らないことがあるため、
+       SmartRCの推定人気は残す。隠した項目は下の詳細スコアで見られる。 */
+    /* 5列を横スクロールなしで収めるため、字と余白を詰める */
+    .all-marks {{ min-width: 0; font-size: 9px; }}
+    .all-marks th, .all-marks td {{ padding: 4px 2px; }}
+    .all-marks th:nth-child(1),  .all-marks td:nth-child(1),   /* 順位（並び順で分かる） */
+    .all-marks th:nth-child(4),  .all-marks td:nth-child(4),   /* 脚質 */
+    .all-marks th:nth-child(6),  .all-marks td:nth-child(6),   /* 市場評価（予想時は空のことがある） */
+    .all-marks th:nth-child(8),  .all-marks td:nth-child(8),   /* 前走評価 */
+    .all-marks th:nth-child(9),  .all-marks td:nth-child(9),   /* 斤量 */
+    .all-marks th:nth-child(10), .all-marks td:nth-child(10),  /* 年齢・性別 */
+    .all-marks th:nth-child(11), .all-marks td:nth-child(11)   /* 騎手 */
+    {{ display: none; }}
+
+    /* ── 買い目提案: 点数と的中率を隠す（合成採算オッズ＝1÷的中率なので読み取れる） ── */
+    #betBody tr td:nth-child(3), #betHead th:nth-child(3),
+    #betBody tr td:nth-child(4), #betHead th:nth-child(4) {{ display: none; }}
+
+    /* ── 詳細スコア: 項目名・バー・数値を1行に収める ──
+       以前は1列に積んでいたため、1頭で930pxになっていた。 */
+    .horse-card {{ grid-template-columns: 44px 1fr; gap: 10px; padding: 12px; }}
+    .score-row {{ grid-template-columns: 1fr; gap: 8px; margin-bottom: 8px; }}
+    .total-score {{ padding: 8px; }}
+    .big-num {{ font-size: 24px; }}
+    .bar-row {{ grid-template-columns: 92px 1fr 54px; gap: 6px; font-size: 11px; }}
+
+    /* ── スコア補正の見方: 色の丸と文章が重なるので2列に分ける ── */
+    .adj-legend-item {{
+      display: grid; grid-template-columns: 10px 1fr; gap: 8px; align-items: start;
+    }}
+    .adj-dot {{ margin-top: 4px; }}
+
+    /* 文章が語の途中で切れないようにする（禁則処理に任せる） */
+    .prob-note, .adj-legend-item span, .subtitle {{
+      word-break: normal; overflow-wrap: anywhere; line-break: strict;
+    }}
+    /* 説明文は行数が多いので、字を詰めて場所を取らないようにする */
+    .prob-note {{ font-size: 10px; line-height: 1.55; }}
   }}
 </style>
 </head>
@@ -1626,16 +1820,13 @@ html = f'''<!DOCTYPE html>
     <h1>🐎 競馬予想 — {_display_title or f'{race_place}{race_r}R {race_class}'}</h1>
     <div class="subtitle">{race_date_str} ・ {race_place}{race_r}R {race_track}{race_dist}m ・ {race_class} ・ {race_heads}頭立て ・ {_track_direction}回り{_course_str}</div>
     <div class="summary-bar">
-      <div class="summary-item">
-        <div class="summary-value">{len(horses)}</div>
-        <div class="summary-label">出走頭数</div>
-      </div>
+      <!-- 出走頭数は上の副題に「{race_heads}頭立て」があるので、ここには出さない -->
       <div class="summary-item">
         {(lambda t: f'<div class="summary-value{" small" if len(t)>5 else ""}">{t}</div>')(horses[0]["馬名"])}
         <div class="summary-label">最高スコア馬</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">{horses[0]["表示スコア"]:.1f}<span style="font-size:10px;color:#f1c40f;font-weight:700;margin-left:4px">(偏差{_dev_map.get(horses[0]["馬名"],50)})</span></div>
+        <div class="summary-value">{horses[0]["表示スコア"]:.1f}<span style="font-size:10px;color:#00674a;font-weight:700;margin-left:4px">(偏差{_dev_map.get(horses[0]["馬名"],50)})</span></div>
         <div class="summary-label">最高スコア</div>
       </div>
     </div>
@@ -1644,26 +1835,26 @@ html = f'''<!DOCTYPE html>
   {shutuba_banner}
   {baba_banner}
 
-  <div class="section">
+  <div class="section podium-section">
     <h2>🏆 上位3頭 予想</h2>
     <div class="podium">
       <div class="podium-card first">
         <div class="podium-mark">🥇</div>
         <div class="podium-name">{honmei["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(honmei)}{honmei["脚質"]} ・ {honmei["騎手"]} ・ {podium_smartrc_pop(honmei)}</div>
-        <div class="podium-score">{honmei["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(honmei["馬名"],50)}</div></div>
+        <div class="podium-score">{honmei["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#00674a;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(honmei["馬名"],50)}</div></div>
       </div>
       <div class="podium-card second">
         <div class="podium-mark">🥈</div>
         <div class="podium-name">{taikou["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(taikou)}{taikou["脚質"]} ・ {taikou["騎手"]} ・ {podium_smartrc_pop(taikou)}</div>
-        <div class="podium-score">{taikou["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(taikou["馬名"],50)}</div></div>
+        <div class="podium-score">{taikou["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#00674a;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(taikou["馬名"],50)}</div></div>
       </div>
       <div class="podium-card third">
         <div class="podium-mark">🥉</div>
         <div class="podium-name">{tanana["馬名"]}</div>
         <div class="podium-info">{podium_waku_str(tanana)}{tanana["脚質"]} ・ {tanana["騎手"]} ・ {podium_smartrc_pop(tanana)}</div>
-        <div class="podium-score">{tanana["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#f1c40f;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(tanana["馬名"],50)}</div></div>
+        <div class="podium-score">{tanana["表示スコア"]:.1f}<div class="podium-dev" style="font-size:10px;color:#00674a;font-weight:700;margin-top:2px">偏差値 {_dev_map.get(tanana["馬名"],50)}</div></div>
       </div>
     </div>
   </div>
@@ -1680,17 +1871,19 @@ html = f'''<!DOCTYPE html>
                    padding:3px 14px;border-radius:5px;border:2px solid {_rec_color};">
         {_rec_badge}
       </span>
-      <span id="evRecReason" style="color:#ccc;font-size:12px;">{_rec_reason}</span>
+      <span id="evRecReason" style="color:#4d5a53;font-size:12px;">{_rec_reason}</span>
     </div>
     <!-- 2行目: 注目馬 / 本命馬自信あり バッジエリア（該当なければ非表示） -->
     {_badge_area_html}
-    <!-- バッジ凡例 -->
-    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:10px;padding:8px 14px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:11px;color:#bbb">
-      <span style="color:#888;font-weight:700">バッジ凡例:</span>
+    <!-- バッジ凡例（スマホでは閉じた状態で開く。下の script を参照） -->
+    <details class="note-fold" id="badge-legend" open>
+    <summary>バッジ凡例</summary>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:10px;padding:8px 14px;background:#f4f8f6;border-radius:8px;font-size:11px;color:#4d5a53">
       <span><span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 6px;border-radius:3px">大穴</span> 推定人気が下位（人気薄）</span>
       <span><span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 6px;border-radius:3px">🎯</span> 注目穴馬（推定人気は下位だがモデル予想3位以内）</span>
       <span><span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 6px;border-radius:3px">📌</span> メモ馬（過去に次走注目として登録）</span>
     </div>
+    </details>
     <!-- モデル信頼度スライダーは廃止（T=20固定）-->
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="ev-tab active" id="tabTanshо" onclick="switchTab('tansho')">単勝 EV</button>
@@ -1717,17 +1910,20 @@ html = f'''<!DOCTYPE html>
         <tbody id="evBody"></tbody>
       </table>
     </div>
+    <details class="note-fold">
+    <summary>期待値の見方</summary>
     <div class="prob-note" id="evNote">
       ※ 勝率はスコアのsoftmax変換による推定値。単勝EV = 勝率推定 × 現在オッズ − 1。<br>
       <b>採算オッズ</b> = EV がちょうど 0 になるオッズ（損益分岐点）。実オッズ ≥ 採算オッズなら EV プラスの可能性。<br>
       現在オッズ欄に締切前の実オッズを入力すると EV が即時更新されます。
     </div>
+    </details>
   </div>
 
   <div class="section">
     <h2>📊 全出走馬一覧</h2>
     <div style="overflow-x:auto">
-    <table style="min-width:560px">
+    <table class="all-marks">
       <thead>
         <tr>
           <th style="white-space:nowrap">順位</th><th style="white-space:nowrap">枠-番</th><th style="white-space:nowrap">馬名</th>
@@ -1752,6 +1948,7 @@ html = f'''<!DOCTYPE html>
 
   <details class="section">
     <summary><h2>📊 補正項目の積み上げ比較（全馬）</h2></summary>
+    {_stack_legend_html}
     <div class="chart-wrap-xl"><canvas id="scoreStackChart"></canvas></div>
     <div class="prob-note">各馬の補正項目を積み上げで比較。ゼロ以上が加点、以下が減点要因。予想順位順で左から表示。</div>
   </details>
@@ -1766,7 +1963,7 @@ html = f'''<!DOCTYPE html>
     <summary><h2>💡 スコア補正の見方</h2></summary>
     <div class="adj-legend">
       <div class="adj-legend-item">
-        <div class="adj-dot" style="background:#e74c3c"></div>
+        <div class="adj-dot" style="background:#c0392b"></div>
         <span><b>最高出力</b>（0〜30pt）: 全過去走の補正タイム最良値を偏差値化 [欠損=偏差50中立]</span>
       </div>
       <div class="adj-legend-item">
@@ -1838,7 +2035,7 @@ html = f'''<!DOCTYPE html>
         <span><b>クラス適応補正</b>（−2〜+1.5pt）: 今走クラス以上での直近5走（1年以内）の1位との着差加重平均で適応度を評価。着差≤0.2秒→+1.5pt（好走継続）、≤0.5秒→+0.8pt、≤1.0秒→0pt、≤1.8秒→-1.0pt、>1.8秒→-2.0pt（壁）。最低2走以上のデータが必要。未勝利クラスは加点上限+0.5pt。</span>
       </div>
       <div class="adj-legend-item">
-        <div class="adj-dot" style="background:#f39c12"></div>
+        <div class="adj-dot" style="background:#b06000"></div>
         <span><b>SmartRC評価補正</b>（−4.5〜+4.5pt）: 過去5走の馬場・展開有利不利評価（h1〜h5_fr_baba）を加重平均（前走×1.0/前々走×0.6/以降逓減）。A=+4.5/B=+2.5pt 上方修正、D=−2.5/E=−4.5pt 下方修正、C=0pt</span>
       </div>
       <div class="adj-legend-item">
@@ -1849,9 +2046,24 @@ html = f'''<!DOCTYPE html>
   </details>
 
   <details class="section">
-    <summary><h2>🐴 全18頭 詳細スコア（📋で過去走ドリルダウン）</h2></summary>
+    <summary><h2>🐴 全頭詳細スコア（📋で過去走ドリルダウン）</h2></summary>
     <div class="horses-grid">{horse_cards}</div>
   </details>
+
+  <script>
+  // スマホは縦に長くなりすぎるので、場所を取るパネルを閉じた状態で開く。
+  // PC（769px以上）では従来どおり開いたまま。
+  // 展開予想は対象外。全出走馬一覧の直後に、常に開いた状態で置く。
+  (function () {{
+    // 幅が取れない状況（表示前など）では何もしない。0 を「狭い」と誤判定しないため。
+    var w = window.innerWidth;
+    if (!(w > 0 && w <= 768)) return;
+    ['badge-legend'].forEach(function (id) {{
+      var el = document.getElementById(id);
+      if (el) el.open = false;
+    }});
+  }})();
+  </script>
 
   <footer>
     生成: {race_date_str} ・ データ: TARGET JV frontier + course-db.com ・ スコアモデル v3
@@ -1962,17 +2174,22 @@ function renderRows(rows) {{
 
   const isFuku = (currentTab === 'fukusho');
   document.getElementById('evBody').innerHTML = sorted.map(h => {{
-    const waku_fg = ['','#222','#fff','#fff','#fff','#222','#fff','#fff','#222'];
+    // JRAの枠番色に合わせる。橙(7枠)・桃(8枠)は黒文字。
+    const waku_fg = ['','#222','#fff','#fff','#fff','#222','#fff','#222','#222'];
     const waku_num = h['枠番'] || 0;
     const waku_bg_c = WAKU_BG[waku_num] || '#888';
     const waku_fg_c = waku_fg[waku_num] || '#fff';
     const waku_b  = h['枠番']
-      ? `<span style="display:inline-block;background:${{waku_bg_c}};color:${{waku_fg_c}};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;margin-right:2px;">${{h['枠番']}}枠</span><span style="display:inline-block;background:${{waku_bg_c}};color:${{waku_fg_c}};font-weight:700;font-size:11px;padding:1px 5px;border-radius:3px;">${{h['馬番'] || '?'}}番</span>`
+      ? `<span style="display:inline-flex;align-items:center;justify-content:center;line-height:1;background:${{waku_bg_c}};color:${{waku_fg_c}};font-weight:700;font-size:11px;height:22px;padding:0 6px;border-radius:3px;margin-right:3px;box-sizing:border-box;padding-top:1px;border:1px solid #8aa79a;">${{h['枠番']}}枠</span><span style="display:inline-flex;align-items:center;justify-content:center;line-height:1;background:${{waku_bg_c}};color:${{waku_fg_c}};font-weight:700;font-size:11px;width:22px;height:22px;border-radius:50%;box-sizing:border-box;padding-top:1px;border:1px solid #8aa79a;">${{h['馬番'] || '?'}}</span>`
       : '<span style="color:#555">未定</span>';
-    const probPct = ((h._prob || 0) * 100).toFixed(1) + '%';
+    const isLocal = !!h['地方実績のみ'];
+    const probPct = isLocal ? '<span style="color:#4d5a53">参考</span>' : (((h._prob || 0) * 100).toFixed(1) + '%');
     const ev      = h._ev;
     let evStr = '-', evCls = 'ev-neutral', judgement = '-';
-    if (ev !== undefined && ev !== null) {{
+    if (isLocal) {{
+      // 参考(地方実績のみ): JRA基準の勝率/EV判定は行わず「参考」表示に固定
+      judgement = '📎 参考'; evStr = '-'; evCls = 'ev-neutral';
+    }} else if (ev !== undefined && ev !== null) {{
       evStr = ev.toFixed(3);
       // EV値のみで判定（大穴・通常共通基準）
       if (ev > 0.05)       {{ evCls = 'ev-positive'; judgement = h._isDark ? '⚠ 大穴注意' : '◎ 買い'; }}
@@ -1980,13 +2197,13 @@ function renderRows(rows) {{
       else                 {{ evCls = 'ev-negative';  judgement = '✕ 見送り'; }}
     }}
     const barWidth = Math.min(100, (h._prob || 0) * 100 * (isFuku ? 2 : 5));
-    const barColor = evCls === 'ev-positive' ? '#2ecc71' :
-                     evCls === 'ev-negative' ? '#e74c3c' : '#95a5a6';
+    const barColor = evCls === 'ev-positive' ? '#0a7d3c' :
+                     evCls === 'ev-negative' ? '#c0392b' : '#4d5a53';
     // 採算オッズ（案A）: 1/勝率推定 = EV=0となる損益分岐点
     const beOdds   = (!isFuku && h._prob > 0) ? 1/h._prob : null;
     // curOdds: 手入力値 or computeEVで初期化済みの採算オッズ
     const curOdds  = !isFuku ? (_userOdds[h['馬番']] != null ? _userOdds[h['馬番']] : beOdds) : null;
-    const beColor  = beOdds ? '#f1c40f' : '#7f8c8d';  // 採算オッズは黄色固定
+    const beColor  = beOdds ? '#00674a' : '#4d5a53';  // 採算オッズは黄色固定
     const beCell   = !isFuku
       ? (beOdds ? `<span style="font-weight:700;color:${{beColor}}">${{beOdds.toFixed(1)}}倍</span>` : '-')
       : `<span style="color:#555">-</span>`;
@@ -1996,18 +2213,18 @@ function renderRows(rows) {{
       : `<input type="number" min="0" max="999" step="0.1"
            value="${{curOdds != null ? curOdds.toFixed(1) : (h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0')}}"
            placeholder="${{h._prob > 0 ? (1/h._prob).toFixed(1) : '0.0'}}"
-           style="width:68px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;
+           style="width:68px;background:#ffffff;color:#2b2b2b;border:1px solid #8aa79a;
                   border-radius:4px;padding:2px 5px;font-size:12px;text-align:right"
            oninput="const v=parseFloat(this.value); _userOdds[${{h['馬番']}}]=(v>0?v:null);
                     computeEV(20)">`;
     // SmartRC推定人気表示: 数字のみ
     const srcRank  = h['SmartRC推定人気順'] != null ? h['SmartRC推定人気順'] : null;
     const srcNinkiCell = srcRank != null
-      ? `<span style="font-weight:700;color:#f39c12">${{srcRank}}位</span>`
+      ? `<span style="font-weight:700;color:#b06000">${{srcRank}}位</span>`
       : '<span style="color:#555">-</span>';
-    return `<tr>
+    return `<tr style="${{isLocal ? 'opacity:.55' : ''}}">
       <td>${{waku_b}}</td>
-      <td style="white-space:nowrap"><b style="font-size:13px">${{h['馬名']}}</b>${{h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}}${{h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}}${{h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}}</td>
+      <td style="white-space:nowrap"><b style="font-size:13px">${{h['馬名']}}</b>${{isLocal ? '<span style="font-size:9px;background:#607d8b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📎参考(地方)</span>' : ''}}${{h._isDark ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px;vertical-align:middle;">大穴</span>' : ''}}${{h['is_memo'] ? '<span style="font-size:9px;background:#8e44ad;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">📌</span>' : ''}}${{h['is_ana']  ? '<span style="font-size:9px;background:#c0392b;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;">🎯</span>' : ''}}</td>
       <td>${{h['脚質']}}</td>
       <td>${{(h['表示スコア']!=null?h['表示スコア']:h['スコア']).toFixed(1)}}</td>
       <td>${{h['順位予想']}}</td>
@@ -2016,7 +2233,7 @@ function renderRows(rows) {{
         (() => {{
           const k = h['乖離度'];
           if (k == null) return '<span style="color:#555">-</span>';
-          const col = k >= 4 ? '#27ae60' : k >= 2 ? '#f39c12' : k >= 0 ? '#95a5a6' : '#e74c3c';
+          const col = k >= 4 ? '#0a7d3c' : k >= 2 ? '#b06000' : k >= 0 ? '#4d5a53' : '#c0392b';
           const pf  = k > 0 ? '+' : '';
           const lbl = k >= 4 ? '大穴↑' : k >= 2 ? '中穴↑' : k >= 0 ? '一致' : '妙味薄↓';
           return `<span style="font-weight:700;color:${{col}}">${{pf}}${{k}}</span>`
@@ -2038,7 +2255,8 @@ function renderRows(rows) {{
 function computeEV(temp) {{
   const scores = EV_DATA.map(h => h['スコア']);
   const maxS   = Math.max(...scores);
-  const exps   = scores.map(s => Math.exp((s - maxS) / temp));
+  // 参考(地方実績のみ)馬はJRA基準と比較不能なため勝率分布から除外(exp=0)。
+  const exps   = scores.map((s, i) => EV_DATA[i]['地方実績のみ'] ? 0 : Math.exp((s - maxS) / temp));
   const sumExp = exps.reduce((a, b) => a + b, 0);
   const rawProbs = exps.map(e => e / sumExp);
 
@@ -2078,7 +2296,10 @@ computeEV(20);
 const STACK_DATA = {score_chart_json};
 const stackCtx = document.getElementById('scoreStackChart');
 if (stackCtx) {{
-  new Chart(stackCtx.getContext('2d'), {{
+  // スマホでは凡例が場所を取りすぎるので消す（上の折り畳みで代用）。
+  // 馬名は斜めだと18頭で隠れるため縦書きにし、間引きも止める。
+  const _narrow = window.innerWidth > 0 && window.innerWidth <= 768;
+  const _stackChart = new Chart(stackCtx.getContext('2d'), {{
     type: 'bar',
     data: STACK_DATA,
     options: {{
@@ -2086,25 +2307,46 @@ if (stackCtx) {{
       maintainAspectRatio: false,
       plugins: {{
         legend: {{
+          display: !_narrow,
           position: 'right',
-          labels: {{ color: '#bdc3c7', font: {{ size: 10 }}, boxWidth: 12 }}
+          labels: {{ color: '#4d5a53', font: {{ size: 10 }}, boxWidth: 12 }}
         }},
         tooltip: {{ mode: 'index', intersect: false }}
       }},
       scales: {{
         x: {{
           stacked: true,
-          ticks: {{ color: '#bdc3c7', font: {{ size: 10 }}, maxRotation: 50 }},
-          grid: {{ color: '#2c3e50' }}
+          ticks: {{
+            color: '#4d5a53',
+            font: {{ size: _narrow ? 9 : 10 }},
+            maxRotation: 90, minRotation: 90, autoSkip: false
+          }},
+          grid: {{ color: '#dde8e2' }}
         }},
         y: {{
           stacked: true,
-          ticks: {{ color: '#bdc3c7' }},
-          grid: {{ color: '#2c3e50' }},
-          title: {{ display: true, text: '補正pts', color: '#7f8c8d' }}
+          grid: {{ color: '#dde8e2' }},
+          // 縦軸の目盛りもスマホでは小さくする（横幅をグラフに回す）
+          title: {{ display: true, text: '補正pts', color: '#4d5a53',
+                    font: {{ size: _narrow ? 9 : 12 }} }},
+          ticks: {{ color: '#4d5a53', font: {{ size: _narrow ? 9 : 11 }} }}
         }}
       }}
     }}
+  }});
+
+  // 説明のポップアップ（ツールチップ）を消す手段がなかったので、
+  // グラフの外に出たとき・別の場所を触ったときに閉じるようにする。
+  const _hideStackTip = function () {{
+    if (!_stackChart.tooltip) return;
+    _stackChart.tooltip.setActiveElements([], {{ x: 0, y: 0 }});
+    _stackChart.setActiveElements([]);
+    _stackChart.update('none');
+  }};
+  stackCtx.addEventListener('mouseleave', _hideStackTip);
+  stackCtx.addEventListener('touchend', _hideStackTip);
+  document.addEventListener('click', function (e) {{
+    if (e.target !== stackCtx) _hideStackTip();
   }});
 }}
 
@@ -2117,15 +2359,15 @@ if (stackCtx) {{
   ITEM_RANKINGS.forEach(item => {{
     const card = document.createElement('div');
     card.style.cssText =
-      'background:#1a2634;border-radius:8px;padding:10px 12px;' +
+      'background:#ffffff;border-radius:8px;padding:10px 12px;' +
       'border-left:4px solid ' + item.color + ';overflow:hidden';
     let inner = '<div style="font-weight:700;font-size:13px;color:' + item.color +
-                ';margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #2c3e50">' +
+                ';margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #dde8e2">' +
                 item.label + '</div>';
     item.ranked.forEach((r, i) => {{
       const val    = r.val;
       const valStr = val > 0 ? '+' + val.toFixed(1) : val.toFixed(1);
-      const valCol = val > 1 ? '#2ecc71' : val < -0.5 ? '#e74c3c' : '#7f8c8d';
+      const valCol = val > 1 ? '#0a7d3c' : val < -0.5 ? '#c0392b' : '#4d5a53';
       const rank   = i < 3 ? RANK_ICONS[i] : (i + 1) + '位';
       inner += '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:12px">' +
                '<span>' + rank + ' ' + r.name + '</span>' +
@@ -2145,12 +2387,12 @@ if (stackCtx) {{
 _BET_PANEL = """  <!-- 買い目提案パネル -->
   <div class="section">
     <h2>🎯 買い目提案</h2>
-    <div id="betAnchorInfo" style="margin-bottom:4px;color:#ccc;font-size:13px"></div>
+    <div id="betAnchorInfo" style="margin-bottom:4px;color:#4d5a53;font-size:13px;padding:2px 0;line-height:1.9"></div>
     <div id="betProbTable" style="margin-bottom:10px"></div>
     <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
       <button class="ev-tab active" id="betTabForm" onclick="setBetMode('form')">フォーメーション</button>
       <button class="ev-tab" id="betTabDetail" onclick="setBetMode('detail')">内訳</button>
-      <span id="betModeNote" style="color:#7f8c8d;font-size:11px"></span>
+      <span id="betModeNote" style="color:#4d5a53;font-size:11px"></span>
     </div>
     <div class="ev-table-wrap">
       <table class="ev-table">
@@ -2161,12 +2403,15 @@ _BET_PANEL = """  <!-- 買い目提案パネル -->
         <tbody id="betBody"></tbody>
       </table>
     </div>
+    <details class="note-fold">
+    <summary>買い目の作り方・判定基準</summary>
     <div class="prob-note">
       ※ 勝率・連対率・複勝率は期待値シミュレーターと同一基準（T=20固定）。<br>
       <b>軸＝スコア偏差値1位</b>。相手＝軸との偏差値差20以内かつ最大min(6,頭数/3)頭、さらに偏差値の連続ギャップが5.0を超えたら断層として打ち切り。列1(≤3)/列2(≤10)/列3(相手全部)で馬連・馬単・ワイド・三連複・三連単を生成。<b>購入推奨/非推奨</b>は次の全条件で判定：①軸+相手の1-3番人気が最大2頭 ②軸が1/2番人気なら相手に1-4番人気なし ③軸のコース特徴pts＞0 ④フォーメーションが1-3番人気のみ、または1-3番人気を総取りしていない。<br>
       <b>馬単・三連単は 1着列＝勝率／2着列＝連対率／3着列＝複勝率</b> でフォーメーション化（2・3列目を自動取捨）。馬連は連対率上位、ワイド・三連複は複勝率上位を相手に。<br>
-      <b>合成採算オッズ＝1÷フォーメーション全体の的中率</b>。投票画面の合成オッズがこれを上回れば<b>期待値プラス（◎）</b>。「内訳」で個別組も確認可。<br>軸は頭固定でないため2着列・3着列にも含めます。購入点数が30点を超える券種は予算圧迫のため非推奨（表示省略）。
+      <b>合成採算オッズ＝1÷フォーメーション全体の的中率</b>。投票画面の合成オッズがこれを上回れば<b>期待値プラス（◎）</b>。「内訳」で個別組も確認可。<br>軸は頭固定でない場合のみ2着列・3着列にも含めます（1頭軸のときは含めません）。購入点数が30点を超える券種は予算圧迫のため非推奨（表示省略）。
     </div>
+    </details>
   </div>
 """
 
@@ -2199,22 +2444,22 @@ function _umaChip(u){
   var w=_UMA_WAKU[u]||0;
   var bg=(typeof WAKU_BG!=='undefined'&&WAKU_BG[w])?WAKU_BG[w]:'#888';
   var fg=(typeof WAKU_FG!=='undefined'&&WAKU_FG[w])?WAKU_FG[w]:'#fff';
-  return '<span style="display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:50%;background:'+bg+';color:'+fg+';font-weight:700;font-size:11px;box-shadow:0 0 0 1px rgba(255,255,255,0.25)">'+u+'</span>';
+  return '<span style="display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:22px;height:22px;line-height:1;box-sizing:border-box;padding-top:1px;border-radius:50%;background:'+bg+';color:'+fg+';font-weight:700;font-size:11px;border:1px solid #8aa79a">'+u+'</span>';
 }
 function _colHtml(cols, sep){
-  var s=(sep==='→')?'<span style="margin:0 5px;color:#9ab;font-weight:700">→</span>':'<span style="margin:0 5px;color:#9ab;font-weight:700">-</span>';
-  return '<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap;gap:2px">'+cols.map(function(c){return '<span style="display:inline-flex;gap:2px">'+c.map(_umaChip).join('')+'</span>';}).join(s)+'</span>';
+  var s=(sep==='→')?'<span style="margin:0 5px;color:#4d5a53;font-weight:700">→</span>':'<span style="margin:0 5px;color:#4d5a53;font-weight:700">-</span>';
+  return '<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:nowrap;gap:2px">'+cols.map(function(c){return '<span style="display:inline-flex;gap:2px">'+c.map(_umaChip).join('')+'</span>';}).join(s)+'</span>';
 }
 function _seqHtml(umaArr, sep){
   var s=(sep==='→')?'<span style="margin:0 3px;color:#889">→</span>':(sep==='-')?'<span style="margin:0 3px;color:#889">-</span>':'';
-  return '<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap">'+umaArr.map(_umaChip).join(s)+'</span>';
+  return '<span style="display:flex;justify-content:flex-start;align-items:center;flex-wrap:nowrap">'+umaArr.map(_umaChip).join(s)+'</span>';
 }
 function _evCell(P, key){
   var Pc = (P>1?1:P);  // 的中率は100%上限・採算オッズは1.0倍下限（多点的中で確率合計が100%超になる不整合を是正）
   var be = Pc>0 ? (1/Pc) : 0; var od=_betOdds[key];
   var evStr='-', cls='', judge='';
   if(od!=null && od>0 && Pc>0){ var e=od*Pc-1; evStr=e.toFixed(2); if(e>0.05){cls='ev-positive';judge='◎ 妙味';} else if(e>=-0.1){cls='ev-neutral';judge='△';} else {cls='ev-negative';judge='✕';} }
-  var inp='<input type="number" inputmode="decimal" min="0" step="0.1" data-betkey="'+key+'" value="'+(od!=null?od:'')+'" style="width:66px;background:#1a2634;color:#ecf0f1;border:1px solid #2c3e50;border-radius:4px;padding:2px 5px;font-size:12px;text-align:right" onchange="_betOddsInput(this)">';
+  var inp='<input type="number" inputmode="decimal" min="0" step="0.1" data-betkey="'+key+'" value="'+(od!=null?od:'')+'" style="width:66px;background:#ffffff;color:#2b2b2b;border:1px solid #8aa79a;border-radius:4px;padding:2px 5px;font-size:12px;text-align:right" onchange="_betOddsInput(this)">';
   return {be:(be>0?be.toFixed(1)+'倍':'-'), inp:inp, ev:evStr, cls:cls, judge:judge};
 }
 function renderBets(){
@@ -2224,7 +2469,7 @@ function renderBets(){
   var allSc=EV_DATA.map(function(h){return h['スコア'];});
   var mean=allSc.reduce(function(a,b){return a+b;},0)/(allSc.length||1);
   var sd=Math.sqrt(allSc.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/(allSc.length||1))||1;
-  var arr=EV_DATA.map(function(h,i){return {name:h['馬名'],uma:h['馬番'],idx:i,p:wp[i],rank:h['順位予想'],src:h['SmartRC推定人気順'],dev:50+10*(h['スコア']-mean)/sd};}).filter(function(x){return x.p>0&&x.uma!=null;});
+  var arr=EV_DATA.map(function(h,i){return {name:h['馬名'],uma:h['馬番'],idx:i,p:wp[i],rank:h['順位予想'],src:h['SmartRC推定人気順'],local:!!h['地方実績のみ'],dev:50+10*(h['スコア']-mean)/sd};}).filter(function(x){return x.p>0&&x.uma!=null&&!x.local;});
   arr.sort(function(a,b){return b.p-a.p;}); arr=arr.slice(0,8);
   if(arr.length<2){ body.innerHTML='<tr><td colspan="8" style="color:#888">データ不足</td></tr>'; return; }
   var names=arr.map(function(x){return x.name;});
@@ -2253,8 +2498,9 @@ function renderBets(){
   var contend=[A].concat(partners);
   // ③-3 偏差値バンド 列1≤3 / 列2≤10 / 列3=相手全部
   var col1=[A].concat(partners.filter(function(n){return (dv[A]-dv[n])<=3.0;})).slice(0,3);
-  var col2=[A].concat(partners.filter(function(n){return (dv[A]-dv[n])<=10.0;}));  // 軸も2着列に（頭固定でないため）
-  var col3=[A].concat(partners.slice());                                             // 軸も3着列に
+  var _headFixed=(col1.length===1);  // 1頭軸(軸が1着固定)なら2着列・3着列に軸を含めない
+  var col2=(_headFixed?[]:[A]).concat(partners.filter(function(n){return (dv[A]-dv[n])<=10.0;}));
+  var col3=(_headFixed?[]:[A]).concat(partners.slice());
   // ② 購入推奨ゲート（全条件AND / 推定人気ベース）
   function _pop(n){ return (sc[n]!=null)?Number(sc[n]):99; }
   var _ktAxis=(EV_DATA[gi[A]]||{})['コース特徴pts'];
@@ -2269,8 +2515,8 @@ function renderBets(){
   var _buy=(partners.length>=1 && _c1 && _c2 && _c3 && _c4);
   var _ktStr=(_ktAxis!=null?((Number(_ktAxis)>0?'+':'')+Number(_ktAxis).toFixed(1)):'-');
   var V = _buy
-    ? {b:'🟢 購入推奨',c:'#27ae60',bg:'#1a3a28',r:'軸'+um[A]+'番(推定'+(srcA<99?srcA+'番人気':'-')+'/コース特徴pts'+_ktStr+')・相手'+partners.length+'頭。①1-3番人気'+_top3+'頭(≤2) ②'+((_pop(A)<=2)?'軸が人気で相手に1-4番人気なし':'軸は3番人気以下')+' ③コース特徴pts>0 ④1-3番人気のみ/総取りでない を全て満たす＝妙味あり'}
-    : {b:'🔴 購入非推奨',c:'#e74c3c',bg:'#3a1a1a',r:'軸'+um[A]+'番。'+((partners.length<1)?'相手不在':((!_c3)?'軸のコース特徴pts≤0':((!_c1)?'1-3番人気が3頭以上':((!_c2)?'軸1/2番人気なのに相手に1-4番人気を含む':((!_c4)?'フォーメーションが1-3番人気のみ/1-3番人気を総取り':'条件不成立')))))+'＝妙味の条件を満たさず'};
+    ? {b:'🟢 購入推奨',c:'#0a5c34',bg:'#e3f2ea',r:'軸'+um[A]+'番(推定'+(srcA<99?srcA+'番人気':'-')+'/コース特徴pts'+_ktStr+')・相手'+partners.length+'頭。①1-3番人気'+_top3+'頭(≤2) ②'+((_pop(A)<=2)?'軸が人気で相手に1-4番人気なし':'軸は3番人気以下')+' ③コース特徴pts>0 ④1-3番人気のみ/総取りでない を全て満たす＝妙味あり'}
+    : {b:'🔴 購入非推奨',c:'#c0392b',bg:'#fdeee6',r:'軸'+um[A]+'番。'+((partners.length<1)?'相手不在':((!_c3)?'軸のコース特徴pts≤0':((!_c1)?'1-3番人気が3頭以上':((!_c2)?'軸1/2番人気なのに相手に1-4番人気を含む':((!_c4)?'フォーメーションが1-3番人気のみ/1-3番人気を総取り':'条件不成立')))))+'＝妙味の条件を満たさず'};
   var miyomi=_buy, boxMode=false, anaMode=false, _anaPicks=[], _anaOpp3=[];
   // 表示は各列とも馬番(若い順)
   function _byUma(a,b){ return um[a]-um[b]; }
@@ -2281,18 +2527,24 @@ function renderBets(){
   var ebr=document.getElementById('evRecReason'); if(ebr){ ebr.textContent=V.r; }
   // info & prob table
   var info=document.getElementById('betAnchorInfo');
-  if(info){ if(boxMode){ var _bx=names.slice(0,Math.min(4,names.length)); info.innerHTML='<b style="color:#f1c40f">軸不在の混戦</b> — 頭固定せず上位'+_bx.length+'頭 '+_bx.map(function(n){return _umaChip(um[n]);}).join(' ')+' をBOX'; } else { info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#f1c40f">'+A+'</b>（偏差値'+dv[A].toFixed(1)+'・モデル1位 / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':''); } }
+  if(info){ if(boxMode){ var _bx=names.slice(0,Math.min(4,names.length)); info.innerHTML='<b style="color:#00674a">軸不在の混戦</b> — 頭固定せず上位'+_bx.length+'頭 '+_bx.map(function(n){return _umaChip(um[n]);}).join(' ')+' をBOX'; } else {
+      var _scArr=EV_DATA.filter(function(h){return h['馬番']!=null&&!h['地方実績のみ'];});
+      var _scTop=_scArr.length?_scArr.reduce(function(a,b){return (b['スコア']>a['スコア'])?b:a;}):null;
+      var _axisNote='';
+      if(_scTop && _scTop['馬名']!==A){ var _sto=_scTop['オッズ']; _axisNote='<div style="font-size:11px;color:#e67e22;margin-top:4px;line-height:1.5">※スコア1位は'+_umaChip(_scTop['馬番'])+' <b>'+_scTop['馬名']+'</b>（'+((_sto!=null&&_sto>0)?_sto+'倍で人気薄':'人気薄')+'）。市場と乖離した人気薄の過剰評価を抑えるため、勝率cap適用で軸は'+_umaChip(um[A])+' <b>'+A+'</b>に調整。</div>'; }
+      info.innerHTML='軸: '+_umaChip(um[A])+' <b style="color:#00674a">'+A+'</b>（偏差値'+dv[A].toFixed(1)+'・勝率1位(オッズ勘案) / 勝率'+(wA*100).toFixed(0)+'% / 想定'+(srcA<99?srcA+'番人気':'-')+'）'+(miyomi?' <span style="color:#3498db">妙味</span>':'')+_axisNote;
+    } }
   var pt=document.getElementById('betProbTable');
   if(pt){
     var trh=(anaMode?[A].concat(_anaOpp3):contend).map(function(n){
-      var tag=(n===A)?'<span style="color:#f1c40f;font-size:10px;margin-left:4px">軸</span>':'';
+      var tag=(n===A)?'<span style="color:#00674a;font-size:10px;margin-left:4px">軸</span>':'';
       var hd=EV_DATA[gi[n]]||{};
       var kya=hd['脚質']?hd['脚質']:'-';
       var sco=(hd['表示スコア']!=null)?Number(hd['表示スコア']).toFixed(1):(hd['スコア']!=null?Number(hd['スコア']).toFixed(1):'-');
       var srk=(sc[n]!=null)?sc[n]+'位':'-';
-      return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+kya+'</td>'+'<td style="text-align:right;color:#bdc3c7">'+sco+'</td>'+'<td style="text-align:center;color:#bdc3c7">'+srk+'</td>'+'<td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
+      return '<tr><td style="white-space:nowrap">'+_umaChip(um[n])+' <b>'+n+'</b>'+tag+'</td>'+'<td style="text-align:center;color:#4d5a53">'+kya+'</td>'+'<td style="text-align:right;color:#4d5a53">'+sco+'</td>'+'<td style="text-align:center;color:#4d5a53">'+srk+'</td>'+'<td>'+(W(n)*100).toFixed(1)+'%</td><td>'+(P2(n)*100).toFixed(1)+'%</td><td>'+(P3(n)*100).toFixed(1)+'%</td></tr>';
     }).join('');
-    pt.innerHTML='<div style="font-size:11px;color:#9fb3c8;margin-bottom:3px">軸・相手の確率（脚質／スコア／推定人気＝SmartRC ・ 勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="width:100%;max-width:720px"><thead><tr><th>馬</th><th style="text-align:center">脚質</th><th style="text-align:right">スコア</th><th style="text-align:center">推定人気</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
+    pt.innerHTML='<div class="badge-detail" style="font-size:11px;color:#4d5a53;margin-bottom:3px">軸・相手の確率（勝率＝1着 / 連対率＝2着以内 / 複勝率＝3着以内）</div><table class="ev-table" style="width:100%;max-width:720px"><thead><tr><th>馬</th><th style="text-align:center">脚質</th><th style="text-align:right">スコア</th><th style="text-align:center">推定人気</th><th>勝率</th><th>連対率</th><th>複勝率</th></tr></thead><tbody>'+trh+'</tbody></table>';
   }
   if(anaMode){
     // 馬連/ワイド相手＝穴のみ（妙味を最大化）、三連複相手＝検出時に確定した _anaOpp3（穴＋強相手）
@@ -2310,7 +2562,7 @@ function renderBets(){
     body.innerHTML=formsA.map(function(f){
       if(f.M<1) return '<tr><td style="font-weight:700">'+f.bt+'</td><td colspan="7" style="color:#667">相手不足</td></tr>';
       var key=f.bt+'|'+f.cols.map(function(c){return c.join(',');}).join(f.sep); var c=_evCell(f.P,key);
-      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_colHtml(f.cols,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
+      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_colHtml(f.cols,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#00674a;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
     }).join('');
     var bmnA=document.getElementById('betModeNote'); if(bmnA) bmnA.textContent='穴妙味: 馬連・ワイドは軸→穴(相手は穴のみ)、三連複は穴＋スコア上位の強相手(スコア5以上離れた人気馬は実力差で除外)。高配当狙いの要検討。';
     return;
@@ -2325,7 +2577,7 @@ function renderBets(){
     var bh=document.getElementById('betHead'); if(bh) bh.innerHTML='<th>券種</th><th>買い目(BOX)</th><th>点数</th><th>的中率</th><th>合成採算オッズ</th><th>実オッズ(入力)</th><th>期待値</th><th>判定</th>';
     var bf=[ {bt:'複勝BOX', M:bx.length, P:P_fk}, {bt:'ワイドBOX', M:pr.length, P:P_wb}, {bt:'馬連BOX', M:pr.length, P:P_mb}, {bt:'三連複BOX', M:tri.length, P:P_tb} ];
     body.innerHTML=bf.map(function(f){ if(f.M<1) return ''; var key=f.bt+'|'+bxu.join(','); var c=_evCell(f.P,key);
-      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_seqHtml(bxu,'')+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>'; }).join('');
+      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_seqHtml(bxu,'')+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#00674a;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>'; }).join('');
     var bmn=document.getElementById('betModeNote'); if(bmn) bmn.textContent='軸不在の混戦のためBOX推奨。的中率は「BOX内で1組以上的中」する確率（複勝BOXは1頭以上、ワイドBOXは2頭以上が3着内）';
     return;
   }
@@ -2344,18 +2596,18 @@ function renderBets(){
     var forms=[
       {bt:'馬連', cols:[[um[A]],uren.map(function(n){return um[n];})], sep:'-', M:uren.length, P:P_uren},
       {bt:'ワイド', cols:[[um[A]],wd.map(function(n){return um[n];})], sep:'-', M:wd.length, P:P_wide},
-      {bt:'馬単(1着列→2着列)', cols:[col1.map(function(n){return um[n];}),col2.map(function(n){return um[n];})], sep:'→', M:utanCnt, P:P_utan},
-      {bt:'三連複(軸-複勝上位)', cols:[[um[A]],wd.map(function(n){return um[n];})], sep:'-', M:trios.length, P:P_3p},
-      {bt:'三連単(1→2→3列)', cols:[col1.map(function(n){return um[n];}),col2.map(function(n){return um[n];}),col3.map(function(n){return um[n];})], sep:'→', M:stanCnt, P:P_3t}
+      {bt:'馬単', cols:[col1.map(function(n){return um[n];}),col2.map(function(n){return um[n];})], sep:'→', M:utanCnt, P:P_utan},
+      {bt:'三連複', cols:[[um[A]],wd.map(function(n){return um[n];})], sep:'-', M:trios.length, P:P_3p},
+      {bt:'三連単', cols:[col1.map(function(n){return um[n];}),col2.map(function(n){return um[n];}),col3.map(function(n){return um[n];})], sep:'→', M:stanCnt, P:P_3t}
     ];
     body.innerHTML=forms.map(function(f){
       if(f.M<1) return '<tr><td style="font-weight:700">'+f.bt+'</td><td colspan="7" style="color:#667">相手不足</td></tr>';
       if(f.M>30) return '<tr><td style="font-weight:700">'+f.bt+'</td><td style="color:#e67e22;font-weight:700">多点数のため非推奨</td><td style="text-align:center">-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>';
       var key=f.bt+'|'+f.cols.map(function(c){return c.join(',');}).join(f.sep);
       var c=_evCell(f.P,key);
-      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_colHtml(f.cols,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
+      return '<tr><td style="font-weight:700">'+f.bt+'</td><td>'+_colHtml(f.cols,f.sep)+'</td><td style="text-align:center">'+f.M+'点</td><td>'+(Math.min(f.P,1)*100).toFixed(1)+'%</td><td style="color:#00674a;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
     }).join('');
-    var mn=document.getElementById('betModeNote'); if(mn) mn.textContent='券種ごとのフォーメーション（合成採算オッズ）。馬単/三連単は列ごとに取捨';
+    var mn=document.getElementById('betModeNote'); if(mn) mn.textContent='合成採算オッズを実オッズが上回れば期待値プラス';
     return;
   }
   // 内訳
@@ -2370,7 +2622,7 @@ function renderBets(){
   st.sort(function(a,b){return b.p-a.p;}); st.forEach(function(x){ rows.push(['三連単',x.c,'→',x.p]); });
   body.innerHTML=rows.map(function(r){
     var key=r[0]+'|'+r[1].join(r[2]); var c=_evCell(r[3],key);
-    return '<tr><td style="font-weight:700">'+r[0]+'</td><td>'+_seqHtml(r[1],r[2])+'</td><td style="text-align:center">1点</td><td>'+(Math.min(r[3],1)*100).toFixed(1)+'%</td><td style="color:#f1c40f;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
+    return '<tr><td style="font-weight:700">'+r[0]+'</td><td>'+_seqHtml(r[1],r[2])+'</td><td style="text-align:center">1点</td><td>'+(Math.min(r[3],1)*100).toFixed(1)+'%</td><td style="color:#00674a;font-weight:700">'+c.be+'</td><td>'+c.inp+'</td><td class="'+c.cls+'">'+c.ev+'</td><td>'+c.judge+'</td></tr>';
   }).join('');
   var mn2=document.getElementById('betModeNote'); if(mn2) mn2.textContent='列取捨に基づく全買い目（個別採算オッズ）';
 }

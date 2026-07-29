@@ -20,6 +20,24 @@ args = ap.parse_args()
 # レース結果を CSV/Excel/HTML から統一ロード（HTML は回顧データ＋全券種配当を含む）
 from result_loader import load_result
 res, meta, _payouts = load_result(args.result, racedata=args.racedata)
+# 速報CSV等でファイルから払戻が取れない場合、jv_exportが出力した
+# haraimodoshi_{rid}.json（NL_HR_PAY/RT_HR_PAY由来）を読み込む。
+if not _payouts:
+    import os as _osh, json as _jsonh
+    _rid_h = _osh.path.splitext(_osh.path.basename(args.result))[0].replace('レース結果_', '').replace('レース結果', '')
+    for _cand in [args.outdir, _osh.path.dirname(_osh.path.abspath(args.result))]:
+        if not _cand:
+            continue
+        _hp = _osh.path.join(_cand, 'haraimodoshi_' + _rid_h + '.json')
+        if _osh.path.exists(_hp):
+            try:
+                with open(_hp, encoding='utf-8') as _hf:
+                    _pj = _jsonh.load(_hf)
+                _payouts = {k: [tuple(x) for x in v] for k, v in _pj.items()}
+                print('  [payout] haraimodoshi_' + _rid_h + '.json を読み込みました（速報払戻）')
+                break
+            except Exception as _he:
+                print('  [payout] 読込スキップ:', _he)
 # 払戻（配当）が取れた場合は haraimodoshi_{rid}.json に保存（将来の券種別回収率バックテスト用）
 if _payouts:
     import json as _json3, os as _os3
@@ -43,14 +61,28 @@ pred_map = {h['馬名']: {
     '過去走なし': h.get('過去走なし', False),
 } for h in pred['horses']}
 
+def _pass_pos(v):
+    """通過順位を整数化。0以下や無効値（未通過コーナー等）は None を返す。"""
+    try:
+        if pd.isna(v):
+            return None
+        x = int(float(str(v).strip()))
+        return x if x > 0 else None
+    except (TypeError, ValueError):
+        return None
+
 rows = []
 for _, r in res.sort_values('入線順位').iterrows():
-    # 出走取消馬を除外（タイムがハイフンのみ・空、または単勝が'取消し'）
+    # 非完走馬を除外（入線順位が空=NaN: 取消・除外・競走中止・落馬など）
+    if pd.isna(r['入線順位']):
+        continue
+    # 出走取消馬を除外（タイムがハイフンのみ・空・nan、または単勝が'取消し'）
     _odds_raw = str(r['単勝オッズ']).strip()
     _time_raw = str(r['タイム']).strip()
     _is_scratch = (
         _odds_raw == '取消し'
         or not _time_raw
+        or _time_raw.lower() in ('nan', 'none')
         or all(c == '-' for c in _time_raw)
     )
     if _is_scratch:
@@ -67,10 +99,10 @@ for _, r in res.sort_values('入線順位').iterrows():
         '決め手': str(r['決め手']).strip(), 'タイム': str(r['タイム']).strip(),
         '着差': str(r['着差']).strip() if pd.notna(r['着差']) else '0',
         '上り3F': (float(r['上り3F']) if pd.notna(r['上り3F']) and str(r['上り3F']) not in ('----','---','') else None),
-        '通過1': (int(float(r['通過1'])) if pd.notna(r['通過1']) and str(r['通過1']) not in ('----','---','') else None),
-        '通過2': (int(float(r['通過2'])) if pd.notna(r['通過2']) and str(r['通過2']) not in ('----','---','') else None),
-        '通過3': (int(float(r['通過3'])) if pd.notna(r['通過3']) and str(r['通過3']) not in ('----','---','') else None),
-        '通過4': (int(float(r['通過4'])) if pd.notna(r['通過4']) and str(r['通過4']) not in ('----','---','') else None),
+        '通過1': _pass_pos(r['通過1']),  # 0=当該コーナー未通過→None(グラフで原点に落ちるのを防ぐ)
+        '通過2': _pass_pos(r['通過2']),
+        '通過3': _pass_pos(r['通過3']),
+        '通過4': _pass_pos(r['通過4']),
         '体重': (int(float(r['体重'])) if pd.notna(r['体重']) and str(r['体重']) not in ('取消し','----','---','') else None),
         '増減': (int(float(r['増減'])) if pd.notna(r['増減']) and str(r['増減']) not in ('取消し','----','---','') else None),
         '予想順位': p.get('予想順位'), 'スコア': p.get('スコア'),
@@ -126,12 +158,16 @@ def _str(v):
 race = {
     'レース名': _str(meta['レース名']), '場所': _str(meta['場所']),
     '距離': int(meta['距離']), '芝ダ': str(meta['芝・ダート']).strip(),
-    '天候': str(meta['天候']).strip(), '馬場': str(meta['馬場状態']).strip(),
-    '頭数': int(meta['頭数']), '前半3F': float(meta['通過3F']),
-    '後半3F': float(meta['上り3F']), 'PCI': float(meta['レースPCI']),
-    '前後差': float(meta['前後3F差']), '最速上3F': float(meta['最速上3F']),
-    '通過ラップ': str(meta['通過ラップ表記']).strip(),
-    '上りラップ': str(meta['上りラップ表記']).strip(),
+    '天候': _str(meta['天候']), '馬場': _str(meta['馬場状態']),
+    '頭数': int(meta['頭数']),
+    '前半3F': (float(meta['通過3F']) if pd.notna(meta.get('通過3F')) else None),
+    '後半3F': (float(meta['上り3F']) if pd.notna(meta.get('上り3F')) else None),
+    'PCI': (float(meta['レースPCI']) if pd.notna(meta.get('レースPCI')) else None),
+    '前後差': (float(meta['前後3F差']) if pd.notna(meta.get('前後3F差')) else None),
+    '最速上3F': (float(meta['最速上3F']) if pd.notna(meta.get('最速上3F')) else None),
+    '通過ラップ': _str(meta.get('通過ラップ表記')),
+    '上りラップ': _str(meta.get('上りラップ表記')),
+    '結果ソース': _str(meta.get('結果ソース')),
     '1着タイム': str(res[res['入線順位']==1].iloc[0]['タイム']).strip(),
     'R': str(int(meta['R'])) if pd.notna(meta.get('R')) else '',
     'クラス名': str(meta.get('クラス名', '')).strip(),
@@ -140,10 +176,17 @@ race = {
 
 data_js = json.dumps(rows, ensure_ascii=False)
 race_js  = json.dumps(race, ensure_ascii=False)
-pci = race['PCI']
-pace_label = 'ハイペース（前傾）' if pci < 50 else 'スローペース（後傾）' if pci > 55 else 'ミドルペース'
-pace_color = '#e74c3c' if pci < 48 else '#3498db' if pci > 53 else '#f39c12'
-sa = race['前後差']
+# ペース系（レースラップ由来）が速報で未取得の場合は「速報回顧では取得不可」を一律表示
+NA_PACE = '速報回顧では取得不可'
+pace_ok = (race.get('前半3F') is not None and race.get('後半3F') is not None)
+pci = race['PCI'] if (pace_ok and race.get('PCI') is not None) else None
+if pci is None:
+    pace_label = NA_PACE
+    pace_color = '#4d5a53'
+else:
+    pace_label = 'ハイペース（前傾）' if pci < 50 else 'スローペース（後傾）' if pci > 55 else 'ミドルペース'
+    pace_color = '#c0392b' if pci < 48 else '#2471a3' if pci > 53 else '#b06000'
+sa = race['前後差'] if (pace_ok and race.get('前後差') is not None) else None
 
 
 # ── 改善点パネル 自動生成 ───────────────────────────────────────
@@ -183,12 +226,18 @@ for r, p in _surprises:
     _improve_items.append(_item('⚠', f"見落とし：{r['馬名']}（{pred_str}→実際{int(r['入線順位'])}着）",
         f"脚質:{r['決め手']} 上り3F:{r['上り3F']}秒。スコアが過小評価だった可能性。臨戦・調教・コース適性補正を再確認。"))
 
-# ④ 脚質傾向（取消馬除外済みrowsを使用）
+# ④ 脚質傾向（取消馬除外済みrowsを使用）。決め手データが無い(速報等でnan)場合は項目ごと非表示。
 _top5 = pd.DataFrame([r for r in rows if r['入線順位'] <= 5])
-_style_cnt = _top5['決め手'].value_counts() if not _top5.empty else pd.Series(dtype=str)
-_style_str = '・'.join(f"{s}:{c}頭" for s, c in _style_cnt.items())
-_pace_str = f"PCI={race['PCI']:.1f}（{pace_label}）"
-_improve_items.append(_item('📌', f'脚質傾向：{_pace_str}', f'5着以内の脚質構成：{_style_str}。ペース予測と実際の脚質傾向を次回に活かすこと。'))
+if not _top5.empty:
+    _valid_style = _top5['決め手'].astype(str).str.strip()
+    _valid_style = _valid_style[~_valid_style.str.lower().isin(['nan', 'none', ''])]
+    _style_cnt = _valid_style.value_counts()
+else:
+    _style_cnt = pd.Series(dtype=str)
+if len(_style_cnt) > 0:
+    _style_str = '・'.join(f"{s}:{c}頭" for s, c in _style_cnt.items())
+    _pace_note = (f"（PCI={pci:.1f}・{pace_label}）" if pci is not None else "")
+    _improve_items.append(_item('📌', f'脚質傾向{_pace_note}', f'5着以内の脚質構成：{_style_str}。ペース予測と実際の脚質傾向を次回に活かすこと。'))
 
 # ⑤ 臨戦補正の有効性（臨戦pts <= -5 の馬が実際に下位か確認）
 _sc_df = None
@@ -219,17 +268,17 @@ _top5_avg_rank = (sum(r['入線順位'] for r, p in _top5_pred) / len(_top5_pred
 
 def _kc(v, good, ok):
     """KPI color helper: green/yellow/red"""
-    if v is None: return '#7f8c8d'
-    return '#2ecc71' if v <= good else '#f39c12' if v <= ok else '#e74c3c'
+    if v is None: return '#4d5a53'
+    return '#0a7d3c' if v <= good else '#b06000' if v <= ok else '#c0392b'
 
-_hit_color = '#2ecc71' if _top3_hit >= 2 else '#f39c12' if _top3_hit == 1 else '#e74c3c'
-_hm_color  = '#2ecc71' if _honmei_rank and _honmei_rank <= 3 else '#f39c12' if _honmei_rank and _honmei_rank <= 5 else '#e74c3c'
+_hit_color = '#0a7d3c' if _top3_hit >= 2 else '#b06000' if _top3_hit == 1 else '#c0392b'
+_hm_color  = '#0a7d3c' if _honmei_rank and _honmei_rank <= 3 else '#b06000' if _honmei_rank and _honmei_rank <= 5 else '#c0392b'
 _hm_txt    = str(_honmei_rank) + '着' if _honmei_rank else '—'
 _err_txt   = f'{_avg_err:.1f}位' if _avg_err is not None else '—'
 _t5_txt    = f'{_top5_avg_rank:.1f}着' if _top5_avg_rank is not None else '—'
 
 _kpi_html = (
-    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">'
+    '<div class="kpi-grid4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">'
     f'<div class="kpi"><div class="kpi-val" style="color:{_hit_color}">{_top3_hit}/3</div>'
     '<div class="kpi-lbl">予想上位3頭<br>3着内的中数</div></div>'
     f'<div class="kpi"><div class="kpi-val" style="color:{_hm_color}">{_hm_txt}</div>'
@@ -241,12 +290,13 @@ _kpi_html = (
     '</div>'
 )
 
-improve_html = '<div class="section"><h2>&#128161; 次回への改善点</h2>' + _kpi_html + ''.join(_improve_items) + '</div>'
+improve_html = ('<div class="section" id="fold-improve"><h2>&#128161; 次回への改善点</h2>'
+                + _kpi_html + ''.join(_improve_items) + '</div>')
 
 # ── ピックアップ馬パネル生成 ─────────────────────────────────────
 def _find_pickup_horses(rows, race):
     """展開不利・末脚光った馬（次走注目）を厳選して最大3頭抽出する"""
-    pci = race['PCI']
+    pci = race['PCI'] if race.get('PCI') is not None else 50.0  # 未取得時は中立扱い
     n   = race['頭数']
     front_styles = {'逃げ', '先行'}
     rear_styles  = {'差し', '追込', '後方', '中団'}
@@ -375,18 +425,22 @@ def _find_pickup_horses(rows, race):
     # 最大3頭に厳選
     return candidates[:3]
 
-_WAKU_BG = {1:'#fff',2:'#555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'#22bb22',7:'#ff8822',8:'#ffaacc'}
+_WAKU_BG = {1:'#ffffff',2:'#555555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'#22bb22',7:'#ff8822',8:'#ffaacc'}
 _WAKU_FG = {1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111',8:'#111'}
 
 def _pickup_html(candidates, race):
     if not candidates:
         return ''
-    pci  = race['PCI']
-    pace = 'ハイペース' if pci < 50 else 'スロー' if pci > 55 else 'ミドル'
-    out  = (f'''<div class="section">
+    pci  = race.get('PCI')
+    if pci is None:
+        _pace_disp = '速報回顧では取得不可'
+    else:
+        _pace = 'ハイペース' if pci < 50 else 'スロー' if pci > 55 else 'ミドル'
+        _pace_disp = f'PCI={pci:.1f}・{_pace}ペース'
+    out  = (f'''<div class="section" id="fold-pickup">
 <h2>&#127919; 次走注目馬ピックアップ</h2>
 <div class="pickup-note">
-  このレースの展開（PCI={pci:.1f}・{pace}ペース）を考慮し、
+  このレースの展開（{_pace_disp}）を考慮し、
   <b>不利な流れの中でも底力を発揮した馬</b>をピックアップしました。<br>
   次走でペースや位置取りが好転した際に、さらなる上積みが期待できます。
 </div>''')
@@ -396,7 +450,7 @@ def _pickup_html(candidates, race):
         wf = _WAKU_FG.get(r['枠番'], '#fff')
         reason_lines = '<br>'.join(f'・{rs}' for rs in c['reasons'])
         _gap = r.get('着差_sec')
-        _gap_str = f' ／ 1着と<b style="color:#f39c12">{_gap:.1f}秒差</b>' if (_gap is not None and _gap < 99.0) else ''
+        _gap_str = f' ／ 1着と<b style="color:#b06000">{_gap:.1f}秒差</b>' if (_gap is not None and _gap < 99.0) else ''
 
         # ── 次走条件ヒント自動生成 ──────────────────────────────
         _hints = []
@@ -418,9 +472,9 @@ def _pickup_html(candidates, race):
         if _gv is not None and _gv <= 0.5:
             _hints.append(f'1着と{_gv:.1f}秒差の僅差。展開が向けば勝ち負け可能なポテンシャル。')
         hint_html = (
-            '<div style="margin-top:8px;padding:8px 10px;background:#1a2332;border-radius:6px;border-left:3px solid #27ae60">'
-            '<div style="font-size:11px;color:#2ecc71;font-weight:700;margin-bottom:4px">🔍 次走注目ポイント</div>'
-            + '<br>'.join(f'<span style="font-size:11px;color:#bdc3c7">・{h}</span>' for h in _hints)
+            '<div style="margin-top:8px;padding:8px 10px;background:#eef4f1;border-radius:6px;border-left:3px solid #0a7d3c">'
+            '<div style="font-size:11px;color:#0a7d3c;font-weight:700;margin-bottom:4px">🔍 次走注目ポイント</div>'
+            + '<br>'.join(f'<span style="font-size:11px;color:#4d5a53">・{h}</span>' for h in _hints)
             + '</div>'
         ) if _hints else ''
 
@@ -479,8 +533,8 @@ def _memo_section_html(memo_rows, pickup_names, race):
         )
     return f'''<div class="section" id="memo-section">
 <h2>&#128204; 次走注目馬メモ</h2>
-<div style="font-size:12px;color:#bdc3c7;margin-bottom:12px;line-height:1.7;
-     padding:10px;background:#0d1117;border-radius:6px;border-left:3px solid #8e44ad">
+<div style="font-size:12px;color:#4d5a53;margin-bottom:12px;line-height:1.7;
+     padding:10px;background:#eef4f1;border-radius:6px;border-left:3px solid #8e44ad">
   ★印はシステムが自動ピックアップした馬です。クリックで選択・解除できます。<br>
   選択後「メモに保存」ボタンを押すと <b>memo_horses.json</b> に追記されます。
 </div>
@@ -495,15 +549,15 @@ def _memo_section_html(memo_rows, pickup_names, race):
     &#128204; メモに保存（memo_horses.json へ書き込み）
   </button>
   <button onclick="selectAllMemo(true)"
-     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+     style="padding:6px 14px;background:#d3e6dd;color:#4d5a53;border:1px solid #dde8e2;
             border-radius:5px;font-size:12px;cursor:pointer">全選択</button>
   <button onclick="selectAllMemo(false)"
-     style="padding:6px 14px;background:#243447;color:#bdc3c7;border:1px solid #2c3e50;
+     style="padding:6px 14px;background:#d3e6dd;color:#4d5a53;border:1px solid #dde8e2;
             border-radius:5px;font-size:12px;cursor:pointer">全解除</button>
-  <span id="memo-save-msg" style="font-size:12px;color:#2ecc71;display:none;margin-left:8px"></span>
+  <span id="memo-save-msg" style="font-size:12px;color:#0a7d3c;display:none;margin-left:8px"></span>
 </div>
 <div id="memo-browser-warn" style="display:none;margin-top:10px;padding:8px 12px;
-     background:#3a1a1a;border-radius:6px;font-size:12px;color:#e74c3c">
+     background:#fdeee6;border-radius:6px;font-size:12px;color:#c0392b">
   ⚠ このブラウザはFile System Access APIに対応していません。<br>
   「JSONをダウンロード」ボタンでファイルを保存し、keiba-dashboardフォルダの
   memo_horses.jsonに手動でマージしてください。
@@ -614,8 +668,35 @@ race_date_short = f"{_rd.year}/{_rd.month:02d}/{_rd.day:02d}"
 race_name = race['レース名']
 _display_name = (race_name if race_name and str(race_name) not in ('nan','None','')
                  else f"{race['場所']}{race.get('R','')}R {race.get('クラス名','')}")
-lap_h1 = race['前半3F'] * 18
-lap_h2 = race['後半3F'] * 18
+# バーの長さは「秒数×18px」だと 30秒で540px になり、スマホでは両方とも
+# 枠いっぱいに張り付いて長短が分からなくなる。長い方を100%とした割合にする。
+_lap_max = max((race.get('前半3F') or 0), (race.get('後半3F') or 0)) or 1
+lap_h1 = (race['前半3F'] / _lap_max * 100) if race.get('前半3F') is not None else 0
+lap_h2 = (race['後半3F'] / _lap_max * 100) if race.get('後半3F') is not None else 0
+# レース概要パネル表示文字列（速報でラップ未取得なら「速報回顧では取得不可」）
+_pci_lbl_disp = (f"PCI={pci:.1f}" if pci is not None else NA_PACE)
+_zen_disp = (f"{race['前半3F']}秒" if race.get('前半3F') is not None else NA_PACE)
+_ago_disp = (f"{race['後半3F']}秒" if race.get('後半3F') is not None else NA_PACE)
+_fastest_disp = (f"{race['最速上3F']:.1f}秒" if race.get('最速上3F') is not None else NA_PACE)
+_sa_disp = (f"前後差 +{sa:.1f}秒 ／最速上がり {_fastest_disp}" if sa is not None
+            else f"前後差 {NA_PACE} ／最速上がり {_fastest_disp}")
+_lap_disp = (f"通過ラップ: {race['通過ラップ']} → 上りラップ: {race['上りラップ']}"
+             if (pace_ok and race.get('通過ラップ')) else f"ラップ: {NA_PACE}")
+# ラップ構成セクション: 取得できた時のみ棒バー、未取得時は0px幅バーで文字が潰れるのを避け
+# 「速報回顧では取得不可」を一行で表示（最速上がりは取得可なので併記）。
+if pace_ok:
+    _lap_section_html = (
+        f'<div class="lap-row"><span style="width:60px;color:#4d5a53;font-size:12px">前半3F</span>'
+        f'<div class="lap-seg" style="width:{lap_h1:.0f}%;background:#c0392b">{_zen_disp}</div></div>'
+        f'<div class="lap-row"><span style="width:60px;color:#4d5a53;font-size:12px">後半3F</span>'
+        f'<div class="lap-seg" style="width:{lap_h2:.0f}%;background:#2471a3">{_ago_disp}</div></div>'
+        f'<div style="font-size:11px;color:#4d5a53;margin-top:4px">{_sa_disp}</div>'
+    )
+else:
+    _lap_section_html = (
+        f'<div style="font-size:13px;color:#b06000;padding:4px 0 6px">{NA_PACE}</div>'
+        f'<div style="font-size:11px;color:#4d5a53">最速上がり {_fastest_disp}</div>'
+    )
 
 # 券種別 結果照合パネル（pred HTMLのEV_DATA + 確定配当で照合）
 try:
@@ -636,70 +717,150 @@ head = f"""<!DOCTYPE html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);min-height:100vh;color:#e0e0e0;
-      font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic",Meiryo,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+body{{background:#dde8e2;min-height:100vh;color:#2b2b2b;
+      font-family: "Hiragino Sans", "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", メイリオ, Meiryo, "Yu Gothic UI", "ＭＳ Ｐゴシック", sans-serif;
       font-size:14px;line-height:1.5;padding:16px;max-width:1100px;margin:0 auto}}
-h1{{font-size:24px;color:#f1c40f;margin-bottom:4px;font-weight:700}} .subtitle{{font-size:13px;color:#7f8c8d;margin-bottom:20px}}
-h2{{font-size:18px;color:#f1c40f;margin-bottom:12px;border-left:3px solid #f1c40f;padding-left:8px;font-weight:700}}
-.section{{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:18px;margin-bottom:18px}}
+h1{{font-size:24px;color:#00674a;margin-bottom:4px;font-weight:700}} .subtitle{{font-size:13px;color:#4d5a53;margin-bottom:20px}}
+/* パネル見出しは濃緑の帯。レース一覧（アプリ側）と同じ見た目に揃える。
+   白いパネル・淡緑の小ブロック・濃緑の見出しで明暗の3段階を作る。 */
+h2{{font-size:16px;color:#ffffff;background:#004c2c;font-weight:700;
+    margin:-18px -18px 14px;padding:11px 14px;border-radius:14px 14px 0 0}}
+.section{{background:#ffffff;border:1px solid #b4c9be;border-radius:14px;padding:18px;margin-bottom:18px}}
 .grid3{{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}}
-.kpi{{background:#0d1117;border-radius:8px;padding:12px;text-align:center}}
-.kpi-val{{font-size:26px;font-weight:700;color:#f1c40f}} .kpi-lbl{{font-size:11px;color:#7f8c8d;margin-top:2px}}
+.kpi{{background:#eef4f1;border-radius:8px;padding:12px;text-align:center}}
+.kpi-val{{font-size:26px;font-weight:700;color:#00674a}} .kpi-lbl{{font-size:11px;color:#4d5a53;margin-top:2px}}
 table{{width:100%;border-collapse:collapse;font-size:13px}}
-th{{background:#243447;color:#7f8c8d;padding:7px 8px;text-align:left;border-bottom:1px solid #2c3e50;white-space:nowrap}}
-td{{padding:7px 8px;border-bottom:1px solid #1e2d3d;vertical-align:middle}}
-tr:hover td{{background:#1f2f42}}
-.hit{{color:#2ecc71;font-weight:700}} .miss{{color:#e74c3c}} .mid{{color:#f39c12}}
-.badge{{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600}}
-.chart-wrap-lg{{position:relative;height:420px}} .note{{font-size:11px;color:#7f8c8d;margin-top:8px;line-height:1.6}}
-.improve-item{{background:#0d1117;border-radius:6px;padding:10px 12px;margin-bottom:8px;border-left:3px solid #f39c12}}
-.improve-title{{font-weight:700;color:#f1c40f;font-size:13px;margin-bottom:4px}}
-.improve-body{{font-size:12px;color:#bdc3c7;line-height:1.6}}
+th{{background:#d3e6dd;color:#004c2c;padding:7px 8px;text-align:left;border-bottom:1px solid #dde8e2;white-space:nowrap}}
+td{{padding:7px 8px;border-bottom:1px solid #dde8e2;vertical-align:middle}}
+tr:hover td{{background:#eef4f1}}
+.hit{{color:#0a7d3c;font-weight:700}} .miss{{color:#c0392b}} .mid{{color:#b06000}}
+.badge{{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;color:#fff}}
+.chart-wrap-lg{{position:relative;height:420px}} .note{{font-size:11px;color:#4d5a53;margin-top:8px;line-height:1.6}}
+.improve-item{{background:#eef4f1;border-radius:6px;padding:10px 12px;margin-bottom:8px;border-left:3px solid #b06000}}
+.improve-title{{font-weight:700;color:#00674a;font-size:13px;margin-bottom:4px}}
+.improve-body{{font-size:12px;color:#4d5a53;line-height:1.6}}
 .lap-row{{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px}}
 .lap-seg{{height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;min-width:60px}}
-.corner-legend{{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding:10px;background:#0d1117;border-radius:6px}}
-.legend-item{{display:flex;align-items:center;gap:5px;font-size:11px;color:#bdc3c7}}
-.waku-circle{{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;border:1px solid #333}}
-.ev-pos{{color:#2ecc71;font-weight:700}} .ev-neg{{color:#e74c3c}}
+.corner-legend{{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding:10px;background:#eef4f1;border-radius:6px}}
+.legend-item{{display:flex;align-items:center;gap:5px;font-size:11px;color:#4d5a53}}
+.waku-circle{{width:22px;height:22px;border-radius:50%;box-sizing:border-box;padding-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;line-height:1;flex-shrink:0;border:1px solid #8aa79a}}
+.ev-pos{{color:#0a7d3c;font-weight:700}} .ev-neg{{color:#c0392b}}
 .ev-summary{{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap}}
-.ev-card{{background:#0d1117;border-radius:6px;padding:8px 14px;font-size:12px;flex:1;min-width:140px}}
-.ev-card-val{{font-size:20px;font-weight:700;color:#f1c40f}} .ev-card-lbl{{color:#7f8c8d;font-size:11px;margin-top:2px}}
-.pickup-note{{font-size:12px;color:#bdc3c7;line-height:1.7;margin-bottom:14px;padding:10px;background:#0d1117;border-radius:6px;border-left:3px solid #9b59b6}}
-.pickup-card{{background:#0d1117;border-radius:8px;padding:12px 14px;margin-bottom:10px;border-left:4px solid #9b59b6}}
+.ev-card{{background:#eef4f1;border-radius:6px;padding:8px 14px;font-size:12px;flex:1;min-width:140px}}
+.ev-card-val{{font-size:20px;font-weight:700;color:#00674a}} .ev-card-lbl{{color:#4d5a53;font-size:11px;margin-top:2px}}
+.pickup-note{{font-size:12px;color:#4d5a53;line-height:1.7;margin-bottom:14px;padding:10px;background:#eef4f1;border-radius:6px;border-left:3px solid #9b59b6}}
+.pickup-card{{background:#eef4f1;border-radius:8px;padding:12px 14px;margin-bottom:10px;border-left:4px solid #9b59b6}}
 .pickup-header{{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}}
-.pickup-name{{font-size:15px;font-weight:700;color:#e0e0e0}}
-.pickup-meta{{font-size:11px;color:#7f8c8d;margin-left:auto}}
-.waku-pill{{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;border:1px solid #333}}
-.pickup-reason{{font-size:12px;color:#bdc3c7;line-height:1.8;padding-left:4px}}
+.pickup-name{{font-size:15px;font-weight:700;color:#2b2b2b}}
+.pickup-meta{{font-size:11px;color:#4d5a53;margin-left:auto}}
+.waku-pill{{padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;border:1px solid #8aa79a}}
+.pickup-reason{{font-size:12px;color:#4d5a53;line-height:1.8;padding-left:4px}}
 .memo-chip{{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
-  background:#243447;border:1px solid #2c3e50;cursor:pointer;transition:all 0.15s;
-  font-size:12px;color:#e0e0e0;user-select:none}}
-.memo-chip:hover{{background:#2c3e50}}
-.memo-chip-rank{{font-size:11px;color:#7f8c8d;min-width:24px}}
+  background:#d3e6dd;border:1px solid #dde8e2;cursor:pointer;transition:all 0.15s;
+  font-size:12px;color:#2b2b2b;user-select:none}}
+.memo-chip:hover{{background:#dde8e2}}
+.memo-chip-rank{{font-size:11px;color:#4d5a53;min-width:24px}}
 .memo-chip-name{{font-weight:700}}
-.memo-chip-auto{{font-size:10px;color:#f1c40f;font-weight:700;margin-left:2px}}
+.memo-chip-auto{{font-size:10px;color:#00674a;font-weight:700;margin-left:2px}}
 .memo-pre-selected{{border-color:#8e44ad}}
+
+  /* ── スマホ対応: 表は必ず自分の枠の中で横スクロールさせる ── */
+  .ev-table-wrap, #betProbTable, #betAnchorInfo {{
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }}
+  @media (max-width: 768px) {{
+    body {{ padding: 8px; }}
+    header {{ padding: 16px; border-radius: 12px; }}
+    h1 {{ font-size: 20px; }}
+    .section {{ padding: 14px; border-radius: 12px; }}
+    .section h2 {{ font-size: 15px; margin: -14px -14px 12px; padding: 10px 12px;
+                   border-radius: 12px 12px 0 0; }}
+    .ev-table {{ font-size: 11px; }}
+    .ev-table th, .ev-table td {{ padding: 4px 6px; }}
+    .past-table {{ font-size: 11px; }}
+    .past-table th, .past-table td {{ padding: 4px 6px; }}
+    /* 横スクロールしても「どの馬の行か」が分かるよう先頭列を固定する */
+    .ev-table th:first-child, .ev-table td:first-child {{
+      position: sticky; left: 0; background: #ffffff; z-index: 2;
+    }}
+    .ev-table thead th:first-child {{ background: #eef4f1; }}
+
+    /* ── レース概要のカード ──
+       3列だと1枚87pxしかなく、「ハイペース（前傾）」が1文字ずつ縦に割れる。
+       スマホでは縦に積んで、1行で読めるようにする。 */
+    .grid3 {{ grid-template-columns: 1fr; gap: 8px; }}
+    .kpi {{ padding: 10px; }}
+    .kpi-val {{ font-size: 20px; }}
+    .kpi-lbl {{ font-size: 10px; }}
+    /* 改善点の4分割も同じ理由で2列にする */
+    .kpi-grid4 {{ grid-template-columns: 1fr 1fr !important; }}
+
+    /* ── 全馬成績詳細: 12列は入らないので補助列を隠す ──
+       残すのは 着順／枠馬番／馬名／人気単勝／予想順位。
+       隠した項目（決め手・走破タイム・通過順位・上り3F・スコア・順位差・予想精度）は
+       上下のパネルで確認できる。順位差は「着順−予想順位」で読み取れる。 */
+    .result-table {{ font-size: 10px; width: 100%; }}
+    .result-table th, .result-table td {{ padding: 4px 4px; white-space: nowrap; }}
+    .result-table th:nth-child(5),  .result-table td:nth-child(5),
+    .result-table th:nth-child(6),  .result-table td:nth-child(6),
+    .result-table th:nth-child(7),  .result-table td:nth-child(7),
+    .result-table th:nth-child(8),  .result-table td:nth-child(8),
+    .result-table th:nth-child(10), .result-table td:nth-child(10),
+    .result-table th:nth-child(11), .result-table td:nth-child(11),
+    .result-table th:nth-child(12), .result-table td:nth-child(12) {{ display: none; }}
+
+    /* ラップ構成: 見出し（前半3F/後半3F）が潰れて縦に割れるので縮ませない */
+    .lap-row > span {{ flex-shrink: 0; white-space: nowrap; }}
+    .lap-seg {{ min-width: 0; }}
+
+    /* ── 期待値分析の1行 ──
+       固定幅の列が7つあり、合計520px。329pxに押し込まれて各列が潰れ、
+       「過大評価」などが1文字ずつ縦に並んでいた。
+       潰さずに2段へ折り返す（::after で強制改行）。 */
+    #evTableWrap > div {{ flex-wrap: wrap; row-gap: 5px; padding: 7px 8px; }}
+    #evTableWrap > div > div {{ flex-shrink: 0; white-space: nowrap; }}
+    #evTableWrap > div::after {{ content: ''; flex-basis: 100%; height: 0; order: 45; }}
+    #evTableWrap > div > div:nth-child(1) {{ order: 10; }}
+    #evTableWrap > div > div:nth-child(2) {{ order: 20; width: auto; flex: 1 1 60px;
+                                             overflow: hidden; text-overflow: ellipsis; }}
+    #evTableWrap > div > div:nth-child(6) {{ order: 30; width: auto; }}
+    #evTableWrap > div > div:nth-child(7) {{ order: 40; width: auto; }}
+    #evTableWrap > div > div:nth-child(3) {{ order: 50; flex: 1 1 90px; min-width: 90px; }}
+    #evTableWrap > div > div:nth-child(4) {{ order: 60; }}
+    #evTableWrap > div > div:nth-child(5) {{ order: 70; }}
+
+    /* ── 折り畳むパネル（改善点・ピックアップ・メモ） ──
+       見出しだけ残して中身を隠す。見出しをタップで開閉できる。
+       あわせて、これらをページ下部へ回す。 */
+    body {{ display: flex; flex-direction: column; }}
+    /* 中身には style="display:grid" 等が直接書かれているので !important で上書きする */
+    .section.folded > *:not(h2) {{ display: none !important; }}
+    .section.folded > h2 {{ margin-bottom: 0; }}
+    .foldable > h2 {{ cursor: pointer; }}
+    .foldable > h2::after {{ content: ' ▾'; font-size: 12px; color: #4d5a53; }}
+    .section.folded > h2::after {{ content: ' ▸'; }}
+    #fold-improve {{ order: 90; }}
+    #fold-pickup  {{ order: 91; }}
+    #memo-section {{ order: 92; }}
+  }}
 </style></head><body>
 <h1>&#127943; レース回顧 &#8212; {_display_name}</h1>
 <div class="subtitle">{race_date_str}・{race['場所']}競馬場 {race['芝ダ']}{race['距離']}m ・{race['クラス名']} ・{race['頭数']}頭立て</div>
 <div class="section"><h2>&#128203; レース概要</h2>
   <div class="grid3" style="margin-bottom:14px">
     <div class="kpi"><div class="kpi-val">{race['1着タイム']}</div><div class="kpi-lbl">勝ちタイム</div></div>
-    <div class="kpi"><div class="kpi-val" style="color:{pace_color}">{pace_label}</div><div class="kpi-lbl">ペース判定（PCI={pci}）</div></div>
-    <div class="kpi"><div class="kpi-val">{race['天候']} / {race['馬場']}</div><div class="kpi-lbl">天候 / 馬場状態</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:{pace_color}">{pace_label}</div><div class="kpi-lbl">ペース判定（{_pci_lbl_disp}）</div></div>
+    <div class="kpi"><div class="kpi-val">{race['天候'] or '—'} / {race['馬場'] or '—'}</div><div class="kpi-lbl">天候 / 馬場状態</div></div>
   </div>
   <div style="margin-bottom:10px">
-    <div style="font-size:12px;color:#7f8c8d;margin-bottom:6px">ラップ構成（600m区間）</div>
-    <div class="lap-row"><span style="width:60px;color:#7f8c8d;font-size:12px">前半3F</span>
-      <div class="lap-seg" style="width:{lap_h1:.0f}px;background:#e74c3c">{race['前半3F']}秒</div></div>
-    <div class="lap-row"><span style="width:60px;color:#7f8c8d;font-size:12px">後半3F</span>
-      <div class="lap-seg" style="width:{lap_h2:.0f}px;background:#3498db">{race['後半3F']}秒</div></div>
-    <div style="font-size:11px;color:#7f8c8d;margin-top:4px">前後差 +{sa:.1f}秒 ／最速上がり {race['最速上3F']:.1f}秒</div>
+    <div style="font-size:12px;color:#4d5a53;margin-bottom:6px">ラップ構成（600m区間）</div>
+    {_lap_section_html}
   </div>
-  <div style="font-size:12px;color:#7f8c8d">通過ラップ: {race['通過ラップ']} → 上りラップ: {race['上りラップ']}</div>
+  <div style="font-size:12px;color:#4d5a53">{_lap_disp}</div>
 </div>
 <div class="section"><h2>&#128202; 全馬成績詳細</h2>
-  <div style="overflow-x:auto"><table>
+  <div style="overflow-x:auto"><table class="result-table">
     <thead><tr><th>着順</th><th>枠/馬番</th><th>馬名</th><th>人気/単勝</th><th>決め手</th><th>走破タイム</th><th>通過順位</th><th>上り3F</th><th>予想順位</th><th>スコア</th><th>順位差</th><th>予想精度</th></tr></thead>
     <tbody id="detailBody"></tbody>
   </table></div>
@@ -711,7 +872,7 @@ tr:hover td{{background:#1f2f42}}
 </div>
 <div class="section"><h2>&#9889; 上がり3F比較（速い順）</h2>
   <div id="agariViz" style="padding:4px 0"></div>
-  <div class="note">バーが長いほど末脚が速い（最速: {race['最速上3F']:.1f}秒）。色は枠番カラー、右の数字は実際の着順。</div>
+  <div class="note">バーが長いほど末脚が速い（最速: {_fastest_disp}）。色は枠番カラー、右の数字は実際の着順。</div>
 </div>
 {bettype_panel_html}
 <div class="section"><h2>&#128176; 期待値分析（予測勝率 vs 市場オッズ）</h2>
@@ -732,8 +893,10 @@ const WAKU_BG = {1:'#ffffff',2:'#555555',3:'#ee3333',4:'#4488ff',5:'#dddd00',6:'
 const WAKU_FG = {1:'#111',2:'#eee',3:'#fff',4:'#fff',5:'#111',6:'#fff',7:'#111',8:'#111'};
 function wBg(w){return WAKU_BG[w]||'#888';}
 function wFg(w){return WAKU_FG[w]||'#fff';}
-function rColor(r){return r===1?'#f1c40f':r<=3?'#2ecc71':r<=6?'#f39c12':'#7f8c8d';}
-function lColor(l){return({'先行':'#f39c12','逃げ':'#e74c3c','差し':'#3498db','後方':'#9b59b6','中団':'#1abc9c'})[l]||'#7f8c8d';}
+function rColor(r){return r===1?'#00674a':r<=3?'#0a7d3c':r<=6?'#b06000':'#4d5a53';}
+function lColor(l){return({'先行':'#b06000','逃げ':'#c0392b','差し':'#2471a3','後方':'#7d3c98','中団':'#0b7460'})[l]||'#4d5a53';}
+// 速報成績には決め手が入らない。'nan' をそのまま出さずハイフンにする。
+function kimete(v){var s=String(v==null?'':v).trim(); return (s===''||s.toLowerCase()==='nan'||s.toLowerCase()==='none')?'ー':s;}
 
 // コーナー通過順 カスタムプラグイン（枠番カラー + 馬番）
 const bangoPlugin={id:'bangoPlugin',afterDatasetsDraw(chart){
@@ -744,7 +907,7 @@ const bangoPlugin={id:'bangoPlugin',afterDatasetsDraw(chart){
     meta.data.forEach(pt=>{
       ctx.save();ctx.beginPath();ctx.arc(pt.x,pt.y,10,0,Math.PI*2);
       ctx.fillStyle=bg;ctx.fill();
-      ctx.strokeStyle='#0d1117';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.strokeStyle='#eef4f1';ctx.lineWidth=1.5;ctx.stroke();
       ctx.fillStyle=fg;ctx.font='bold 8px sans-serif';
       ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(ds.bango,pt.x,pt.y);ctx.restore();
@@ -770,9 +933,9 @@ if(window.Chart)new Chart(cornerCtx,{type:'line',
   data:{labels:_chartLabels,datasets:cornerDS},
   options:{responsive:true,maintainAspectRatio:false,
     scales:{
-      y:{reverse:true,min:1,max:DATA.length,ticks:{color:'#7f8c8d',stepSize:2},grid:{color:'#2c3e50'},
-         title:{display:true,text:'通過順位（小=前）',color:'#7f8c8d'}},
-      x:{ticks:{color:'#bdc3c7',font:{size:13}},grid:{color:'#2c3e50'}}
+      y:{reverse:true,min:1,max:DATA.length,ticks:{color:'#4d5a53',stepSize:2},grid:{color:'#dde8e2'},
+         title:{display:true,text:'通過順位（小=前）',color:'#4d5a53'}},
+      x:{ticks:{color:'#4d5a53',font:{size:13}},grid:{color:'#dde8e2'}}
     },
     plugins:{legend:{display:false},
       tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y}番手`}}}
@@ -797,16 +960,18 @@ document.getElementById('agariViz').innerHTML=agS.map((h,i)=>{
   // バーが短い(40%未満)場合はテキストをバー外(右側)に白で表示して視認性を確保
   const shortBar=Number(pct)<40;
   const timeLabel=`${h['上り3F'].toFixed(1)}秒${i===0?' ★最速':''}`;
+  // 1枠・5枠は明るい色なので文字は黒。影も白にしないと縁取りが潰れる。
+  const barShadow=(barFg==='#111'||barFg==='#222')?'0 0 3px rgba(255,255,255,0.9)':'0 0 3px rgba(0,0,0,0.5)';
   const innerSpan=shortBar?''
-    :`<span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:${barFg};font-weight:700;text-shadow:0 0 3px rgba(0,0,0,0.5)">${timeLabel}</span>`;
+    :`<span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;color:${barFg};font-weight:700;text-shadow:${barShadow}">${timeLabel}</span>`;
   const outerSpan=shortBar
-    ?`<span style="font-size:11px;color:#ecf0f1;font-weight:600;margin-left:4px;white-space:nowrap">${timeLabel}</span>`
+    ?`<span style="font-size:11px;color:#2b2b2b;font-weight:600;margin-left:4px;white-space:nowrap">${timeLabel}</span>`
     :'';
   return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-    <div style="width:26px;height:26px;border-radius:50%;background:${barBg};color:${barFg};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid #444">${h['馬番']}</div>
-    <div style="width:110px;font-size:11px;color:#bdc3c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h['馬名']}</div>
-    <div style="flex:1;background:#243447;border-radius:4px;height:22px;position:relative;overflow:visible;display:flex;align-items:center">
-      <div style="height:100%;width:${pct}%;background:${barBg};opacity:0.9;border-radius:4px;position:relative;flex-shrink:0">${innerSpan}</div>
+    <div style="width:22px;height:22px;border-radius:50%;box-sizing:border-box;padding-top:1px;background:${barBg};color:${barFg};font-size:10px;font-weight:bold;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #8aa79a">${h['馬番']}</div>
+    <div style="width:110px;font-size:11px;color:#4d5a53;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h['馬名']}</div>
+    <div style="flex:1;background:#d3e6dd;border:1px solid #b4c9be;border-radius:4px;height:22px;position:relative;overflow:visible;display:flex;align-items:center">
+      <div style="height:100%;width:${pct}%;background:${barBg};border:1px solid #8aa79a;box-sizing:border-box;border-radius:4px;position:relative;flex-shrink:0">${innerSpan}</div>
       ${outerSpan}
     </div>
     <div style="width:32px;font-size:12px;color:${rColor(h['入線順位'])};font-weight:700;text-align:right">${h['入線順位']}着</div>
@@ -837,18 +1002,18 @@ const successRate=posCount>0?(successEV.length/posCount*100).toFixed(0):'—';
 const totalSuccess=successEV.length+cutEV.length;
 const totalRate=(totalSuccess/sc.length*100).toFixed(0);
 document.getElementById('evSummary').innerHTML=`
-  <div class="ev-card"><div class="ev-card-val" style="color:#f1c40f">${totalSuccess}頭</div><div class="ev-card-lbl">期待値判定成功<br><small>◎高評価×好走 ＋ ○低評価×凡走</small></div></div>
-  <div class="ev-card"><div class="ev-card-val" style="color:#f1c40f">${totalRate}%</div><div class="ev-card-lbl">期待値判定成功率<br><small>（全出走馬中）</small></div></div>
-  <div class="ev-card"><div class="ev-card-val" style="color:#f1c40f">${successEV.length}頭</div><div class="ev-card-lbl">◎ 高評価×好走<br><small>確率比>1 かつ 人気超え好走</small></div></div>
-  <div class="ev-card"><div class="ev-card-val" style="color:#2ecc71">${cutEV.length}頭</div><div class="ev-card-lbl">○ 低評価×凡走<br><small>確率比≤1 かつ 人気どおり凡走</small></div></div>
-  <div class="ev-card"><div class="ev-card-val" style="color:#e74c3c">${overEV.length}頭</div><div class="ev-card-lbl">△ 過大評価<br><small>確率比>1 だが 人気どおり</small></div></div>
-  <div class="ev-card"><div class="ev-card-val" style="color:#95a5a6">${missEV.length}頭</div><div class="ev-card-lbl">✕ 見落とし<br><small>確率比≤1 だが 人気超え好走</small></div></div>`;
+  <div class="ev-card"><div class="ev-card-val" style="color:#00674a">${totalSuccess}頭</div><div class="ev-card-lbl">期待値判定成功<br><small>◎高評価×好走 ＋ ○低評価×凡走</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#00674a">${totalRate}%</div><div class="ev-card-lbl">期待値判定成功率<br><small>（全出走馬中）</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#00674a">${successEV.length}頭</div><div class="ev-card-lbl">◎ 高評価×好走<br><small>確率比>1 かつ 人気超え好走</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#0a7d3c">${cutEV.length}頭</div><div class="ev-card-lbl">○ 低評価×凡走<br><small>確率比≤1 かつ 人気どおり凡走</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#c0392b">${overEV.length}頭</div><div class="ev-card-lbl">△ 過大評価<br><small>確率比>1 だが 人気どおり</small></div></div>
+  <div class="ev-card"><div class="ev-card-val" style="color:#4d5a53">${missEV.length}頭</div><div class="ev-card-lbl">✕ 見落とし<br><small>確率比≤1 だが 人気超え好走</small></div></div>`;
 // 確率比（予測÷市場）でソート：モデルが市場より高く評価した順
 const evByRatio=[...sc].sort((a,b)=>(b._p/b._mp)-(a._p/a._mp));
 const barMax=Math.max(...sc.map(h=>Math.max(h._p,h._mp)));
-const legend2='<div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:#7f8c8d;flex-wrap:wrap">'
-  +'<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:28px;height:10px;border-radius:3px;background:#f1c40f"></span>予測勝率（モデル）</span>'
-  +'<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:28px;height:10px;border-radius:3px;background:#4a6080"></span>市場確率（1÷オッズ）</span>'
+const legend2='<div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:#4d5a53;flex-wrap:wrap">'
+  +'<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:28px;height:10px;border-radius:3px;background:#00674a"></span>予測勝率（モデル）</span>'
+  +'<span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:28px;height:10px;border-radius:3px;background:#b06000"></span>市場確率（1÷オッズ）</span>'
   +'<span style="margin-left:8px">確率比＝予測÷市場 / 1.0超＝モデルが市場より高く評価（黄背景）</span>'
   +'</div>';
 const rows2=evByRatio.map(h=>{
@@ -862,31 +1027,31 @@ const rows2=evByRatio.map(h=>{
   // 人気以上に好走 = 入線順位 < 人気（市場期待以上のパフォーマンス）
   const outperform=h['入線順位']<h['人気'];
   // ◎ 高評価×好走 ／ ○ 低評価×凡走 → どちらも期待値判定成功
-  const jdg=isOver&&outperform  ?'<b style="color:#f1c40f">◎期待値判定成功</b>'
-            :!isOver&&!outperform?'<span style="color:#2ecc71;font-size:10px">○期待値判定成功</span>'
-            :isOver&&!outperform ?'<span style="color:#e74c3c;font-size:10px">△過大評価</span>'
-            :                    '<span style="color:#95a5a6;font-size:10px">✕見落とし</span>';
-  const rc2=ratio>=1.5?'#f1c40f':ratio>=1.0?'#e8d07a':ratio>=0.7?'#7f8c8d':'#e74c3c';
+  const jdg=isOver&&outperform  ?'<b style="color:#00674a">◎期待値判定成功</b>'
+            :!isOver&&!outperform?'<span style="color:#0a7d3c;font-size:10px">○期待値判定成功</span>'
+            :isOver&&!outperform ?'<span style="color:#c0392b;font-size:10px">△過大評価</span>'
+            :                    '<span style="color:#4d5a53;font-size:10px">✕見落とし</span>';
+  const rc2=ratio>=1.5?'#00674a':ratio>=1.0?'#8a6d1f':ratio>=0.7?'#4d5a53':'#c0392b';
   return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:7px 10px;border-radius:7px;'
-    +'background:'+(isOver?'rgba(241,196,15,0.07)':'rgba(255,255,255,0.02)')+'\">'
-    +'<div style="width:26px;height:26px;border-radius:50%;background:'+wBg(w)+';color:'+wFg(w)
-    +';font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid #333">'+h['馬番']+'</div>'
-    +'<div style="width:108px;font-size:12px;color:#e0e0e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0"><b>'+h['馬名']+'</b></div>'
+    +'background:'+(isOver?'#fdf6e0':'#ffffff')+'\">'
+    +'<div style="width:22px;height:22px;border-radius:50%;border:1px solid #8aa79a;background:'+wBg(w)+';color:'+wFg(w)
+    +';font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #8aa79a">'+h['馬番']+'</div>'
+    +'<div style="width:108px;font-size:12px;color:#2b2b2b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0"><b>'+h['馬名']+'</b></div>'
     +'<div style="flex:1;min-width:100px">'
       +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">'
-        +'<div style="height:11px;background:#f1c40f;border-radius:2px;width:'+pW+'%;min-width:2px"></div>'
-        +'<span style="font-size:10px;color:#f1c40f;white-space:nowrap">'+(h._p*100).toFixed(1)+'%</span>'
+        +'<div style="height:11px;background:#00674a;border-radius:2px;width:'+pW+'%;min-width:2px"></div>'
+        +'<span style="font-size:10px;color:#00674a;white-space:nowrap">'+(h._p*100).toFixed(1)+'%</span>'
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:5px">'
-        +'<div style="height:11px;background:#4a6080;border-radius:2px;width:'+mW+'%;min-width:2px"></div>'
-        +'<span style="font-size:10px;color:#7f8c8d;white-space:nowrap">'+(h._mp*100).toFixed(1)+'%</span>'
+        +'<div style="height:11px;background:#b06000;border-radius:2px;width:'+mW+'%;min-width:2px"></div>'
+        +'<span style="font-size:10px;color:#4d5a53;white-space:nowrap">'+(h._mp*100).toFixed(1)+'%</span>'
       +'</div>'
     +'</div>'
     +'<div style="width:54px;text-align:center;font-size:13px;font-weight:700;color:'+rc2+'">x'+ratio.toFixed(2)+'</div>'
-    +'<div style="width:46px;text-align:right;font-size:11px;font-weight:700;color:'+(isOver?'#2ecc71':'#e74c3c')+'">'+(isOver?'+':'')+evPct+'%</div>'
+    +'<div style="width:46px;text-align:right;font-size:11px;font-weight:700;color:'+(isOver?'#0a7d3c':'#c0392b')+'">'+(isOver?'+':'')+evPct+'%</div>'
     +'<div style="width:80px;text-align:right;font-size:11px;line-height:1.4">'
-    +'<span style="color:#7f8c8d">'+h['人気']+'人気</span>'
-    +'<span style="color:'+(outperform?'#2ecc71':'#e74c3c')+';font-weight:700"> → </span>'
+    +'<span style="color:#4d5a53">'+h['人気']+'人気</span>'
+    +'<span style="color:'+(outperform?'#0a7d3c':'#c0392b')+';font-weight:700"> → </span>'
     +'<span style="color:'+rColor(h['入線順位'])+';font-weight:700">'+mk+h['入線順位']+'着</span>'
     +'</div>'
     +'<div style="width:60px;text-align:center;font-size:11px">'+jdg+'</div>'
@@ -902,41 +1067,58 @@ document.getElementById('detailBody').innerHTML=
     const d=isTarget&&h['予想順位']?h['予想順位']-h['入線順位']:null;
     const ds=d===null?'—':d>0?'+'+d:d===0?'±0':String(d);
     const dc=d===null?'':d>=3?'class="hit"':d<=-3?'class="miss"':'class="mid"';
-    const ev2=!isTarget?'<span style="font-size:10px;color:#7f8c8d">対象外</span>'
-             :isRef?'<span style="font-size:10px;color:#7f8c8d">参考</span>'
+    const ev2=!isTarget?'<span style="font-size:10px;color:#4d5a53">対象外</span>'
+             :isRef?'<span style="font-size:10px;color:#4d5a53">参考</span>'
              :d===null?'—'
-             :Math.abs(d)<=1?'<span class="badge" style="background:#27ae60">◎</span>'
-             :Math.abs(d)<=3?'<span class="badge" style="background:#f39c12">△</span>'
-             :'<span class="badge" style="background:#e74c3c">✕</span>';
-    const predCell=!isTarget?'<span style="font-size:10px;color:#7f8c8d">対象外</span>'
-                  :isRef?'<span style="font-size:10px;color:#7f8c8d">参考'+h['予想順位']+'位</span>'
+             :Math.abs(d)<=1?'<span class="badge" style="background:#0a7d3c">◎</span>'
+             :Math.abs(d)<=3?'<span class="badge" style="background:#b06000">△</span>'
+             :'<span class="badge" style="background:#c0392b">✕</span>';
+    const predCell=!isTarget?'<span style="font-size:10px;color:#4d5a53">対象外</span>'
+                  :isRef?'<span style="font-size:10px;color:#4d5a53">参考'+h['予想順位']+'位</span>'
                   :h['予想順位']?h['予想順位']+'位':'—';
-    const scoreCell=!isTarget?'<span style="font-size:10px;color:#7f8c8d">—</span>'
-                   :isRef?'<span style="font-size:10px;color:#7f8c8d">'+h['スコア'].toFixed(1)+'(参考)</span>'
+    const scoreCell=!isTarget?'<span style="font-size:10px;color:#4d5a53">—</span>'
+                   :isRef?'<span style="font-size:10px;color:#4d5a53">'+h['スコア'].toFixed(1)+'(参考)</span>'
                    :h['スコア'].toFixed(1);
     const rowBg=h['入線順位']===1?'background:rgba(241,196,15,0.12)':h['入線順位']<=3?'background:rgba(46,204,113,0.08)':h['入線順位']<=5?'background:rgba(243,156,18,0.06)':'';
     const rankTxt=h['入線順位']<=5?`color:${rColor(h['入線順位'])}`:'color:inherit';
     // 走破タイム + 着差
     const gapSec=h['着差_sec'];
-    const gapStr=(gapSec!==null&&gapSec>0)?`<span style="font-size:10px;color:#e67e22"> +${gapSec.toFixed(1)}秒</span>`:'';
+    const gapStr=(gapSec!==null&&gapSec>0)?`<span style="font-size:10px;color:#b06000"> +${gapSec.toFixed(1)}秒</span>`:'';
     const timeCell=`${h['タイム']}${gapStr}`;
     // 通過順位（null除外してハイフン連結）
     const passes=[h['通過1'],h['通過2'],h['通過3'],h['通過4']].filter(v=>v!==null&&v!==undefined);
     const passCell=passes.length>0?passes.join('-'):'—';
     const wn=h['枠番']||Math.ceil(h['馬番']/2);
     const wakuCell=`<div style="display:flex;align-items:center;gap:4px;white-space:nowrap">
-      <div style="width:20px;height:20px;border-radius:3px;background:${wBg(wn)};color:${wFg(wn)};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:1px solid #555;flex-shrink:0">${wn}</div>
-      <div style="width:20px;height:20px;border-radius:50%;background:${wBg(wn)};color:${wFg(wn)};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:1px solid #555;flex-shrink:0">${h['馬番']}</div>
+      <div style="width:24px;height:22px;border-radius:3px;box-sizing:border-box;padding-top:1px;background:${wBg(wn)};color:${wFg(wn)};font-size:10px;font-weight:bold;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid #8aa79a;flex-shrink:0">${wn}</div>
+      <div style="width:22px;height:22px;border-radius:50%;box-sizing:border-box;padding-top:1px;background:${wBg(wn)};color:${wFg(wn)};font-size:10px;font-weight:bold;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid #8aa79a;flex-shrink:0">${h['馬番']}</div>
     </div>`;
     return `<tr style="${rowBg}"><td><b style="${rankTxt}">${h['入線順位']}着</b></td>
       <td>${wakuCell}</td>
       <td><b>${h['馬名']}</b></td><td>${h['人気']}人気 / ${h['単勝オッズ']}倍</td>
-      <td style="color:${lColor(h['決め手'])}">${h['決め手']}</td>
-      <td style="white-space:nowrap">${timeCell}</td><td style="font-size:12px;color:#ccc;letter-spacing:0.5px">${passCell}</td>
+      <td style="color:${lColor(h['決め手'])}">${kimete(h['決め手'])}</td>
+      <td style="white-space:nowrap">${timeCell}</td><td style="font-size:12px;color:#4d5a53;letter-spacing:0.5px">${passCell}</td>
       <td>${h['上り3F'].toFixed(1)}秒</td><td>${predCell}</td><td>${scoreCell}</td>
       <td ${dc}>${ds}</td><td>${ev2}</td></tr>`;
   }).join('');
-</script></body></html>"""
+</script>
+<script>
+// スマホは縦に長くなりすぎるので、振り返り用の3パネルは閉じた状態で開く。
+// 見出しをタップで開閉。PC（769px以上）では従来どおり開いたまま。
+(function () {
+  var w = window.innerWidth;
+  if (!(w > 0 && w <= 768)) return;   // 幅が取れないときは何もしない
+  ['fold-improve', 'fold-pickup', 'memo-section'].forEach(function (id) {
+    var sec = document.getElementById(id);
+    if (!sec) return;
+    var h2 = sec.querySelector('h2');
+    if (!h2) return;
+    sec.classList.add('folded', 'foldable');
+    h2.addEventListener('click', function () { sec.classList.toggle('folded'); });
+  });
+})();
+</script>
+</body></html>"""
 
 html = head + js
 

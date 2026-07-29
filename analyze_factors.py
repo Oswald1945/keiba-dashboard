@@ -7,7 +7,7 @@ from scipy.stats import spearmanr
 SD = pathlib.Path(__file__).parent
 DONE = SD / 'input' / 'done'
 
-FACTORS = ['総合スコア','最高出力pts','クラスpts','時計pts','展開pts','斤量pts','距離pts',
+FACTORS = ['総合スコア','最高出力pts','クラスpts','時計pts','コース特徴pts','斤量pts','距離pts',
            'コース適性pts','臨戦pts','人気補正pts','騎手pts','馬体重pts','継続pts','着差pts',
            '枠順pts','昇級pts','馬場適性pts','SmartRC評価pts']
 

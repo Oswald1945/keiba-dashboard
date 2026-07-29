@@ -28,3 +28,29 @@ input/
 # Windows
 Thumbs.db
 desktop.ini
+
+# Webアプリ（いつでも作り直せるもの）
+app/frontend/node_modules/
+app/frontend/dist/
+app/backend/.cache/
+
+# 回帰テストの基準データは上の中間生成データ扱いから除外しない
+# （smartrc_*.json 等のルールに巻き込まれて基準が欠けるのを防ぐ）
+!app/tests/golden/**
+
+# 個人メモ。リポジトリが公開設定のため、GitHubには置かない。
+memo_horses.json
+app/data/users.json
+app/data/invites.json
+app/data/session_secret.txt
+# 削除予定のメモ。いまは空だが、本文が入る器なので同じ扱いにする。
+app/data/memo_archived.json
+
+# 公開サーバーの接続先（IP・ユーザー名）。同じ理由で置かない。
+app/data/server.json
+
+# 退避フォルダ（約1.9GB・14000ファイル）。メモの控えも入るため必ず除外する。
+_archive/
+
+# JV-Link の書き出し（中間データ。いつでも作り直せる）
+jv_out/

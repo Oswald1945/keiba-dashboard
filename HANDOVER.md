@@ -1,5 +1,5 @@
 # 競馬ダッシュボード プロジェクト引継ぎ資料
-作成日: 2026-06-08
+作成日: 2026-06-08 / 最終更新: 2026-06-17
 
 ---
 
@@ -41,8 +41,8 @@ python run_new.py --review # 回顧生成 → GitHub push
 
 ### 再生成フロー（done/フォルダから）
 ```
-python resample_test.py --date 20260607   # 特定日を全再生成
-python resample_test.py --race 20260607_hs11  # 特定レースを再生成
+python resample_test.py --date 20260614   # 特定日を全再生成
+python resample_test.py --race 20260614_hs11  # 特定レースを再生成
 python resample_test.py --all             # 全レース再生成
 python resample_test.py --list            # 利用可能レース一覧
 ```
@@ -82,11 +82,11 @@ run_new.py と fetch_baba.py の両方に定義されている。
 # JRA
 'TK','TO' → 東京
 'CB','NA','NS' → 中山
-'HN','HS' → 阪神      ← HS追加済み（以前はHSが欠落していてエラー）
+'HN','HS' → 阪神
 'KT','KY' → 京都
 'CK','CC' → 中京
 'NK','NG','NI' → 新潟
-'HK' → 函館
+'HK','HD' → 函館
 'SM','SP' → 札幌
 'FK' → 福島
 'KO','KK' → 小倉
@@ -116,19 +116,36 @@ run_new.py と fetch_baba.py の両方に定義されている。
 | 馬体重補正 | 0/-1pt | 大幅増減で減点 |
 | 継続騎乗 | 0/+1pt | 同騎手継続で加点 |
 | 前走着差 | -2〜+1pt | 着差の大小 |
-| SmartRC評価補正 | -4.5〜+4.5pt | 過去5走の有利不利加重平均 |
+| SmartRC評価補正 | -3.0〜+4.5pt | 過去5走の有利不利加重平均 |
 | 上がりpts | ±3pt | 上がり3F偏差値 |
+| 枠番補正 | ±3pt程度 | コース別10年実績データに基づく枠番勝率補正 |
 
-### SmartRC評価係数
+### SmartRC評価係数（現行）
 ```python
 SMARTRC_HYOKA_PTS = {
-    'A': +4.5,  # 大きく不利 → 実力過小評価
-    'B': +2.5,  # やや不利
-    'C':  0.0,  # 中立
-    'D': -2.5,  # やや有利に恵まれた
-    'E': -4.5,  # 大きく有利
+    'A': +4.5,   # 大きく不利 → 実力過小評価 → 上方修正
+    'B': +2.5,   # やや不利
+    'C':  0.0,   # 中立
+    'D': -2.5,   # やや有利
+    'E': -3.0,   # 大きく有利（-4.5→-3.0に緩和済: 実力馬の過剰ペナルティを抑制）
 }
 ```
+
+### コース別枠番補正（calc_wakuban_pts）
+全JRA10場の過去10年レースデータ（約40万頭）から枠番別勝率を集計し、コース・距離カテゴリ別に補正値テーブルを構築。枠1〜8それぞれに対して最大±3pt程度の補正を付与。
+
+---
+
+## ダッシュボードUI概要（build_dashboard_v3.py）
+
+### バッジエリア（予想結果サマリーの下に表示）
+- **💎 注目馬**: 妙味あり（EV判定で割安かつ一定条件を満たす馬）
+- **⭐ 本命馬自信あり**: `偏差値 ≥ 65 OR スコアリード ≥ 15pt` かつ1番人気でない場合に表示
+
+### EVシミュレーター
+- **モデル信頼度スライダー（T値）**: デフォルト20。小さいほど上位馬に確率集中、大きいほど全馬分散
+- **softmax変換**: スコア → 勝率推定。大穴馬は市場オッズの最大3倍までに圧縮（MAX_RATIO=3.0）
+- **採算オッズ**: 現在オッズ欄に入力すると即時EV更新
 
 ---
 
@@ -136,56 +153,49 @@ SMARTRC_HYOKA_PTS = {
 
 ### 1. `WAKU_BG is not defined` ReferenceError（修正済み）
 - **原因:** `WAKU_BG`定数がinner functionスコープ外で未定義
-- **修正:** `build_dashboard_v3.py` のメインJSスコープ（関数定義より前）に`const WAKU_BG = {...}`を追加
+- **修正:** `build_dashboard_v3.py` のメインJSスコープに`const WAKU_BG = {...}`を追加
 
 ### 2. HS（阪神）会場コード欠落（修正済み）
 - **原因:** `run_new.py`と`fetch_baba.py`の会場コードマップに`HS`が未登録
-- **修正:** 両ファイルに`'HS': '阪神'`を追加（`HN`と並記）
+- **修正:** 両ファイルに`'HS': '阪神'`を追加
 
 ### 3. EV初期値がフラットにならない問題（修正済み）
-- **原因:** `_userOdds`初期化が`computeEV`関数外で行われ、デフォルト値でEVが計算されていた
+- **原因:** `_userOdds`初期化が`computeEV`関数外で行われていた
 - **修正:** `_userOdds`初期化を`computeEV`関数内部の先頭に移動
 
 ### 4. ファイルトランケーション（繰り返し発生しやすい）
 - **現象:** 大きなPythonファイルを編集後に末尾が切れる
 - **対処:** 編集後に`wc -l`で行数確認 + 末尾`if __name__ == '__main__':`の有無チェック
-- 補完スクリプト: `repair_score_horse.py`（過去に使用）
+- **復旧:** `git show HEAD:ファイル名 | tail -n +{切れた行番号}` で末尾を補完
 
-### 5. Nullバイト混入（修正済み）
-- **原因:** 不明（ファイル保存時の問題）
-- **修正:** `data.replace(b'\x00', b'')`でnullバイトを除去してからパース
+### 5. Nullバイト混入（score_horse_v3.py）
+- **原因:** ファイル保存時の問題（繰り返し発生することがある）
+- **修正:** `python3 -c "data=open(f,'rb').read(); open(f,'wb').write(data.rstrip(b'\\x00'))"`
+
+### 6. Zone2バグ（修正済み / 2026-06-17）
+- **原因:** `n*0.32 <= 4.5` の条件でn=15のとき zone2 が実質空になる
+- **修正:** 条件を `n*0.32 <= 5.0` に変更（calc_tenkai_pts_all内）
 
 ---
 
-## 現在の状態（2026-06-08時点）
+## 現在の状態（2026-06-17時点）
 
-### 最新の予想ダッシュボード（2026-06-07 阪神・東京）
-
-**📍 阪神（hs）**
-- R7: https://oswald1945.github.io/keiba-dashboard/pred_20260607_hs7.html
-- R8: https://oswald1945.github.io/keiba-dashboard/pred_20260607_hs8.html
-- R9: https://oswald1945.github.io/keiba-dashboard/pred_20260607_hs9.html
-- R10: https://oswald1945.github.io/keiba-dashboard/pred_20260607_hs10.html
-- R11: https://oswald1945.github.io/keiba-dashboard/pred_20260607_hs11.html
-- R12: https://oswald1945.github.io/keiba-dashboard/pred_20260607_hs12.html
+### 最新の予想ダッシュボード（2026-06-14 東京・阪神・函館）
 
 **📍 東京（tk）**
-- R7: https://oswald1945.github.io/keiba-dashboard/pred_20260607_tk7.html
-- R8: https://oswald1945.github.io/keiba-dashboard/pred_20260607_tk8.html
-- R9: https://oswald1945.github.io/keiba-dashboard/pred_20260607_tk9.html
-- R10: https://oswald1945.github.io/keiba-dashboard/pred_20260607_tk10.html
-- R11: https://oswald1945.github.io/keiba-dashboard/pred_20260607_tk11.html
-- R12: https://oswald1945.github.io/keiba-dashboard/pred_20260607_tk12.html
+- R6〜R12: https://oswald1945.github.io/keiba-dashboard/pred_20260614_tk6.html 〜 tk12
 
-### 最新の回顧ダッシュボード（2026-06-07）
-- HN7R: https://oswald1945.github.io/keiba-dashboard/20260607_HN7R_C1_review.html
-- HN8R: https://oswald1945.github.io/keiba-dashboard/20260607_HN8R_C1_review.html
-- HN9R: https://oswald1945.github.io/keiba-dashboard/20260607_HN9R_C2_SumotoTokubetsu_review.html
-- HN10R〜HN12R: 同様にGitHub Pages公開済み
-- TK7R〜TK12R: 同様にGitHub Pages公開済み（安田記念含む）
+**📍 阪神（hs）**
+- R6〜R12: https://oswald1945.github.io/keiba-dashboard/pred_20260614_hs6.html 〜 hs12
+
+**📍 函館（hd）**
+- R7〜R12: https://oswald1945.github.io/keiba-dashboard/pred_20260614_hd7.html 〜 hd12
 
 ### doneフォルダ状況
 - `input/done/` に蓄積中（2022〜2026年のレースデータ）
+
+### 未完了タスク
+- **Task #8「過去レース再スコアリング＆精度検証」**: in_progress（枠番補正・Zone2修正後の精度検証がまだ）
 
 ---
 
@@ -205,13 +215,16 @@ python run_new.py --review
 python run_new.py --force
 
 # 特定日の全レース再生成
-python resample_test.py --date 20260607
+python resample_test.py --date 20260614
 
 # 利用可能レース一覧
 python resample_test.py --list
 
-# 馬場情報取得（例: 東京 2026-06-14）
-python fetch_baba.py --venue 東京 --date 20260614 --out baba_TK.json
+# 馬場情報取得（例: 東京 2026-06-21）
+python fetch_baba.py --venue 東京 --date 20260621 --out baba_TK.json
+
+# SmartRC手動取得（自動取得失敗時のみ）
+python smartrc_fetch.py --rcode 2026062105011211 --out
 
 # メモ馬管理URL
 https://oswald1945.github.io/keiba-dashboard/memo_horses.html
@@ -219,13 +232,13 @@ https://oswald1945.github.io/keiba-dashboard/memo_horses.html
 
 ---
 
-## 今後の改善候補（未着手）
+## 今後の改善候補
 
-1. **スコア精度向上** - コース適性・距離適性の更なる細分化
-2. **複数日付の回顧一括生成** - `resample_test.py`への機能追加
-3. **SmartRC評価の重み調整** - 現状の±4.5ptが最適かの検証
-4. **馬場状態の予想への反映精度向上** - 雨量→馬場劣化の推定精度改善
-5. **UI改善** - ダッシュボードのモバイル表示最適化
+1. **Task #8 精度検証**: 枠番補正・Zone2修正後の過去レース再スコアリングで的中率変化を計測
+2. **スコア精度向上**: コース適性・距離適性の更なる細分化
+3. **SmartRC評価の重み調整**: 現状の係数（A:+4.5〜E:-3.0）が最適かの継続検証
+4. **複数日付の回顧一括生成**: `resample_test.py`への機能追加
+5. **UI改善**: ダッシュボードのモバイル表示最適化
 
 ---
 

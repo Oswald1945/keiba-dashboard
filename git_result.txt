@@ -1,0 +1,14 @@
+[1] no lock file
+[2] git add: 0 warning: in the working copy of 'build_dashboard_v3.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'do_git.py', LF will be replaced by CRLF the next time Git touches it
+
+[3] git commit: 0
+[main 845a02b] ui: add badge area for 注目馬/本命馬自信あり; rename 自信あり badge with horse name
+ 2 files changed, 42 insertions(+), 35 deletions(-)
+
+[4] git push: 0
+To https://github.com/Oswald1945/keiba-dashboard.git
+   27973d9..845a02b  main -> main
+
+
+=== DONE ===

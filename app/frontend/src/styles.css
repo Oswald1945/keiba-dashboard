@@ -1,0 +1,1386 @@
+/* JRA公式サイト(jra.go.jp)から採取した色に合わせた明色テーマ。
+   採取値: ヘッダー緑 #007853 / 濃緑 #004C2C / 淡緑 #DEF2ED / 極淡緑 #F2FCF6
+           文字 #333333 / リンク青 #0155AD / 赤 #CC3535
+   白を主役にして、緑の同系色で階層をつける。
+   PC=横並び / スマホ=縦積み。同じ画面をCSSだけで切り替える。 */
+:root {
+  --green:      #00674a;
+  --green-dark: #004c2c;
+  --green-mid:  #248250;
+  --green-pale: #d3e6dd;
+  --green-lite: #eef4f1;
+
+  --bg: #dde8e2;        /* 画面の下地。白飛びしないよう一段落とす */
+  --panel: #ffffff;     /* カードは白のままにして文字を読みやすく */
+  --panel2: #eef4f1;
+  --text: #2b2b2b;
+  --muted: #4d5a53;
+  --accent: #00674a;
+  --line: #b4c9be;
+  --link: #0155ad;
+  --danger: #c0392b;
+
+  /* JRA公式サイトと同じフォント指定（Windowsではメイリオになる） */
+  --font: "Hiragino Sans", "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN",
+          メイリオ, Meiryo, "Yu Gothic UI", "ＭＳ Ｐゴシック", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ボタン・入力欄はブラウザ既定のフォントになるので、明示的に揃える */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.header h1 {
+  font-size: 20px;
+  margin: 8px 0 4px;
+  color: var(--green-dark);
+}
+
+.header .sub {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 15px; /* iOSで自動ズームしない最小サイズ */
+  width: 100%;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+.note.error {
+  color: var(--danger);
+}
+
+/* 会場ごとの列。スマホは1列、PCは開催会場数（最大3）に合わせる。 */
+.venue-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.venue-col {
+  min-width: 0;
+}
+
+.venue-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  /* 開いている日付の見出しと同じ濃さにする（色が少しだけ違うと目につくため） */
+  background: var(--green-dark);
+  color: #fff;
+  border-radius: 8px 8px 0 0;
+}
+
+.venue-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.venue-kaisai {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.venue-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.race-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 6px;
+  background: #fff;
+}
+
+.race-no {
+  font-weight: 700;
+  color: var(--green-dark);
+  font-size: 13px;
+  flex: 0 0 auto;
+  min-width: 28px;
+}
+
+.race-time {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 注目レースの印 */
+.star {
+  flex: 0 0 auto;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted);
+  padding: 4px 0;
+  user-select: none;
+}
+
+.star.on { color: #d8a800; }
+.star:hover { color: #b06000; }
+
+.race-item.featured {
+  background: #fffaf0;
+  box-shadow: inset 3px 0 0 #d8a800;
+}
+
+.race-item.featured:hover { background: #fff5e0; }
+
+/* 名前と条件に余った幅をすべて配分する（重賞名が長くても列は広げない） */
+.race-title {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.race-item.empty { opacity: 0.5; }
+
+.race-item {
+  background: #fff;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 6px;
+  /* 1レース＝1行を守る。折り返すと会場の列ごとに行の高さが揃わなくなる。
+     入りきらない分はレース名側を詰めて「…」で切る。 */
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.race-list .race-item:last-child { border-bottom: none; }
+
+.race-item:hover {
+  background: var(--green-lite);
+}
+
+/* 長い重賞名は「…」で切らず2行まで折り返す。横幅は1列のまま。
+   （nowrap のままだと「デルマーサラブレッドクラブ賞マリーンＳ」が見切れる） */
+.race-name {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+/* レース名が無い平場は条件を見出しにするので、太字にしない */
+.race-name.plain {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.race-cond {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;      /* 「2勝／芝／2600m」と縦に割れるのを防ぐ */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+/* 一覧のバッジは押すとその画面に直接飛べるボタン */
+button.badge {
+  cursor: pointer;
+  padding: 3px 8px;
+  min-height: 24px;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+/* 1行に収めるため、バッジ側は縮まず折り返さない */
+.badges {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+button.badge:hover { filter: brightness(1.08); }
+
+.badge-pred {
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+  color: #fff;
+}
+
+/* 管理画面の情報表示用（白地に緑の枠）。押せないラベルはこちらを使う。 */
+.badge-outline {
+  background: #fff;
+  border-color: var(--green);
+  color: var(--green-dark);
+}
+
+/* 確定成績で作った回顧。予想と同じ濃い緑。 */
+.badge-review {
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+  color: #fff;
+}
+
+/* 速報成績のままの回顧。確定で作り直せば濃い緑に変わる。 */
+.badge-review.rt {
+  background: var(--green-pale);
+  border-color: #a9cfc2;
+  color: var(--green-dark);
+}
+
+.badge-todo {
+  background: #fff8e6;
+  border-color: #d8a800;
+  color: #7a5c00;
+}
+
+.badge-note {
+  background: var(--green-pale);
+  border-color: #a9cfc2;
+  color: var(--green-dark);
+}
+
+.badge-baba {
+  background: #fdeee6;
+  border-color: #d9865a;
+  color: #8a4520;
+}
+
+/* ── 閲覧画面 ───────────────────────────────────────── */
+.viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.viewer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.viewer-title {
+  font-size: 13px;
+  color: var(--muted);
+  flex: 1 1 100%;
+  order: 3;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--link);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.tab {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.tab.active {
+  background: var(--green-dark);
+  color: #fff;
+  border-color: var(--green-dark);
+  font-weight: 700;
+}
+
+.tab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.viewer-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #fff;
+}
+
+/* ── EV判定 ─────────────────────────────────────────── */
+.viewer-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.ev-panel {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.ev-warning {
+  background: #fff8e6;
+  border: 1px solid #d8a800;
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.ev-tabs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.save-state {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ev-note {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.ev-list,
+.bet-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ev-item,
+.bet-item {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.ev-item.local {
+  opacity: 0.55;
+}
+
+.ev-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ev-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.uma-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 11px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+  flex: 0 0 auto;
+}
+
+.ev-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ev-facts b {
+  color: var(--text);
+}
+
+.ev-input-row,
+.bet-line1,
+.bet-line2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 12px;
+}
+
+.ev-label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.be-odds {
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+.odds-input {
+  width: 84px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 15px; /* iOSで自動ズームしない最小サイズ */
+  text-align: right;
+}
+
+.ev-value,
+.ev-judge {
+  font-weight: 700;
+}
+
+.ev-positive { color: #0a7d3c; }
+.ev-negative { color: var(--danger); }
+.ev-neutral  { color: #6b7a72; }
+
+.ev-h3 {
+  font-size: 16px;
+  margin: 18px 0 8px;
+}
+
+.bet-banner {
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid;
+}
+
+.bet-banner.buy {
+  background: var(--green-pale);
+  border-color: var(--green);
+}
+
+.bet-banner.nobuy {
+  background: #fdecec;
+  border-color: var(--danger);
+}
+
+.bet-badge {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.bet-reason {
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.bet-anchor {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.axis-note {
+  font-size: 11px;
+  color: #b06000;
+  line-height: 1.7;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.bet-cols {
+  font-size: 12px;
+  color: var(--muted);
+  display: grid;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.bet-uma {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.muted { color: var(--muted); }
+.warn  { color: #b06000; font-weight: 700; }
+
+/* ── 全体ナビ（スマホは下部固定・親指で届く位置） ───────── */
+.globalnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.navbtn {
+  flex: 1;
+  background: none;
+  border: none;
+  border-top: 2px solid transparent;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 12px 6px;      /* タップ領域を44px以上に */
+  min-height: 48px;
+  cursor: pointer;
+}
+
+.navbtn.active {
+  color: var(--green-dark);
+  border-top-color: var(--green-dark);
+  font-weight: 700;
+  background: var(--green-pale);
+}
+
+/* 下部ナビに隠れないよう本文の下に余白を作る */
+.viewhost {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0));
+}
+
+.viewhost .viewer {
+  height: calc(100dvh - 64px - env(safe-area-inset-bottom, 0));
+}
+
+/* モード切替バー */
+.modebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  background: var(--green-dark);
+  color: #fff;
+  font-size: 12px;
+}
+
+.modebar .muted { color: rgba(255, 255, 255, 0.85); }
+
+.modebar .check { font-size: 13px; color: #fff; }
+
+/* 公開サーバーのログアウト。右端に寄せる（左は「ログイン中：ID」） */
+.modebar .logout {
+  margin-left: auto;
+  color: #fff;
+  font-size: 13px;
+  text-decoration: underline;
+  padding: 2px 4px;
+}
+
+.modebar .logout:hover { color: #cfe6d9; }
+
+/* ── 折り畳み ───────────────────────────────────────── */
+.collapsible {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  margin-bottom: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* 見出しは濃い緑の帯＋白文字。
+   薄緑にすると、ページ背景(--bg #dde8e2)とほとんど同じ色になって見出しが埋もれ、
+   画面全体が単調に見えてしまう。白い本文との明暗差で区切りを作る。
+   開いている見出しはさらに濃くして、開閉の状態が色でも分かるようにする。 */
+.collapsible-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  border: none;
+  color: #fff;
+  text-align: left;
+  padding: 12px;
+  min-height: 48px;      /* タップ領域 */
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.collapsible.open .collapsible-head {
+  background: var(--green-dark);
+  border-bottom: 1px solid var(--line);
+}
+
+.collapsible-head:hover { background: var(--green-dark); }
+.collapsible.open .collapsible-head:hover { background: #003a22; }
+
+.collapsible-caret {
+  color: #fff;
+  opacity: 0.8;
+  width: 12px;
+  flex: 0 0 auto;
+}
+
+.collapsible-title {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapsible-sub {
+  margin-left: auto;
+  color: #fff;
+  opacity: 0.8;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* 画面幅で出し分ける（既定はスマホ向け＝狭い方を表示） */
+.only-wide { display: none; }
+.only-narrow { display: inline; }
+
+/* 見出しを1行に収める。日付が2行に折り返すと一覧が読みにくい。 */
+.collapsible-head .collapsible-title { min-width: 0; }
+.collapsible-head .collapsible-title > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collapsible-body { padding: 12px; }
+
+/* 折り畳みの中では二重枠にしない */
+.collapsible .collapsible { border-left: none; border-right: none; border-radius: 0; }
+
+/* ── メモ馬 ─────────────────────────────────────────── */
+.memo-filters {
+  grid-template-columns: 1fr;
+  align-items: center;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.btn {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 11px 14px;
+  min-height: 44px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: var(--green-dark);
+  color: #fff;
+  border-color: var(--green-dark);
+  font-weight: 700;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.link-btn.danger {
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.memo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+/* 登録レース数が違う馬が横に並ぶと、grid だと見出しまで引き伸ばされてしまう。
+   縦積みにして、余った高さは最後のメモ欄が吸収する。 */
+.memo-horse {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.memo-horse > * { flex: 0 0 auto; }
+
+/* 最後のメモだけ伸ばして、カードの高さを揃える */
+.memo-horse > .memo-entry:last-child {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.memo-horse > .memo-entry:last-child textarea {
+  flex: 1 1 auto;
+  min-height: 64px;
+}
+
+/* 見出し行に薄い緑を敷いて、白の面積を減らす */
+.memo-head {
+  background: var(--green-pale);
+  margin: -10px -12px 0;
+  padding: 8px 12px;
+  border-radius: 9px 9px 0 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.memo-name { color: var(--green-dark); }
+
+.memo-entry {
+  background: var(--green-lite);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
+  margin-top: 2px;
+}
+
+.memo-racedate {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.memo-registered {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.memo-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.memo-name {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.memo-src {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.memo-meta {
+  font-size: 11px;
+}
+
+.memo-text {
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
+  background: #fff;
+}
+
+/* 追加フォーム */
+.memo-form {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.req {
+  color: var(--danger);
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.form-actions,
+.dup-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* 重複確認 */
+.dup-box {
+  border: 1px solid #d8a800;
+  background: #fff8e6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 12px;
+}
+
+.dup-title {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.dup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.dup-item {
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  display: grid;
+  gap: 3px;
+}
+
+.dup-item.same {
+  outline: 1px solid var(--accent);
+}
+
+.dup-src {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-weight: 700;
+}
+
+.dup-memo {
+  color: var(--muted);
+}
+
+.dup-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── 管理画面 ───────────────────────────────────────── */
+.admin-status {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.admin-status .ok { color: var(--green); }
+.admin-status .ng { color: var(--danger); }
+
+.bet-h4 {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 14px 0 6px;
+}
+
+/* 工程番号。見出しと同じ色にして、番号だけが浮かないようにする。 */
+.step {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.checklist {
+  background: var(--green-lite);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12px;
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.small { font-size: 11px; }
+
+.warn-box {
+  background: #fff8e6;
+  border: 1px solid #d8a800;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.race-group {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.group-head .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.race-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px;
+  min-height: 44px;
+  font-size: 12px;
+  cursor: pointer;
+  display: grid;
+  gap: 1px;
+  min-width: 60px;
+  align-content: center;
+}
+
+.chip.on {
+  background: var(--green-dark);
+  color: #fff;
+  border-color: var(--green-dark);
+  font-weight: 700;
+}
+
+.chip.maiden {
+  border-color: #d8a800;
+  background: #fff8e6;
+}
+
+.chip.maiden .chip-sub { color: #7a5c00; }
+.chip.on.maiden .chip-sub { color: #fff; }
+.chip-sub { font-size: 10px; }
+
+.baba-card {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.baba-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.baba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.baba-grid label {
+  display: grid;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.gen-list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.gen-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--green-lite);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.gen-links {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.gen-links a { color: var(--link); }
+
+.pending-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.result-box {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.result-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.result-chip {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.result-chip.確定 { background: var(--green-pale); border-color: var(--green); }
+.result-chip.一部 { background: #fff8e6; border-color: #d8a800; }
+.result-chip.未確定 { background: #f2f2f2; }
+
+/* ジョブログ */
+.joblog {
+  background: #1d2b24;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+.joblog-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.job-status {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.job-status.running { background: #d8e8ff; }
+.job-status.ok { background: var(--green-pale); }
+.job-status.error { background: #fdecec; }
+.job-status.cancelled { background: #eee; }
+
+.joblog-body {
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #e6f0ea;
+}
+
+/* ── 検証画面 ───────────────────────────────────────── */
+.val-filters {
+  grid-template-columns: 1fr;
+  align-items: end;
+}
+
+.source-row {
+  display: grid;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.source-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.preset-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.vf {
+  display: grid;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.kpi {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.kpi-sub {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.bd { margin-top: 10px; }
+
+/* 表は必ず自分の中で横スクロールさせる（ページ全体を横に伸ばさない） */
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.val-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.val-table th,
+.val-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.val-table th {
+  background: var(--green-pale);
+  color: var(--green-dark);
+  font-weight: 700;
+  font-size: 11px;
+  position: sticky;
+  top: 0;
+}
+
+.val-table td.n,
+.val-table th.n { text-align: right; }
+
+.val-table tr:last-child td { border-bottom: none; }
+
+/* ── PC ───────────────────────────────────────────── */
+@media (min-width: 720px) {
+  .only-wide { display: inline; }
+  .only-narrow { display: none; }
+
+  .filters {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  .race-item {
+    align-items: center;
+    gap: 8px;
+  }
+
+  .viewer-title {
+    flex: 1;
+    order: 0;
+  }
+
+  .memo-filters {
+    grid-template-columns: 2fr auto auto;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .form-grid .wide {
+    grid-column: 1 / -1;
+  }
+
+  .val-filters {
+    grid-template-columns: repeat(4, auto) 1fr auto;
+    gap: 10px;
+  }
+
+  /* PCは画面が広いので、ナビを上に戻して本文を広く使う */
+  .globalnav {
+    position: static;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 8px 12px 0;
+    background: none;
+    border-top: none;
+    gap: 4px;
+  }
+
+  .navbtn {
+    flex: 0 0 auto;
+    border-top: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 16px;
+  }
+
+  .navbtn.active {
+    border-top-color: transparent;
+    border-bottom-color: var(--accent);
+    background: none;
+  }
+
+  .viewhost { padding-bottom: 0; }
+  .viewhost .viewer { height: 100dvh; }
+
+  /* 会場ごとに列を作る（2場開催なら2列、3場なら3列） */
+  .venue-cols {
+    grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+  }
+
+  /* メモ馬はPCで2カラム */
+  .memo-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .val-filters .preset-row {
+    grid-column: 1 / -1;
+  }
+}

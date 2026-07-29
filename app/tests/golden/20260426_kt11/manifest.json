@@ -1,0 +1,25 @@
+{
+  "race_id": "20260426_kt11",
+  "date": "20260426",
+  "venue": "京都",
+  "baba": "良",
+  "race_class": "Ｇ２",
+  "surface": "芝",
+  "inputs": {
+    "過去走": "過去走_20260426_kt11.csv",
+    "出馬表": "出馬表_20260426_kt11.csv",
+    "坂路": "坂路_20260426_kt11.csv",
+    "ウッド": "ウッド_20260426_kt11.csv"
+  },
+  "traits": {
+    "has_local_only": false,
+    "has_smartrc": true,
+    "has_result": false,
+    "missing_training": false,
+    "wide_top_odds": true
+  },
+  "smartrc": "smartrc_20260426_kt11.json",
+  "baba_json": "baba_20260426_kt11.json",
+  "track_bias_sources": {},
+  "effective_memo_sha256": "07473db7b7e3bd5651678a21d8adae166a1f9634740de1a35d25a86a321041b9"
+}

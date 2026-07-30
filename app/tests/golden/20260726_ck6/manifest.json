@@ -9,17 +9,19 @@
     "過去走": "過去走_20260726_ck6.csv",
     "出馬表": "出馬表_20260726_ck6.csv",
     "坂路": "坂路_20260726_ck6.csv",
-    "ウッド": "ウッド_20260726_ck6.csv"
+    "ウッド": "ウッド_20260726_ck6.csv",
+    "レース結果": "レース結果_20260726_ck6.csv"
   },
   "traits": {
     "has_local_only": false,
     "has_smartrc": true,
-    "has_result": false,
+    "has_result": true,
     "missing_training": false,
     "wide_top_odds": false
   },
   "smartrc": "smartrc_20260726_ck6.json",
   "baba_json": "baba_20260726_ck6.json",
+  "haraimodoshi": "haraimodoshi_20260726_ck6.json",
   "track_bias_sources": {
     "レース結果_20260725_ck10.csv": "a1a0bed0c6182b2d217c2ece9451f1a9c6cc8250577d32a272fe4cc412317a50",
     "レース結果_20260725_ck11.csv": "4aeea8795741d915796eca94256ba7f52635883737279706bb31f01278319028",
@@ -28,5 +30,5 @@
     "レース結果_20260725_ck8.csv": "079aa50d06491005d4f15b6cf65179096386b71257fa1c84c4b9c7a234f8f44f",
     "レース結果_20260725_ck9.csv": "6b0ddaf44e67cae8522756b61701bd0422aa9db8fd8fab170a9047ea1bf8656f"
   },
-  "effective_memo_sha256": "c095a61c899574f011469a50c86c46e8f35266b4ba3917e4abd715d733d4378d"
+  "effective_memo_sha256": "62d9769b8138e929ef3f1067a4d29ef49c1cc96db3650ec97f95d9e1731533b8"
 }

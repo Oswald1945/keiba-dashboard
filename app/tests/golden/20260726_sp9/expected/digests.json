@@ -1,4 +1,6 @@
 {
-  "pred_html_sha256": "30bc09758adcebec65026c80017ebbce5b0a9c141ab79f4c7dabe6514cd8472d",
-  "pred_html_bytes": 193512
+  "pred_html_sha256": "3df0d1628b442afb91aabae749d4cb3eedf8ade4bd64cadd27bdc5797303ac24",
+  "pred_html_bytes": 209189,
+  "review_html_sha256": "df6869635623f2e8e790136289dae3dc304fd45db6d4cb4ce4f038324b415007",
+  "review_html_bytes": 68879
 }

@@ -908,6 +908,7 @@ _comp_fields = [
     ('枠順pts',       '枠順',     '#9edae5'),  # ライトシアン
     ('昇級pts',       '昇級',     '#c5b0d5'),  # ラベンダー
     ('クラス適応pts',  'クラス適応', '#1abc9c'),  # ターコイズ
+    ('上がりpts',     '上がり',    '#6a51a3'),  # ダークバイオレット
     ('SmartRC評価pts',  'SmartRC評価', '#b06000'),  # アンバー
     ('馬場適性pts',       '馬場適性',   '#16a085'),  # エメラルド
 ]
@@ -918,13 +919,18 @@ _chart_datasets = [
      'backgroundColor': col, 'stack': 'adj'}
     for fld, lbl, col in _comp_fields
 ]
+# 棒の高さ（補正項目の合計）と総合スコアは一致しない。
+# 偏差値gap収縮補正や調教フロアが後から効くため、順位（総合スコア順）と
+# 棒の高さが前後することがある。総合スコアを点で重ねる案は、棒に埋もれて
+# かえって読みにくかったため入れていない。
 score_chart_json = json.dumps(
     {'labels': _chart_labels, 'datasets': _chart_datasets}, ensure_ascii=False)
 
 # 積み上げチャートの色凡例。18頭立てだとチャート内の凡例が場所を取りすぎるので、
 # スマホではチャートの凡例を消し、代わりにこの折り畳みを出す。
 _stack_legend_html = (
-    '<details class="note-fold stack-legend"><summary>色の凡例（16項目）</summary>'
+    f'<details class="note-fold stack-legend">'
+    f'<summary>色の凡例（{len(_comp_fields)}項目）</summary>'
     '<div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;'
     'color:#4d5a53;padding:6px 0">'
     + ''.join(

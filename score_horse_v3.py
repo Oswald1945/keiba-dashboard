@@ -2572,11 +2572,27 @@ def compute_scores(
     if _floor_applied:
         print(f"  [C-3b] 調教フロア適用: {', '.join(_floor_applied)}")
 
-    # 出馬表に単勝オッズ列がない場合、過去走から引き継いだオッズをクリア
-    # （採算オッズをダッシュボード側で表示するため）
-    if shutuba_df is not None and '単勝オッズ' not in shutuba_df.columns:
-        res['単勝オッズ'] = None
-        res['人気'] = None
+    # 今走の単勝オッズ・人気は「出馬表に実際に入っている値」だけを使う。
+    #
+    # 出馬表には単勝の列があっても、レース前は中身が空のことがある。
+    # 以前は「列が無いときだけクリア」していたため、列が空のときに
+    # 過去走から引き継いだオッズが今走のオッズとして残っていた。
+    # 実例: 前走G1で14着だったときの205.7倍が今走のオッズになり、
+    # ダッシュボードの大穴補正が勝率を10.9%→1.6%まで潰していた。
+    if shutuba_df is not None:
+        def _today_values(col: str) -> dict:
+            if col not in shutuba_df.columns:
+                return {}
+            out = {}
+            for _name, _val in zip(shutuba_df['馬名'], shutuba_df[col]):
+                v = pd.to_numeric(_val, errors='coerce')
+                if pd.notna(v) and float(v) > 0:
+                    out[str(_name).strip()] = float(v)
+            return out
+
+        _key = res['馬名'].astype(str).str.strip()
+        res['単勝オッズ'] = _key.map(_today_values('単勝オッズ'))
+        res['人気'] = _key.map(_today_values('人気'))
 
     # ── ④ 偏差値gap収縮補正（過剰評価の是正）────────────────────────────
     # 過去走バックテスト(157R)で、軸の偏差値gapが大きい「抜けた1頭」ほど

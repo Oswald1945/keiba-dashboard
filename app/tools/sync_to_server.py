@@ -144,10 +144,26 @@ def merge_memo(local: list, remote: list) -> tuple:
 
 
 # ── サーバーとのやりとり ────────────────────────────────────────
-def _ssh(conf: dict, script: str, data: bytes | None = None):
-    cmd = ['ssh', '-p', str(conf.get('port', 22)),
+# ssh/scp に必ず付ける設定。
+# アプリの中から起動すると端末が無く、鍵の確認などで入力待ちになったまま
+# 止まることがある（実際に6分以上応答しなくなった）。BatchMode で対話を
+# 一切させず、接続できないときは待たずに失敗させる。
+SSH_OPTS = ['-o', 'BatchMode=yes',
+            '-o', 'StrictHostKeyChecking=accept-new',
+            '-o', 'ConnectTimeout=20',
+            '-o', 'ServerAliveInterval=15',
+            '-o', 'ServerAliveCountMax=4']
+
+
+def _ssh(conf: dict, script: str, data: bytes | None = None, timeout: int = 180):
+    cmd = ['ssh', *SSH_OPTS, '-p', str(conf.get('port', 22)),
            f'{conf["user"]}@{conf["host"]}', script]
-    return subprocess.run(cmd, input=data, capture_output=True)
+    try:
+        return subprocess.run(cmd, input=data if data is not None else b'',
+                              capture_output=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        print(f'  サーバーの応答がありません（{timeout}秒で打ち切り）')
+        return subprocess.CompletedProcess(cmd, 1, b'', b'timeout')
 
 
 def remote_stats(conf: dict, subdir: str, patterns: list) -> dict:
@@ -189,10 +205,16 @@ def send(conf: dict, files: list, subdir: str = '') -> int:
     for i in range(0, len(files), BATCH):
         chunk = [str(f) for f in files[i:i + BATCH]]
         # -p で更新時刻を保つ（次回の差分判定に使う）
-        rc = subprocess.run(['scp', '-p', '-q', '-P', port] + chunk + [dest]).returncode
+        try:
+            rc = subprocess.run(['scp', '-p', '-q', *SSH_OPTS, '-P', port]
+                                + chunk + [dest],
+                                stdin=subprocess.DEVNULL, timeout=1800).returncode
+        except subprocess.TimeoutExpired:
+            print('    送信が終わりません（30分で打ち切り）')
+            return 1
         if rc != 0:
             return rc
-        print(f'    {min(i + BATCH, len(files))}/{len(files)} 件')
+        print(f'    {min(i + BATCH, len(files))}/{len(files)} 件', flush=True)
     return 0
 
 

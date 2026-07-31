@@ -54,5 +54,9 @@ def child_env() -> dict:
 
     run_new.py が smartrc_fetch / fetch_baba を呼ぶときと同じく
     PYTHONIOENCODING=utf-8 を立てて、標準出力の文字化けを防ぐ。
+
+    PYTHONUNBUFFERED も立てる。パイプ越しだと Python は出力を溜め込むため、
+    途中経過が画面に出ず「動いているのか止まっているのか分からない」状態に
+    なる（実際にSSHで止まったとき、ログが6行で止まって見えた）。
     """
-    return {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
+    return {**os.environ, 'PYTHONIOENCODING': 'utf-8', 'PYTHONUNBUFFERED': '1'}

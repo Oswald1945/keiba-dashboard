@@ -4,6 +4,7 @@ import Collapsible from '../ui/Collapsible'
 import {
   adminApi,
   type AdminStatus,
+  type Job,
   type AppPublishStatus,
   type BabaPreview,
   type GeneratedRace,
@@ -60,6 +61,9 @@ export default function AdminPanel() {
   // ジョブが終わるたびに増やす。⑤のパネルはこれを見て一覧を取り直す
   // （回顧を作った直後に「未公開0件」のままにならないように）。
   const [jobsDone, setJobsDone] = useState(0)
+  // 画面下部に出す固定バー用。手順②や⑤は画面のかなり下にあるため、
+  // 進捗がページ上部にしか出ないと「押せたのか」「終わったのか」が分からない。
+  const [liveJob, setLiveJob] = useState<Job | null>(null)
 
   const reload = useCallback(() => {
     adminApi.status().then(setStatus).catch((e: Error) => setError(e.message))
@@ -165,7 +169,12 @@ export default function AdminPanel() {
         </button>
       </nav>
 
-      <JobLog jobId={jobId} onFinished={() => { reload(); setJobsDone((n) => n + 1) }} />
+      <JobLog
+        jobId={jobId}
+        onProgress={setLiveJob}
+        onFinished={() => { reload(); setJobsDone((n) => n + 1) }}
+      />
+      <JobStatusBar job={liveJob} onClose={() => setLiveJob(null)} />
 
       {flow === 'review' ? (
         <>
@@ -173,6 +182,7 @@ export default function AdminPanel() {
           <ReviewAutoSection step="②" reviews={reviews} busy={busy} onRun={run} />
           <AppPublishSection
             step="③"
+            kind="review"
             dates={reviewDates}
             busy={busy}
             refreshKey={jobsDone}
@@ -262,9 +272,39 @@ export default function AdminPanel() {
       </Section>
 
       {/* ⑤ 確認してアプリへ公開 */}
-      <AppPublishSection step="⑤" dates={groups.map((g) => g.date)} busy={busy}
-                         refreshKey={jobsDone} onRun={run} />
+      <AppPublishSection step="⑤" kind="pred" dates={groups.map((g) => g.date)}
+                         busy={busy} refreshKey={jobsDone} onRun={run} />
       </>
+      )}
+    </div>
+  )
+}
+
+// ── 実行状況の固定バー ───────────────────────────────────────────
+const JOB_LABEL: Record<string, string> = {
+  queued: '待機中', running: '実行中', ok: '完了', error: '失敗', cancelled: '中断',
+}
+
+function JobStatusBar({ job, onClose }: { job: Job | null; onClose: () => void }) {
+  if (!job) return null
+  const running = job.status === 'running' || job.status === 'queued'
+  const last = job.lines?.length ? job.lines[job.lines.length - 1] : ''
+  return (
+    <div className={`jobbar ${job.status}`}>
+      <b className="jobbar-name">{job.name}</b>
+      <span className="jobbar-state">{JOB_LABEL[job.status] ?? job.status}</span>
+      {job.steps_total > 0 && (
+        <span className="jobbar-step">{job.steps_done} / {job.steps_total}</span>
+      )}
+      {running && <span className="jobbar-note">実行中は他のボタンを押せません</span>}
+      {job.error && <span className="jobbar-err">{job.error}</span>}
+      {!job.error && last && <span className="jobbar-last">{last}</span>}
+      {running ? (
+        <button className="btn" onClick={() => adminApi.cancel(job.id).catch(() => {})}>
+          中断する
+        </button>
+      ) : (
+        <button className="btn" onClick={onClose}>閉じる</button>
       )}
     </div>
   )
@@ -409,7 +449,7 @@ function BabaSection({ dates, busy }: { dates: string[]; busy: boolean }) {
           ))}
         </select>
         <button className="btn primary" disabled={loading} onClick={load}>
-          JRAから取得する
+          {loading ? 'JRAから取得中…' : 'JRAから取得する'}
         </button>
       </div>
       {err && <div className="note error">{err}</div>}
@@ -491,12 +531,16 @@ function AppPublishSection({
   dates,
   busy,
   refreshKey,
+  kind,
   onRun,
 }: {
   step: string
   dates: string[]
   busy: boolean
   refreshKey: number
+  /** 予想作成の流れなら 'pred'、回顧作成なら 'review'。
+      関係ない側の公開状況まで出すと、何を見ればよいのか分からなくなる。 */
+  kind: 'pred' | 'review'
   onRun: (fn: () => Promise<{ job_id: string }>) => void
 }) {
   const [date, setDate] = useState('')
@@ -552,16 +596,14 @@ function AppPublishSection({
     return s[kind] === 'sent'
   }
 
-  /** まだサーバーに出していない（または中身が変わった）レース。 */
-  const notYet = races.filter(
-    (r) => (r.has_pred && stateOf(r, 'pred') !== true)
-        || (r.has_review && stateOf(r, 'review') !== true),
-  )
+  const isPred = kind === 'pred'
+  const label = isPred ? '予想' : '回顧'
+  const has = (r: GeneratedRace) => (isPred ? r.has_pred : r.has_review)
 
-  const havePred = races.filter((r) => r.has_pred)
-  const haveReview = races.filter((r) => r.has_review)
-  const donePred = havePred.filter((r) => stateOf(r, 'pred') === true).length
-  const doneReview = haveReview.filter((r) => stateOf(r, 'review') === true).length
+  /** まだサーバーに出していない（または中身が変わった）レース。 */
+  const notYet = races.filter((r) => has(r) && stateOf(r, kind) !== true)
+  const haveIt = races.filter(has)
+  const doneIt = haveIt.filter((r) => stateOf(r, kind) === true).length
 
   return (
     <Section
@@ -595,9 +637,9 @@ function AppPublishSection({
           ) : (
             <>
               この日 {races.length} レース ／
-              {' '}予想 <b>{donePred}/{havePred.length}</b> 件公開済み ・
-              {' '}回顧 <b>{doneReview}/{haveReview.length}</b> 件公開済み
-              {notYet.length === 0 && races.length > 0 && <b>（すべて反映済み）</b>}
+              {' '}{label} <b>{doneIt}/{haveIt.length}</b> 件公開済み
+              {notYet.length === 0 && haveIt.length > 0 && <b>（すべて反映済み）</b>}
+              {haveIt.length === 0 && <b>（{label}はまだ作られていません）</b>}
             </>
           )}
         </div>
@@ -605,8 +647,7 @@ function AppPublishSection({
 
       <ul className="gen-list">
         {races.map((r) => {
-          const predOk = stateOf(r, 'pred')
-          const reviewOk = stateOf(r, 'review')
+          const ok = stateOf(r, kind)
           return (
             <li key={r.race_id} className="gen-item">
               <label className="check">
@@ -614,23 +655,18 @@ function AppPublishSection({
                 <b>{r.venue}{r.race_no}R</b> {r.race_name ?? ''}
               </label>
               <span className="gen-links">
-                {r.has_pred && (
-                  <a href={`/api/races/${r.race_id}/pred.html`} target="_blank" rel="noreferrer">予想を確認</a>
+                {has(r) && (
+                  <a href={`/api/races/${r.race_id}/${isPred ? 'pred' : 'review'}.html`}
+                     target="_blank" rel="noreferrer">{label}を確認</a>
                 )}
-                {r.has_review && (
-                  <a href={`/api/races/${r.race_id}/review.html`} target="_blank" rel="noreferrer">回顧を確認</a>
-                )}
-                {/* 無印だと「未公開」と「確認できていない」の区別が付かないので、両方出す */}
-                {r.has_pred && predOk !== null && (
-                  <span className={predOk ? 'badge badge-outline' : 'badge badge-todo'}>
-                    予想 {predOk ? '公開済み' : '未公開'}
+                {/* 無印だと「未公開」と「確認できていない」の区別が付かないので、
+                    確認できたときだけ出す */}
+                {has(r) && ok !== null && (
+                  <span className={ok ? 'badge badge-outline' : 'badge badge-todo'}>
+                    {label} {ok ? '公開済み' : '未公開'}
                   </span>
                 )}
-                {r.has_review && reviewOk !== null && (
-                  <span className={reviewOk ? 'badge badge-outline' : 'badge badge-todo'}>
-                    回顧 {reviewOk ? '公開済み' : '未公開'}
-                  </span>
-                )}
+                {!has(r) && <span className="muted">{label}なし</span>}
               </span>
             </li>
           )
@@ -638,7 +674,7 @@ function AppPublishSection({
       </ul>
       <button className="btn primary" disabled={!picked.size || busy}
               onClick={() => onRun(() => adminApi.appPublish([...picked]))}>
-        選んだ {picked.size} レースをアプリに公開する
+        選んだ {picked.size} レースの{label}をアプリに公開する
       </button>
       <div className="muted">
         公開先: <a href="https://oz-king-keiba.com" target="_blank" rel="noreferrer">https://oz-king-keiba.com</a>

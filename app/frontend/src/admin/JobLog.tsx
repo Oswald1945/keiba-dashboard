@@ -5,9 +5,12 @@ import { adminApi, type Job } from './adminApi'
 export default function JobLog({
   jobId,
   onFinished,
+  onProgress,
 }: {
   jobId: string | null
   onFinished?: (job: Job) => void
+  /** 1秒ごとの状態。画面下部の固定バーに出すために使う。 */
+  onProgress?: (job: Job | null) => void
 }) {
   const [job, setJob] = useState<Job | null>(null)
   const [lines, setLines] = useState<string[]>([])
@@ -20,12 +23,14 @@ export default function JobLog({
   // と回り続けてしまう。最新のものを入れ物に持ち、依存からは外す。
   const onFinishedRef = useRef(onFinished)
   useEffect(() => { onFinishedRef.current = onFinished }, [onFinished])
+  const onProgressRef = useRef(onProgress)
+  useEffect(() => { onProgressRef.current = onProgress }, [onProgress])
 
   useEffect(() => {
     setLines([])
     setJob(null)
     finishedRef.current = false
-    if (!jobId) return
+    if (!jobId) { onProgressRef.current?.(null); return }
     let alive = true
     let after = 0
     const tick = async () => {
@@ -33,6 +38,7 @@ export default function JobLog({
         const j = await adminApi.job(jobId, after)
         if (!alive) return
         setJob(j)
+        onProgressRef.current?.(j)
         if (j.lines.length) {
           after += j.lines.length
           setLines((prev) => [...prev, ...j.lines])

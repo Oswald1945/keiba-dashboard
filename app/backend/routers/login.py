@@ -12,12 +12,18 @@ from ..services import auth
 router = APIRouter()
 
 # ログインしていなくても通す道（ログイン画面・招待画面と、その見た目に必要なもの）
-OPEN_PATHS = ('/login', '/invite/', '/api/health', '/favicon.ico')
+OPEN_PATHS = ('/login', '/invite/', '/api/health', '/favicon.ico',
+              # ログイン前の画面でもアイコンを出すため
+              '/site.webmanifest', '/apple-touch-icon.png', '/icon-')
 
 _PAGE = """<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ログイン — 競馬予想/回顧ダッシュボード</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#00563a">
 <style>
   :root {{ --green:#004c2c; --line:#b4c9be; }}
   * {{ box-sizing:border-box; }}
@@ -104,6 +110,10 @@ _FORM = """<!doctype html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{title} — 競馬予想/回顧ダッシュボード</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#00563a">
 <style>
   :root {{ --green:#004c2c; --line:#b4c9be; }}
   * {{ box-sizing:border-box; }}

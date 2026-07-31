@@ -1,0 +1,16 @@
+{
+  "name": "競馬予想/回顧ダッシュボード",
+  "short_name": "競馬ダッシュボード",
+  "description": "予想と回顧のダッシュボードを見るためのアプリ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#dde8e2",
+  "theme_color": "#00563a",
+  "lang": "ja",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

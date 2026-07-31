@@ -7,7 +7,8 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import (FileResponse, HTMLResponse, JSONResponse,
+                               RedirectResponse)
 from fastapi.staticfiles import StaticFiles
 
 from . import config
@@ -82,3 +83,17 @@ if config.FRONTEND_DIST.exists():
     app.mount('/assets',
               StaticFiles(directory=config.FRONTEND_DIST / 'assets'),
               name='assets')
+
+    # アイコン類はルート直下に置かれる（ブラウザが決め打ちで取りに来るため）。
+    # まとめて mount すると API と衝突するので、実在するものだけ個別に配る。
+    def _serve(path):
+        def handler():
+            return FileResponse(path)
+        return handler
+
+    for _name in ('favicon.ico', 'site.webmanifest', 'apple-touch-icon.png',
+                  'icon-16.png', 'icon-32.png', 'icon-192.png', 'icon-512.png'):
+        _p = config.FRONTEND_DIST / _name
+        if _p.exists():
+            app.add_api_route(f'/{_name}', _serve(_p),
+                              methods=['GET'], include_in_schema=False)

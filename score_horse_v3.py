@@ -2677,6 +2677,22 @@ def compute_scores(
     return res, meta, past_races_map
 
 
+def _no_nan(v):
+    """欠損は None にそろえる。
+
+    DataFrame の欠損は NaN で来る。NaN は None ではないので、
+    受け取り側が「None でなければ数字」とみなして int() すると落ちる
+    （build_dashboard_v3.py で実際に落ちた）。欠損の表し方を None に
+    統一するだけで、値そのものには手を触れない。
+    """
+    if v is None:
+        return None
+    try:
+        return None if pd.isna(v) else v
+    except (TypeError, ValueError):
+        return v
+
+
 def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None) -> dict:
     """DataFrame → horses_data.json 用 dict"""
     horses = []
@@ -2722,11 +2738,11 @@ def build_horses_json(res: pd.DataFrame, meta: dict, past_races_map: dict = None
             '上がりpts':        round(float(r.get('上がりpts', 0)), 1),
             '馬場適性pts':      round(float(r.get('馬場適性pts', 0)), 1),
             'SmartRC評価pts':   round(float(r.get('SmartRC評価pts', 0)), 1),
-            'SmartRC評価':      r.get('SmartRC評価'),          # A/B/C/D/E or None
-            'SmartRCテンパターン':   r.get('SmartRCテンパターン'),
-            'SmartRC上がりパターン': r.get('SmartRC上がりパターン'),
-            'SmartRC人気ランク':  r.get('SmartRC人気ランク'),   # アルファベット
-            'SmartRC推定人気順':  r.get('SmartRC推定人気順'),   # 数字
+            'SmartRC評価':      _no_nan(r.get('SmartRC評価')),          # A/B/C/D/E or None
+            'SmartRCテンパターン':   _no_nan(r.get('SmartRCテンパターン')),
+            'SmartRC上がりパターン': _no_nan(r.get('SmartRC上がりパターン')),
+            'SmartRC人気ランク':  _no_nan(r.get('SmartRC人気ランク')),   # アルファベット
+            'SmartRC推定人気順':  _no_nan(r.get('SmartRC推定人気順')),   # 数字
             'SmartRCテン速度順位':  (int(r['SmartRCテン速度順位'])  if r.get('SmartRCテン速度順位')  is not None and not pd.isna(r['SmartRCテン速度順位'])  else None),
             'SmartRC上がり速度順位': (int(r['SmartRC上がり速度順位']) if r.get('SmartRC上がり速度順位') is not None and not pd.isna(r['SmartRC上がり速度順位']) else None),
             '脚質':             r['脚質'],

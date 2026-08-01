@@ -285,6 +285,24 @@ def main():
             WHERE idYear=? AND idMonthDay=? AND idJyoCD=? AND idRaceNum=?
             ORDER BY CAST(Umaban AS INTEGER)""",
         (yy, mmdd, jyo, rno)))
+
+    # 枠順確定時に除外された馬を落とす。
+    # JV-Data は木曜の出走馬名表(DataKubun=1)の時点で馬番"00"のレコードを作る。
+    # 金曜の出馬表(DataKubun=2)で馬番が振られるが、除外された馬は更新されず
+    # 馬番"00"のまま残る。これを出馬表に混ぜると出走しない馬を採点してしまい、
+    # 頭数も1頭多く数えてしまう（2026/08/02 中京7R 名鉄杯で発覚）。
+    # ただし全馬が"00"のレースは枠順そのものが無いデータ（2014〜2016年の
+    # 海外レース）なので、そのときは何も落とさない。
+    def _has_umaban(e):
+        return (e["Umaban"] or "").strip() not in ("", "00")
+
+    _numbered = [e for e in ent if _has_umaban(e)]
+    if _numbered and len(_numbered) < len(ent):
+        _dropped = [e["Bamei"] for e in ent if not _has_umaban(e)]
+        print("  [出馬表] 馬番なし（枠順確定時に除外）の %d頭を除きます: %s"
+              % (len(_dropped), ", ".join(_dropped)))
+        ent = _numbered
+
     kettos = [e["KettoNum"] for e in ent]
     name_of = {e["KettoNum"]: e["Bamei"] for e in ent}
     age_of = {e["KettoNum"]: e["Barei"] for e in ent}

@@ -397,6 +397,7 @@ function BabaSection({ dates, busy }: { dates: string[]; busy: boolean }) {
   const [msg, setMsg] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -429,11 +430,15 @@ function BabaSection({ dates, busy }: { dates: string[]; busy: boolean }) {
 
   const save = async () => {
     setErr(null)
+    setMsg(null)
+    setSaving(true)
     try {
       await adminApi.babaSave(date, edit)
-      setMsg('baba_manual.json に保存しました。')
+      setMsg(`${fmtDate(date)} の馬場を保存しました（${Object.keys(edit).length}場）。`)
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : '保存に失敗しました')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -514,10 +519,15 @@ function BabaSection({ dates, busy }: { dates: string[]; busy: boolean }) {
               </div>
             </div>
           ))}
+          {/* 結果はパネル上部にも出るが、ここまでスクロールしていると
+              見えない。ボタンのすぐ横にも同じ内容を出す。 */}
           <div className="form-actions">
-            <button className="btn primary" disabled={busy} onClick={save}>
-              確認したので保存する
+            <button className="btn primary" disabled={busy || saving} onClick={save}>
+              {saving ? '保存中…' : '確認したので保存する'}
             </button>
+            {saving && <span className="muted">baba_manual.json に書き込んでいます…</span>}
+            {!saving && msg && <span className="save-ok">{msg}</span>}
+            {!saving && err && <span className="note error">{err}</span>}
           </div>
         </>
       )}

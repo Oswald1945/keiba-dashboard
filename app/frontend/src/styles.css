@@ -1474,3 +1474,13 @@ button.badge:hover { filter: brightness(1.08); }
   font-size: 16px;
   vertical-align: -1px;
 }
+
+/* 保存できたことをボタンの横に出す。上部の通知だけだと、
+   長いパネルの下まで進んだときに見えない。 */
+.save-ok {
+  color: #1f6b3a;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.save-ok::before { content: '✔ '; }

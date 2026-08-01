@@ -1,0 +1,38 @@
+{
+  "race_id": "20260801_ck10",
+  "date": "20260801",
+  "venue": "中京",
+  "baba": "良",
+  "race_class": "1勝",
+  "surface": "ダ",
+  "inputs": {
+    "過去走": "過去走_20260801_ck10.csv",
+    "出馬表": "出馬表_20260801_ck10.csv",
+    "坂路": "坂路_20260801_ck10.csv",
+    "ウッド": "ウッド_20260801_ck10.csv"
+  },
+  "traits": {
+    "has_local_only": false,
+    "has_smartrc": true,
+    "has_result": false,
+    "missing_training": false,
+    "wide_top_odds": false
+  },
+  "smartrc": "smartrc_20260801_ck10.json",
+  "baba_json": "baba_20260801_ck10.json",
+  "track_bias_sources": {
+    "レース結果_20260725_ck10.csv": "a1a0bed0c6182b2d217c2ece9451f1a9c6cc8250577d32a272fe4cc412317a50",
+    "レース結果_20260725_ck11.csv": "4aeea8795741d915796eca94256ba7f52635883737279706bb31f01278319028",
+    "レース結果_20260725_ck6.csv": "01320fd55fa766deefc917d3facfa067596a1f9edfbf8ca9acde2609fd4d54f6",
+    "レース結果_20260725_ck7.csv": "62ffd2c355cbf4e82396a2d22fbadb9f7646733d7079a21f96846cb07935a6b7",
+    "レース結果_20260725_ck8.csv": "079aa50d06491005d4f15b6cf65179096386b71257fa1c84c4b9c7a234f8f44f",
+    "レース結果_20260725_ck9.csv": "6b0ddaf44e67cae8522756b61701bd0422aa9db8fd8fab170a9047ea1bf8656f",
+    "レース結果_20260726_ck10.csv": "97960ea2a86bd413be5abaa6e1a069d1e3071c01256087c8b4daf999e8bffbac",
+    "レース結果_20260726_ck11.csv": "1176a1b5647e87fb4da16739b13c010f11ba71eb2b7a8bdb36a7ce22aaedc928",
+    "レース結果_20260726_ck6.csv": "08cb854406a7f3202bee0f9897301602e88ff8d493b730b4f9b7c7381b70ae21",
+    "レース結果_20260726_ck7.csv": "f39c95baab60ddc8f79a0f32ac5bb0854b1d060c33b507af48848f42a6ba9c8d",
+    "レース結果_20260726_ck8.csv": "4850979b12ae13877373422503c1b7038974a7dbb2265e77be22d9bc0330ace1",
+    "レース結果_20260726_ck9.csv": "373504f333c65c54226eff100d8fa318b6b5ba1339687e522fc2bbb666b9b692"
+  },
+  "effective_memo_sha256": "bd04915664bc05a147891bdcebeb94f923f4b2b51c3ed049fcb3320108642b91"
+}

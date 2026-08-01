@@ -1,0 +1,36 @@
+{
+  "race_id": "20260801_ng8",
+  "date": "20260801",
+  "venue": "新潟",
+  "baba": "稍重",
+  "race_class": "1勝",
+  "surface": "芝",
+  "inputs": {
+    "過去走": "過去走_20260801_ng8.csv",
+    "出馬表": "出馬表_20260801_ng8.csv",
+    "坂路": "坂路_20260801_ng8.csv",
+    "ウッド": "ウッド_20260801_ng8.csv"
+  },
+  "traits": {
+    "has_local_only": false,
+    "has_smartrc": true,
+    "has_result": false,
+    "missing_training": false,
+    "wide_top_odds": false
+  },
+  "smartrc": "smartrc_20260801_ng8.json",
+  "baba_json": "baba_20260801_ng8.json",
+  "track_bias_sources": {
+    "レース結果_20260725_ng12.csv": "444363e867e717ea12c37cc69a406d6ea76ca1e839f1b4e429f8068fe6a99bc8",
+    "レース結果_20260725_ng5.csv": "7c5b2fa0f827ccfd9b389473b8f19ec5e9738c0c66138668f5f0c12914ad3ed1",
+    "レース結果_20260725_ng6.csv": "dbb83138eeeb6e6d04e76f32af4278a545450ac6567db133c691c11d1ed90804",
+    "レース結果_20260725_ng7.csv": "133962a9bac44e21f39225bb3758a659c6d03fcb13582154910c4af2f4d3b3a5",
+    "レース結果_20260725_ng8.csv": "769685b285d84979313295ead4bd98cb52bc86029d0ccce9c69b30c10f0aa09a",
+    "レース結果_20260726_ng11.csv": "1a6246a3a2bddd4f195fba4fbb9194ae793a40cc2e96797bd05ecdeb14390f8c",
+    "レース結果_20260726_ng5.csv": "07c060e333f444671012b5af9bcf6fb334061a24e94e01ece1079e5a6a9ac0cc",
+    "レース結果_20260726_ng6.csv": "ccbcd97784f9b5b3749aa5da55e2eb2b83129629fa1ce9c9d3059ed768cd87ab",
+    "レース結果_20260726_ng7.csv": "f7fb2722685673085a972663a7f33361854acb3b961f0aa7bf3f33692c831e91",
+    "レース結果_20260726_ng8.csv": "0faa1b9e49bb86258bbd20fcf2baa128d5813c2287609589835cd7e181c47fb1"
+  },
+  "effective_memo_sha256": "bd04915664bc05a147891bdcebeb94f923f4b2b51c3ed049fcb3320108642b91"
+}

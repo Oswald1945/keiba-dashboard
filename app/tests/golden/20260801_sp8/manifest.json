@@ -1,0 +1,38 @@
+{
+  "race_id": "20260801_sp8",
+  "date": "20260801",
+  "venue": "札幌",
+  "baba": "稍重",
+  "race_class": "1勝",
+  "surface": "ダ",
+  "inputs": {
+    "過去走": "過去走_20260801_sp8.csv",
+    "出馬表": "出馬表_20260801_sp8.csv",
+    "坂路": "坂路_20260801_sp8.csv",
+    "ウッド": "ウッド_20260801_sp8.csv"
+  },
+  "traits": {
+    "has_local_only": false,
+    "has_smartrc": true,
+    "has_result": false,
+    "missing_training": false,
+    "wide_top_odds": false
+  },
+  "smartrc": "smartrc_20260801_sp8.json",
+  "baba_json": "baba_20260801_sp8.json",
+  "track_bias_sources": {
+    "レース結果_20260725_sp10.csv": "5723a9ae7a01a55507b9d0f69bd20c78463ef7ccf18a2e53308e6510fbfb22f3",
+    "レース結果_20260725_sp11.csv": "29aca2a9d6acfbdd218aa96cfaf195e65afdf06db032aae1b74446ded6d8468a",
+    "レース結果_20260725_sp12.csv": "0fe63e0517803f3ae923dd02eb7272ce162aaa115c741b6731e08ec095e37726",
+    "レース結果_20260725_sp7.csv": "fd4ca2e8f7584581ff60278274521c9dbe5dd0356035842f8cf464034dbba2ca",
+    "レース結果_20260725_sp8.csv": "88918210edd50e7b4924b56fe071129ba3095ae0e50a89ff16a17620b76ec426",
+    "レース結果_20260725_sp9.csv": "e46bc87daa3ea433061bc76b992731f03b72950df1a622dc5dddf602f4426f25",
+    "レース結果_20260726_sp10.csv": "4d4787554587bceb3f588ef2b79a617192c5664083ff83d8140f68bdda283b1a",
+    "レース結果_20260726_sp11.csv": "b3f29e2cc6f96b714c7a382df1f800d8451b63271a7889eb0b6952180aa80648",
+    "レース結果_20260726_sp12.csv": "8a5038df071ad6040c18b52780a4199803e489b43d310b33fe388175b55cf305",
+    "レース結果_20260726_sp7.csv": "60194849d2031f441ad8677c4074cd032e5397c07ddc39a0131b274f87962588",
+    "レース結果_20260726_sp8.csv": "b0ccd7c020ea359f9d930ea1ab56c9314c31153ac69180ddec8b61be8b5847af",
+    "レース結果_20260726_sp9.csv": "e09e685d05d0b97341ce5264d81921c3f3f8006df56eb5df0ccc62326a23f555"
+  },
+  "effective_memo_sha256": "bd04915664bc05a147891bdcebeb94f923f4b2b51c3ed049fcb3320108642b91"
+}

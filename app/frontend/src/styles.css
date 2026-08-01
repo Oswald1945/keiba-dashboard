@@ -1466,3 +1466,11 @@ button.badge:hover { filter: brightness(1.08); }
 
 /* バーに隠れないよう、本文の下に余白を作る */
 .app.admin { padding-bottom: 76px; }
+
+/* ビューワーのヘッダーに置く注目レースの印。
+   一覧の☆と同じ見た目だが、レース名の右に並ぶので少し余白を空ける。 */
+.viewer-title .star {
+  margin-left: 8px;
+  font-size: 16px;
+  vertical-align: -1px;
+}

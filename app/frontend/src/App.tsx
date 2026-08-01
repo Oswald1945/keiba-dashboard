@@ -77,10 +77,15 @@ type ViewerTab = 'pred' | 'review'
 function Viewer({
   race,
   initialTab,
+  featured,
+  onToggleFeatured,
   onClose,
 }: {
   race: Race
   initialTab?: ViewerTab
+  /** この画面で開いているレースが注目レースかどうか */
+  featured: boolean
+  onToggleFeatured: () => void
   onClose: () => void
 }) {
   const [tab, setTab] = useState<ViewerTab>(
@@ -96,6 +101,14 @@ function Viewer({
         <div className="viewer-title">
           {formatDateLong(race.date)} {race.venue}
           {race.race_no}R {race.race_name ?? ''}
+          <span
+            className={`star${featured ? ' on' : ''}`}
+            role="button"
+            title={featured ? '注目を外す' : '注目レースにする'}
+            onClick={onToggleFeatured}
+          >
+            {featured ? '★' : '☆'}
+          </span>
         </div>
         <div className="tabs">
           <button
@@ -322,6 +335,8 @@ function RaceView({ mode }: { mode: AppMode | null }) {
       <Viewer
         race={selected.race}
         initialTab={selected.tab}
+        featured={featured.has(selected.race.race_id)}
+        onToggleFeatured={() => toggleFeatured(selected.race.race_id)}
         onClose={() => setSelected(null)}
       />
     )

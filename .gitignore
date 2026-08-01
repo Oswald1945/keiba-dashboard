@@ -16,6 +16,9 @@ HANDOFF.md
 horses_data_*.json
 scores_*.csv
 smartrc_*.json
+# 検証用の5年データ。1本100MBを超えGitHubが受け付けない。
+# 採点し直せば作れるので、リポジトリには置かない。
+factor_rows*.jsonl
 shared_urls.txt
 accuracy_report_*.html
 
